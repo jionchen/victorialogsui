@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  victorialogs:
+    image: victoriametrics/victoria-logs:latest
+    ports:
+      - "9428:9428"
+    volumes:
+      - vlogs-data:/vlogs-data
+    command:
+      - "-storageDataPath=/vlogs-data"
+      - "-retentionPeriod=30d"
+
+  vlogs-ui:
+    build: .
+    ports:
+      - "8080:80"
+    depends_on:
+      - victorialogs
+
+volumes:
+  vlogs-data:
