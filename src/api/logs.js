@@ -3,6 +3,24 @@ import client, { axios } from './client.js'
 let currentQueryController = null
 let currentHitsController = null
 
+export function parseNdjsonChunk(chunk, remainder = '') {
+  const raw = `${remainder}${chunk || ''}`
+  const lines = raw.split('\n')
+  const nextRemainder = lines.pop() || ''
+  const items = lines
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      try {
+        return JSON.parse(line)
+      } catch {
+        return { _msg: line }
+      }
+    })
+
+  return { items, remainder: nextRemainder }
+}
+
 /**
  * Query logs
  * API: /select/logsql/query
@@ -27,15 +45,11 @@ export async function queryLogs({ query, limit = 100, start, end }) {
     timeout: 120000, // 120s for large queries
   })
 
-  // VictoriaLogs returns NDJSON (newline-delimited JSON)
-  const lines = response.data.trim().split('\n').filter(Boolean)
-  return lines.map((line) => {
-    try {
-      return JSON.parse(line)
-    } catch {
-      return { _msg: line }
-    }
-  })
+  const { items, remainder } = parseNdjsonChunk(response.data, '')
+  if (remainder.trim()) {
+    items.push({ _msg: remainder.trim() })
+  }
+  return items
 }
 
 /**

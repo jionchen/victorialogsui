@@ -75,7 +75,9 @@
           <div class="log-row__cell log-row__msg">日志内容</div>
         </div>
 
-        <template v-for="(log, index) in visibleLogs" :key="index">
+        <div :style="{ height: `${virtualWindow.offsetTop}px` }" />
+
+        <template v-for="({ log, index }) in visibleLogs" :key="index">
           <div
             class="log-row"
             :class="{ expanded: expandedIndex === index }"
@@ -109,6 +111,8 @@
             @view-context="openContext"
           />
         </template>
+
+        <div :style="{ height: `${bottomSpacerHeight}px` }" />
       </template>
     </div>
 
@@ -128,6 +132,7 @@ import { useQueryStore } from '../stores/query.js'
 import { useSettingsStore } from '../stores/settings.js'
 import { formatTimestamp } from '../utils/timeUtils.js'
 import { getStreamLabel } from '../utils/formatters.js'
+import { calculateVirtualWindow } from '../utils/virtualList.js'
 import LogDetail from './LogDetail.vue'
 import LogContextModal from './LogContextModal.vue'
 
@@ -142,30 +147,45 @@ const scrollContainer = ref(null)
 
 const contextVisible = ref(false)
 const contextLog = ref(null)
+const scrollTop = ref(0)
 
 // Pre-computed skeleton widths to avoid Math.random() in templates
 const skeletonWidths = Array.from({ length: 15 }, (_, i) => 30 + ((i * 17 + 7) % 60))
 
-// Virtual Scrolling (Progressive Rendering)
-const visibleCount = ref(100)
-const visibleLogs = computed(() => logStore.logs.slice(0, visibleCount.value))
+const ROW_HEIGHT = 40
+const virtualWindow = computed(() => {
+  return calculateVirtualWindow({
+    total: logStore.logs.length,
+    scrollTop: scrollTop.value,
+    containerHeight: scrollContainer.value?.clientHeight || 400,
+    itemHeight: ROW_HEIGHT,
+    overscan: 6,
+  })
+})
+
+const visibleLogs = computed(() => {
+  return logStore.logs
+    .slice(virtualWindow.value.start, virtualWindow.value.end)
+    .map((log, offset) => ({
+      log,
+      index: virtualWindow.value.start + offset,
+    }))
+})
+
+const bottomSpacerHeight = computed(() => {
+  return Math.max(0, virtualWindow.value.totalHeight - virtualWindow.value.offsetTop - (visibleLogs.value.length * ROW_HEIGHT))
+})
 
 watch(() => logStore.logs, () => {
-  visibleCount.value = 100
   expandedIndex.value = -1
+  scrollTop.value = 0
   if (scrollContainer.value) {
     scrollContainer.value.scrollTop = 0
   }
 })
 
 function onScroll(e) {
-  const target = e.target
-  // Load more when user scrolls near the bottom
-  if (target.scrollHeight - target.scrollTop <= target.clientHeight + 300) {
-    if (visibleCount.value < logStore.logs.length) {
-      visibleCount.value += 100
-    }
-  }
+  scrollTop.value = e.target.scrollTop
 }
 
 function openContext(log) {

@@ -38,6 +38,7 @@
         <TimeRangePicker />
         <QueryEditor />
         <SavedViewsPanel />
+        <LiveTailPanel />
         <button class="btn-primary" @click="submitSearch" :disabled="logStore.loading">
           ▶ 查询
         </button>
@@ -76,6 +77,7 @@ import { useLogStore } from './stores/logs.js'
 import TimeRangePicker from './components/TimeRangePicker.vue'
 import QueryEditor from './components/QueryEditor.vue'
 import SavedViewsPanel from './components/SavedViewsPanel.vue'
+import LiveTailPanel from './components/LiveTailPanel.vue'
 import FilterBar from './components/FilterBar.vue'
 import FieldSidebar from './components/FieldSidebar.vue'
 import HitsHistogram from './components/HitsHistogram.vue'
