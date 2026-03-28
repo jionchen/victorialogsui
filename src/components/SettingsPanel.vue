@@ -88,6 +88,17 @@
     </div>
 
     <div class="settings-drawer__section">
+      <div class="settings-drawer__label">治理策略</div>
+      <a-select v-model="securityRole" @change="onSecurityChange">
+        <a-option value="admin">管理员</a-option>
+        <a-option value="analyst">分析员</a-option>
+      </a-select>
+      <a-checkbox v-model="redactionEnabled" @change="onRedactionChange" style="margin-top: 10px;">
+        启用敏感字段脱敏
+      </a-checkbox>
+    </div>
+
+    <div class="settings-drawer__section">
       <a-button type="primary" @click="testConnection" :loading="testing">
         测试连接
       </a-button>
@@ -95,6 +106,8 @@
         {{ testResult.message }}
       </div>
     </div>
+
+    <AuditPanel />
   </div>
 </template>
 
@@ -102,6 +115,7 @@
 import { ref, computed } from 'vue'
 import { useSettingsStore } from '../stores/settings.js'
 import { useQueryStore } from '../stores/query.js'
+import AuditPanel from './AuditPanel.vue'
 import client, {
   getAuthCredentials,
   setAuth,
@@ -122,6 +136,8 @@ const authPassword = ref(savedAuth.password || '')
 const resultLimit = ref(settingsStore.resultLimit)
 const pinnedFieldsText = ref(settingsStore.pinnedFields.join(', '))
 const theme = ref(settingsStore.theme)
+const securityRole = ref(settingsStore.securityRole)
+const redactionEnabled = ref(settingsStore.redactionEnabled)
 const testing = ref(false)
 const testResult = ref(null)
 const addApiError = ref('')
@@ -178,6 +194,14 @@ function onPinnedChange() {
 
 function onThemeChange() {
   settingsStore.setTheme(theme.value)
+}
+
+function onSecurityChange() {
+  settingsStore.setSecurityRole(securityRole.value)
+}
+
+function onRedactionChange() {
+  settingsStore.setRedactionEnabled(redactionEnabled.value)
 }
 
 async function testConnection() {

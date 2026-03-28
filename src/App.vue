@@ -138,6 +138,7 @@ watch(
     const url = new URL(window.location)
     url.searchParams.set('s', state)
     window.history.replaceState({}, '', url)
+    settingsStore.logAuditEvent('执行查询', queryStore.effectiveQuery)
     executeSearch()
   }
 )

@@ -124,6 +124,11 @@ export const useSettingsStore = defineStore('settings', () => {
   const tableColumns = ref(
     JSON.parse(localStorage.getItem('vlogs_table_columns') || 'null') || [...DEFAULT_COLUMNS]
   )
+  const securityRole = ref(localStorage.getItem('vlogs_security_role') || 'admin')
+  const redactionEnabled = ref(localStorage.getItem('vlogs_redaction_enabled') !== 'false')
+  const auditEvents = ref(
+    JSON.parse(localStorage.getItem('vlogs_audit_events') || '[]')
+  )
 
   const savedViews = ref(
     JSON.parse(localStorage.getItem('vlogs_saved_views') || '[]')
@@ -147,6 +152,27 @@ export const useSettingsStore = defineStore('settings', () => {
     localStorage.removeItem('vlogs_table_columns')
   }
 
+  function setSecurityRole(role) {
+    securityRole.value = role
+    localStorage.setItem('vlogs_security_role', role)
+  }
+
+  function setRedactionEnabled(value) {
+    redactionEnabled.value = value
+    localStorage.setItem('vlogs_redaction_enabled', String(value))
+  }
+
+  function logAuditEvent(action, summary) {
+    const event = {
+      id: `audit_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+      action,
+      summary,
+      timestamp: new Date().toISOString(),
+    }
+    auditEvents.value = [event, ...auditEvents.value].slice(0, 20)
+    localStorage.setItem('vlogs_audit_events', JSON.stringify(auditEvents.value))
+  }
+
   function upsertSavedView(view) {
     const item = {
       id: view.id || `view_${Date.now()}`,
@@ -160,6 +186,7 @@ export const useSettingsStore = defineStore('settings', () => {
       ...savedViews.value.filter(existing => existing.id !== item.id),
     ].slice(0, 20)
     localStorage.setItem('vlogs_saved_views', JSON.stringify(savedViews.value))
+    logAuditEvent('保存视图', view.name)
   }
 
   function removeSavedView(id) {
@@ -179,6 +206,7 @@ export const useSettingsStore = defineStore('settings', () => {
       ...savedQueries.value.filter(existing => existing.id !== saved.id),
     ].slice(0, 20)
     localStorage.setItem('vlogs_saved_queries', JSON.stringify(savedQueries.value))
+    logAuditEvent('保存查询', item.name)
   }
 
   function removeSavedQuery(id) {
@@ -193,6 +221,9 @@ export const useSettingsStore = defineStore('settings', () => {
     resultLimit, setResultLimit,
     savedViews, upsertSavedView, removeSavedView,
     savedQueries, upsertSavedQuery, removeSavedQuery,
+    securityRole, setSecurityRole,
+    redactionEnabled, setRedactionEnabled,
+    auditEvents, logAuditEvent,
     tableColumns, toggleTableColumn, resetTableColumns,
   }
 })

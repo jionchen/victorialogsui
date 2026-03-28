@@ -69,6 +69,9 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useQueryStore } from '../stores/query.js'
+import { useSettingsStore } from '../stores/settings.js'
+import { redactSensitiveFields } from '../utils/redaction.js'
+import { canViewField } from '../utils/permissions.js'
 import { tryFormatJSON } from '../utils/formatters.js'
 
 const props = defineProps({
@@ -79,6 +82,7 @@ const props = defineProps({
 defineEmits(['view-context'])
 
 const queryStore = useQueryStore()
+const settingsStore = useSettingsStore()
 const activeTab = ref('table')
 const copied = ref(false)
 
@@ -93,7 +97,11 @@ function copyLog() {
 
 // Sort fields: _time first, then stream fields, then others, _msg last
 const sortedFields = computed(() => {
-  const entries = Object.entries(props.log)
+  const visibleRecord = settingsStore.redactionEnabled
+    ? redactSensitiveFields(props.log)
+    : props.log
+  const entries = Object.entries(visibleRecord)
+    .filter(([key]) => canViewField(key, settingsStore.securityRole))
   return entries.sort((a, b) => {
     const order = (key) => {
       if (key === '_time') return 0
