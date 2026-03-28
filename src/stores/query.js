@@ -178,36 +178,44 @@ export const useQueryStore = defineStore('query', () => {
     addQueryToHistory(effectiveQuery.value)
   }
 
-  // URL State persistence
-  function getUrlState() {
-    return btoa(unescape(encodeURIComponent(JSON.stringify({
+  function createSnapshot() {
+    return {
       tp: timePreset.value,
       cs: customStart.value,
       ce: customEnd.value,
-      f: filters.value,
+      f: JSON.parse(JSON.stringify(filters.value)),
       ft: freeTextQuery.value,
       m: isManualMode.value,
-      mq: manualQuery.value
-    }))))
+      mq: manualQuery.value,
+    }
+  }
+
+  function applySnapshot(state = {}) {
+    if (state.tp !== undefined) timePreset.value = state.tp
+    if (state.cs !== undefined) customStart.value = state.cs
+    if (state.ce !== undefined) customEnd.value = state.ce
+    if (state.f !== undefined) {
+      filters.value = state.f
+      const maxId = Math.max(0, ...state.f.map(x => x.id))
+      nextFilterId = maxId + 1
+    }
+    if (state.ft !== undefined) freeTextQuery.value = state.ft
+    if (state.m !== undefined) isManualMode.value = state.m
+    if (state.mq !== undefined) {
+      manualQuery.value = state.mq
+      manualDraft.value = state.mq
+    }
+  }
+
+  // URL State persistence
+  function getUrlState() {
+    return btoa(unescape(encodeURIComponent(JSON.stringify(createSnapshot()))))
   }
 
   function loadUrlState(base64Str) {
     try {
       const state = JSON.parse(decodeURIComponent(escape(atob(base64Str))))
-      if (state.tp !== undefined) timePreset.value = state.tp
-      if (state.cs !== undefined) customStart.value = state.cs
-      if (state.ce !== undefined) customEnd.value = state.ce
-      if (state.f !== undefined) {
-        filters.value = state.f
-        const maxId = Math.max(0, ...state.f.map(x => x.id))
-        nextFilterId = maxId + 1
-      }
-      if (state.ft !== undefined) freeTextQuery.value = state.ft
-      if (state.m !== undefined) isManualMode.value = state.m
-      if (state.mq !== undefined) {
-        manualQuery.value = state.mq
-        manualDraft.value = state.mq
-      }
+      applySnapshot(state)
     } catch (e) {
       console.error('Failed to parse URL state', e)
     }
@@ -223,7 +231,7 @@ export const useQueryStore = defineStore('query', () => {
     setManualQuery, updateManualDraft, submitQueryDraft, exitManualMode,
     autoRefreshInterval, setAutoRefresh,
     queryVersion, executeQuery,
-    getUrlState, loadUrlState,
+    createSnapshot, applySnapshot, getUrlState, loadUrlState,
     queryHistory, addQueryToHistory, clearQueryHistory,
   }
 })

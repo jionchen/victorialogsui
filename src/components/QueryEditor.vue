@@ -1,47 +1,54 @@
 <template>
   <div class="query-editor">
-    <input
-      class="query-editor__input"
-      v-model="queryText"
-      :placeholder="'LogsQL: 例如 level:error 或 {src_k8s.namespace.name=\x22production\x22}'"
-      @keydown.enter="onSubmit"
-      @input="onInput"
-    />
-    <a-dropdown trigger="click" position="br">
-      <button class="icon-btn" title="查询历史" style="margin-left: -32px; z-index: 2;" @click.prevent>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-        </svg>
-      </button>
-      <template #content>
-        <div v-if="queryStore.queryHistory.length === 0" class="query-history__empty">
-          暂无历史记录
-        </div>
-        <template v-else>
-          <div class="query-history__header">
-            最近查询记录
+    <div class="query-editor__main">
+      <input
+        class="query-editor__input"
+        :class="[`is-${validation.level}`]"
+        v-model="queryText"
+        :placeholder="'LogsQL: 例如 level:error 或 {src_k8s.namespace.name=\x22production\x22}'"
+        @keydown.enter="onSubmit"
+        @input="onInput"
+      />
+      <a-dropdown trigger="click" position="br">
+        <button class="icon-btn" title="查询历史" style="margin-left: -32px; z-index: 2;" @click.prevent>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </button>
+        <template #content>
+          <div v-if="queryStore.queryHistory.length === 0" class="query-history__empty">
+            暂无历史记录
           </div>
-          <a-doption
-            v-for="(h, idx) in queryStore.queryHistory"
-            :key="idx"
-            @click="applyHistory(h)"
-            class="query-history__item"
-          >
-            {{ h }}
-          </a-doption>
-          <div class="query-history__divider" />
-          <a-doption @click="queryStore.clearQueryHistory()" class="query-history__clear">
-            清空历史记录
-          </a-doption>
+          <template v-else>
+            <div class="query-history__header">
+              最近查询记录
+            </div>
+            <a-doption
+              v-for="(h, idx) in queryStore.queryHistory"
+              :key="idx"
+              @click="applyHistory(h)"
+              class="query-history__item"
+            >
+              {{ h }}
+            </a-doption>
+            <div class="query-history__divider" />
+            <a-doption @click="queryStore.clearQueryHistory()" class="query-history__clear">
+              清空历史记录
+            </a-doption>
+          </template>
         </template>
-      </template>
-    </a-dropdown>
+      </a-dropdown>
+    </div>
+    <div class="query-editor__hint" :class="[`is-${validation.level}`]">
+      {{ validation.message }}
+    </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { useQueryStore } from '../stores/query.js'
+import { validateQuery } from '../utils/queryValidation.js'
 
 const queryStore = useQueryStore()
 const queryText = computed({
@@ -56,6 +63,8 @@ const queryText = computed({
   },
 })
 
+const validation = computed(() => validateQuery(queryText.value))
+
 function onInput() {
   queryStore.updateManualDraft(queryText.value)
 }
@@ -66,8 +75,8 @@ function onSubmit() {
 }
 
 function applyHistory(h) {
-  queryText.value = h
-  queryStore.setManualQuery(h)
+  queryStore.updateManualDraft(h)
+  queryStore.submitQueryDraft()
   queryStore.executeQuery()
 }
 </script>

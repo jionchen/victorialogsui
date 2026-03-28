@@ -717,6 +717,13 @@ html, body, #app {
 .query-editor {
   flex: 1;
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.query-editor__main {
+  display: flex;
   align-items: center;
   gap: 8px;
 }
@@ -740,6 +747,58 @@ html, body, #app {
 
 .query-editor__input::placeholder {
   color: var(--text-muted);
+}
+
+.query-editor__input.is-error {
+  border-color: var(--danger);
+}
+
+.query-editor__input.is-warning {
+  border-color: var(--warning);
+}
+
+.query-editor__input.is-valid {
+  border-color: var(--success);
+}
+
+.query-editor__hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding-left: 2px;
+}
+
+.query-editor__hint.is-error {
+  color: var(--danger);
+}
+
+.query-editor__hint.is-warning {
+  color: var(--warning);
+}
+
+.query-editor__hint.is-valid {
+  color: var(--success);
+}
+
+.saved-views-btn {
+  min-width: 56px;
+}
+
+.saved-views-menu {
+  min-width: 220px;
+}
+
+.saved-views-menu__header {
+  padding: 8px 12px 4px;
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.saved-views-menu__empty {
+  padding: 6px 12px 10px;
+  color: var(--text-muted);
+  font-size: 12px;
 }
 
 /* ===== Time Range Picker ===== */

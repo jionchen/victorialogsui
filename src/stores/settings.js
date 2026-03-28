@@ -125,6 +125,13 @@ export const useSettingsStore = defineStore('settings', () => {
     JSON.parse(localStorage.getItem('vlogs_table_columns') || 'null') || [...DEFAULT_COLUMNS]
   )
 
+  const savedViews = ref(
+    JSON.parse(localStorage.getItem('vlogs_saved_views') || '[]')
+  )
+  const savedQueries = ref(
+    JSON.parse(localStorage.getItem('vlogs_saved_queries') || '[]')
+  )
+
   function toggleTableColumn(field) {
     const idx = tableColumns.value.indexOf(field)
     if (idx > -1) {
@@ -140,11 +147,52 @@ export const useSettingsStore = defineStore('settings', () => {
     localStorage.removeItem('vlogs_table_columns')
   }
 
+  function upsertSavedView(view) {
+    const item = {
+      id: view.id || `view_${Date.now()}`,
+      name: view.name,
+      snapshot: view.snapshot,
+      summary: view.summary || '*',
+      updatedAt: new Date().toISOString(),
+    }
+    savedViews.value = [
+      item,
+      ...savedViews.value.filter(existing => existing.id !== item.id),
+    ].slice(0, 20)
+    localStorage.setItem('vlogs_saved_views', JSON.stringify(savedViews.value))
+  }
+
+  function removeSavedView(id) {
+    savedViews.value = savedViews.value.filter(item => item.id !== id)
+    localStorage.setItem('vlogs_saved_views', JSON.stringify(savedViews.value))
+  }
+
+  function upsertSavedQuery(item) {
+    const saved = {
+      id: item.id || `query_${Date.now()}`,
+      name: item.name,
+      query: item.query,
+      updatedAt: new Date().toISOString(),
+    }
+    savedQueries.value = [
+      saved,
+      ...savedQueries.value.filter(existing => existing.id !== saved.id),
+    ].slice(0, 20)
+    localStorage.setItem('vlogs_saved_queries', JSON.stringify(savedQueries.value))
+  }
+
+  function removeSavedQuery(id) {
+    savedQueries.value = savedQueries.value.filter(item => item.id !== id)
+    localStorage.setItem('vlogs_saved_queries', JSON.stringify(savedQueries.value))
+  }
+
   return {
     theme, setTheme, initTheme,
     apiBaseUrl, updateApiBaseUrl, apiBaseUrlList, addApiBaseUrl, removeApiBaseUrl,
     pinnedFields, setPinnedFields,
     resultLimit, setResultLimit,
+    savedViews, upsertSavedView, removeSavedView,
+    savedQueries, upsertSavedQuery, removeSavedQuery,
     tableColumns, toggleTableColumn, resetTableColumns,
   }
 })

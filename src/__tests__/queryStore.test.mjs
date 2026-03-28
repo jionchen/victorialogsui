@@ -56,3 +56,27 @@ test('query store can return to visual mode when submitted draft matches built q
   assert.equal(store.effectiveQuery, 'level:error')
 })
 
+test('query store can export and re-apply a saved view snapshot', async () => {
+  setActivePinia(createPinia())
+  const { useQueryStore } = await import('../stores/query.js')
+  const store = useQueryStore()
+
+  store.setTimePreset('1h')
+  store.addFilter('service', 'payments')
+  store.updateManualDraft('status:500')
+  store.submitQueryDraft()
+
+  const snapshot = store.createSnapshot()
+
+  store.clearAllFilters()
+  store.setTimePreset('5m')
+  store.exitManualMode()
+
+  store.applySnapshot(snapshot)
+
+  assert.equal(store.timePreset, '1h')
+  assert.equal(store.filters.length, 1)
+  assert.equal(store.filters[0].field, 'service')
+  assert.equal(store.manualDraft, 'status:500')
+  assert.equal(store.effectiveQuery, 'status:500')
+})
