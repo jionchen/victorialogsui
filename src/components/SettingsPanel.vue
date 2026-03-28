@@ -1,6 +1,5 @@
 <template>
   <div style="display: flex; flex-direction: column; gap: 20px;">
-    <!-- API Connection List -->
     <div class="settings-drawer__section">
       <div class="settings-drawer__label">VictoriaLogs 地址列表</div>
       <div v-for="item in settingsStore.apiBaseUrlList" :key="item.url" class="api-list-item" :class="{ active: item.url === apiUrl }">
@@ -17,7 +16,6 @@
         </a-button>
       </div>
 
-      <!-- Add New API -->
       <div class="add-api-form">
         <a-input v-model="newApiName" placeholder="名称 (如: 生产集群)" size="small" />
         <a-input v-model="newApiUrl" placeholder="http://IP:端口" size="small" />
@@ -25,13 +23,18 @@
           添加
         </a-button>
       </div>
-      
+
       <div style="margin-top: 6px; font-size: 11px; color: var(--text-muted);">
-        提示: 点击地址切换。所有请求通过本地代理转发，无跨域问题。
+        提示: 点击地址切换。仅允许切换到部署配置声明过的后端地址。
+      </div>
+      <div style="margin-top: 6px; font-size: 11px; color: var(--text-muted);">
+        允许列表: {{ allowedTargets.join(' / ') || '仅默认代理' }}
+      </div>
+      <div v-if="addApiError" style="margin-top: 6px; font-size: 11px; color: var(--danger);">
+        {{ addApiError }}
       </div>
     </div>
 
-    <!-- Authentication -->
     <div class="settings-drawer__section">
       <div class="settings-drawer__label">认证 (Basic Auth)</div>
       <div class="settings-auth-row">
@@ -48,9 +51,11 @@
           @change="onAuthChange"
         />
       </div>
+      <div style="margin-top: 6px; font-size: 11px; color: var(--text-muted);">
+        凭证仅保存在当前浏览器会话中，关闭页面后失效。
+      </div>
     </div>
 
-    <!-- Result Limit -->
     <div class="settings-drawer__section">
       <div class="settings-drawer__label">默认结果数量</div>
       <a-select v-model="resultLimit" @change="onLimitChange">
@@ -61,7 +66,6 @@
       </a-select>
     </div>
 
-    <!-- Pinned Fields -->
     <div class="settings-drawer__section">
       <div class="settings-drawer__label">置顶字段 (逗号分隔)</div>
       <a-textarea
@@ -75,7 +79,6 @@
       </div>
     </div>
 
-    <!-- Theme -->
     <div class="settings-drawer__section">
       <div class="settings-drawer__label">主题</div>
       <a-radio-group v-model="theme" @change="onThemeChange">
@@ -84,7 +87,6 @@
       </a-radio-group>
     </div>
 
-    <!-- Connection Test -->
     <div class="settings-drawer__section">
       <a-button type="primary" @click="testConnection" :loading="testing">
         测试连接
@@ -97,11 +99,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useSettingsStore } from '../stores/settings.js'
-import client, { getAuthCredentials, setAuth } from '../api/client.js'
+import { useQueryStore } from '../stores/query.js'
+import client, {
+  getAuthCredentials,
+  setAuth,
+  getAllowedProxyTargets,
+  normalizeProxyTarget,
+} from '../api/client.js'
 
 const settingsStore = useSettingsStore()
+const queryStore = useQueryStore()
 
 const apiUrl = computed(() => settingsStore.apiBaseUrl)
 const newApiName = ref('')
@@ -115,27 +124,33 @@ const pinnedFieldsText = ref(settingsStore.pinnedFields.join(', '))
 const theme = ref(settingsStore.theme)
 const testing = ref(false)
 const testResult = ref(null)
+const addApiError = ref('')
+const allowedTargets = getAllowedProxyTargets()
 
 function selectApi(url) {
   settingsStore.updateApiBaseUrl(url)
 }
 
 function addNewApi() {
+  addApiError.value = ''
   if (!newApiUrl.value) return
   
-  // Sanitize URL: remove trailing slash, /select/vmui, etc.
   let sanitizedUrl = newApiUrl.value.trim().replace(/\/$/, '')
   sanitizedUrl = sanitizedUrl.replace(/\/select\/vmui$/, '')
   sanitizedUrl = sanitizedUrl.replace(/\/select$/, '')
   
-  // Ensure protocol
   if (sanitizedUrl && !sanitizedUrl.startsWith('http')) {
     sanitizedUrl = 'http://' + sanitizedUrl
   }
-  
-  settingsStore.addApiBaseUrl(newApiName.value || '未命名', sanitizedUrl)
-  // 添加后自动选中该地址
-  settingsStore.updateApiBaseUrl(sanitizedUrl)
+
+  const normalized = normalizeProxyTarget(sanitizedUrl)
+  const ok = settingsStore.addApiBaseUrl(newApiName.value || '未命名', normalized)
+  if (!ok) {
+    addApiError.value = '该地址未在允许列表中，请先在部署配置中声明允许的后端地址。'
+    return
+  }
+
+  settingsStore.updateApiBaseUrl(normalized)
   newApiName.value = ''
   newApiUrl.value = ''
 }
@@ -150,6 +165,7 @@ function onAuthChange() {
 
 function onLimitChange() {
   settingsStore.setResultLimit(resultLimit.value)
+  queryStore.executeQuery()
 }
 
 function onPinnedChange() {

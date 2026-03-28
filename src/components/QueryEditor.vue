@@ -40,25 +40,28 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed } from 'vue'
 import { useQueryStore } from '../stores/query.js'
 
 const queryStore = useQueryStore()
-const queryText = ref(queryStore.effectiveQuery)
-
-// Sync from store to input
-watch(() => queryStore.logsQL, (val) => {
-  if (!queryStore.isManualMode) {
-    queryText.value = val
-  }
+const queryText = computed({
+  get() {
+    if (queryStore.isManualMode || queryStore.manualDraft) {
+      return queryStore.manualDraft
+    }
+    return queryStore.logsQL
+  },
+  set(value) {
+    queryStore.updateManualDraft(value)
+  },
 })
 
 function onInput() {
-  queryStore.setManualQuery(queryText.value)
+  queryStore.updateManualDraft(queryText.value)
 }
 
 function onSubmit() {
-  queryStore.setManualQuery(queryText.value)
+  queryStore.submitQueryDraft()
   queryStore.executeQuery()
 }
 

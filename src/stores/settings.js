@@ -1,9 +1,41 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { setApiBaseUrl, getApiBaseUrl } from '../api/client.js'
+import { ref } from 'vue'
+import {
+  setApiBaseUrl,
+  getApiBaseUrl,
+  getAllowedProxyTargets,
+  isAllowedProxyTarget,
+  normalizeProxyTarget,
+} from '../api/client.js'
+
+function buildDefaultApiList() {
+  return [
+    { name: '默认 (代理配置)', url: '' },
+    ...getAllowedProxyTargets().map((url) => ({
+      name: new URL(url).host,
+      url,
+    })),
+  ]
+}
+
+function sanitizeApiList(items) {
+  const defaults = buildDefaultApiList()
+  const byUrl = new Map(defaults.map(item => [item.url, item]))
+
+  for (const item of items || []) {
+    const normalized = normalizeProxyTarget(item?.url)
+    if (normalized === '' || isAllowedProxyTarget(normalized)) {
+      byUrl.set(normalized, {
+        name: item?.name || byUrl.get(normalized)?.name || normalized || '默认 (代理配置)',
+        url: normalized,
+      })
+    }
+  }
+
+  return Array.from(byUrl.values())
+}
 
 export const useSettingsStore = defineStore('settings', () => {
-  // Theme
   const theme = ref(localStorage.getItem('vlogs_theme') || 'dark')
   
   function setTheme(newTheme) {
@@ -21,48 +53,49 @@ export const useSettingsStore = defineStore('settings', () => {
     setTheme(theme.value)
   }
 
-  // API Base URL List
-  // url 为空表示使用 vite.config.js / nginx 中配置的默认地址
   const apiBaseUrlList = ref(
-    JSON.parse(localStorage.getItem('vlogs_api_url_list') || 'null') || [
-      { name: '默认 (代理配置)', url: '' },
-      { name: '172.19.0.176', url: 'http://172.19.0.176:19428' },
-    ]
+    sanitizeApiList(JSON.parse(localStorage.getItem('vlogs_api_url_list') || 'null'))
   )
   const apiBaseUrl = ref(getApiBaseUrl())
-
-  function updateApiBaseUrl(url) {
-    apiBaseUrl.value = url
-    setApiBaseUrl(url)
-    
-    // Ensure the current URL is in the list
-    if (!apiBaseUrlList.value.find(item => item.url === url)) {
-      apiBaseUrlList.value.push({ name: '自定义', url })
-      saveUrlList()
-    }
-  }
 
   function saveUrlList() {
     localStorage.setItem('vlogs_api_url_list', JSON.stringify(apiBaseUrlList.value))
   }
 
-  function addApiBaseUrl(name, url) {
-    if (!apiBaseUrlList.value.find(item => item.url === url)) {
-      apiBaseUrlList.value.push({ name, url })
+  function updateApiBaseUrl(url) {
+    const normalized = normalizeProxyTarget(url)
+    const safeUrl = normalized && isAllowedProxyTarget(normalized) ? normalized : ''
+
+    apiBaseUrl.value = safeUrl
+    setApiBaseUrl(safeUrl)
+
+    if (!apiBaseUrlList.value.find(item => item.url === safeUrl)) {
+      apiBaseUrlList.value.push({ name: '自定义', url: safeUrl })
       saveUrlList()
     }
+  }
+
+  function addApiBaseUrl(name, url) {
+    const normalized = normalizeProxyTarget(url)
+    if (!normalized || !isAllowedProxyTarget(normalized)) {
+      return false
+    }
+
+    if (!apiBaseUrlList.value.find(item => item.url === normalized)) {
+      apiBaseUrlList.value.push({ name, url: normalized })
+      saveUrlList()
+    }
+    return true
   }
 
   function removeApiBaseUrl(url) {
     apiBaseUrlList.value = apiBaseUrlList.value.filter(item => item.url !== url)
     saveUrlList()
-    // If we removed the active one, fallback to the first one
     if (apiBaseUrl.value === url && apiBaseUrlList.value.length > 0) {
       updateApiBaseUrl(apiBaseUrlList.value[0].url)
     }
   }
 
-  // Pinned fields (default K8s fields)
   const DEFAULT_PINNED = [
     'src_k8s.namespace.name',
     'src_container.name',
@@ -78,7 +111,6 @@ export const useSettingsStore = defineStore('settings', () => {
     localStorage.setItem('vlogs_pinned_fields', JSON.stringify(fields))
   }
 
-  // Result limit
   const resultLimit = ref(
     parseInt(localStorage.getItem('vlogs_result_limit') || '500', 10)
   )
@@ -88,7 +120,6 @@ export const useSettingsStore = defineStore('settings', () => {
     localStorage.setItem('vlogs_result_limit', String(limit))
   }
 
-  // Table Columns
   const DEFAULT_COLUMNS = ['level', '_stream']
   const tableColumns = ref(
     JSON.parse(localStorage.getItem('vlogs_table_columns') || 'null') || [...DEFAULT_COLUMNS]

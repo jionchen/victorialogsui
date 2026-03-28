@@ -37,7 +37,7 @@
       <div class="app-toolbar__row">
         <TimeRangePicker />
         <QueryEditor />
-        <button class="btn-primary" @click="executeSearch" :disabled="logStore.loading">
+        <button class="btn-primary" @click="submitSearch" :disabled="logStore.loading">
           ▶ 查询
         </button>
       </div>
@@ -95,19 +95,10 @@ function toggleTheme() {
   settingsStore.setTheme(settingsStore.theme === 'dark' ? 'light' : 'dark')
 }
 
-async function loadInitialData() {
-  const { start, end } = queryStore.timeRange
-  const query = queryStore.effectiveQuery
-
-  await fieldStore.loadFieldNames({ query, start, end })
-}
-
 async function executeSearch() {
   const { start, end } = queryStore.timeRange
   const query = queryStore.effectiveQuery
   const limit = settingsStore.resultLimit
-
-  queryStore.executeQuery()
 
   await Promise.all([
     logStore.fetchLogs({ query, limit, start, end }),
@@ -115,26 +106,36 @@ async function executeSearch() {
     fieldStore.loadFieldNames({ query, start, end }),
   ])
 }
+
+function submitSearch() {
+  queryStore.submitQueryDraft()
+  queryStore.executeQuery()
+}
 // Watch for filter changes → auto execute and update URL
 let searchTimer = null
 watch(
   () => [
     queryStore.filters, queryStore.timePreset, queryStore.customStart, queryStore.customEnd,
-    queryStore.freeTextQuery, queryStore.manualQuery, queryStore.isManualMode
+    queryStore.freeTextQuery
   ],
   () => {
     clearTimeout(searchTimer)
     searchTimer = setTimeout(() => {
-      // Update URL
-      const state = queryStore.getUrlState()
-      const url = new URL(window.location)
-      url.searchParams.set('s', state)
-      window.history.replaceState({}, '', url)
-
-      executeSearch()
+      queryStore.executeQuery()
     }, 300)
   },
   { deep: true }
+)
+
+watch(
+  () => queryStore.queryVersion,
+  () => {
+    const state = queryStore.getUrlState()
+    const url = new URL(window.location)
+    url.searchParams.set('s', state)
+    window.history.replaceState({}, '', url)
+    executeSearch()
+  }
 )
 
 // Auto refresh
@@ -160,9 +161,8 @@ watch(
     logStore.clearLogs()
     fieldStore.clearCache()
 
-    // 2. 等待当前搜索完成后再继续，避免与旧请求竞争
-    //    executeSearch 内部已包含 loadFieldNames，无需再调 loadInitialData
-    await executeSearch()
+    // 2. 使用当前已提交的查询重新加载
+    queryStore.executeQuery()
   }
 )
 
@@ -176,8 +176,7 @@ onMounted(() => {
     queryStore.loadUrlState(stateStr)
   }
 
-  loadInitialData()
-  executeSearch()
+  queryStore.executeQuery()
 
   // Global Keyboard Shortcuts
   window.addEventListener('keydown', onGlobalKeydown)

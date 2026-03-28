@@ -1,6 +1,49 @@
 import axios from 'axios'
 
 const DEFAULT_AUTH = { username: '', password: '' }
+const DEFAULT_PROXY_TARGET = 'http://172.19.0.176:19428'
+const RAW_ALLOWED_PROXY_TARGETS = import.meta.env?.VITE_ALLOWED_PROXY_TARGETS || ''
+
+export function normalizeProxyTarget(raw) {
+  if (raw === undefined || raw === null) return ''
+
+  const input = String(raw).trim()
+  if (!input) return ''
+
+  try {
+    const url = new URL(input)
+    if (!['http:', 'https:'].includes(url.protocol)) return null
+    if (url.username || url.password || url.search || url.hash) return null
+    return `${url.protocol}//${url.host}`
+  } catch {
+    return null
+  }
+}
+
+function parseAllowedProxyTargets(raw) {
+  return raw
+    .split(',')
+    .map(item => item.trim())
+    .filter(Boolean)
+    .map(item => normalizeProxyTarget(item))
+    .filter(Boolean)
+}
+
+const ALLOWED_PROXY_TARGETS = Array.from(new Set([
+  DEFAULT_PROXY_TARGET,
+  ...parseAllowedProxyTargets(RAW_ALLOWED_PROXY_TARGETS),
+]))
+
+export function getAllowedProxyTargets() {
+  return [...ALLOWED_PROXY_TARGETS]
+}
+
+export function isAllowedProxyTarget(raw) {
+  const normalized = normalizeProxyTarget(raw)
+  if (normalized === '') return true
+  if (!normalized) return false
+  return ALLOWED_PROXY_TARGETS.includes(normalized)
+}
 
 // axios 始终通过 /api 代理发送请求，避免跨域问题
 const client = axios.create({
@@ -12,15 +55,20 @@ const client = axios.create({
 // 存储用户选择的实际 VictoriaLogs 地址，通过请求头传递给代理
 function getTargetUrl() {
   try {
-    return localStorage.getItem('vlogs_target_url') || ''
+    const stored = localStorage.getItem('vlogs_target_url') || ''
+    const normalized = normalizeProxyTarget(stored)
+    return isAllowedProxyTarget(normalized) ? normalized : ''
   } catch {
     return ''
   }
 }
 
 export function setApiBaseUrl(url) {
+  const normalized = normalizeProxyTarget(url)
+  const safeUrl = normalized && isAllowedProxyTarget(normalized) ? normalized : ''
+
   try {
-    localStorage.setItem('vlogs_target_url', url)
+    localStorage.setItem('vlogs_target_url', safeUrl)
   } catch { /* ignore */ }
 }
 
@@ -31,7 +79,7 @@ export function getApiBaseUrl() {
 // ======== 认证管理 ========
 function getAuth() {
   try {
-    const saved = localStorage.getItem('vlogs_auth')
+    const saved = sessionStorage.getItem('vlogs_auth')
     if (saved) return JSON.parse(saved)
   } catch { /* ignore */ }
   return DEFAULT_AUTH
@@ -40,7 +88,14 @@ function getAuth() {
 export function setAuth(username, password) {
   const auth = { username, password }
   try {
-    localStorage.setItem('vlogs_auth', JSON.stringify(auth))
+    if (!username && !password) {
+      sessionStorage.removeItem('vlogs_auth')
+      localStorage.removeItem('vlogs_auth')
+      return
+    }
+
+    sessionStorage.setItem('vlogs_auth', JSON.stringify(auth))
+    localStorage.removeItem('vlogs_auth')
   } catch { /* ignore */ }
 }
 
@@ -63,7 +118,7 @@ client.interceptors.request.use((config) => {
   // 将实际目标地址作为自定义请求头传给代理
   const target = getTargetUrl()
 
-  if (target && target.startsWith('http')) {
+  if (target && isAllowedProxyTarget(target)) {
     console.log(`[Axios Outgoing] ${config.method?.toUpperCase()} ${config.url} -> Proxy-Target: ${target}`)
     if (config.headers && typeof config.headers.set === 'function') {
       config.headers.set('x-proxy-target', target)
@@ -97,20 +152,16 @@ client.interceptors.response.use(
     const config = error.config
     if (!config) return Promise.reject(error)
 
-    // 初始化重试计数
     config._retryCount = config._retryCount || 0
 
-    // 判断是否为可重试的错误 (502, 503, 网络错误)
     const isRetryable =
-      !error.response || // 网络错误 (ENETDOWN, ECONNRESET 等)
+      !error.response ||
       error.response.status === 502 ||
       error.response.status === 503
 
     if (isRetryable && config._retryCount < MAX_RETRIES) {
       config._retryCount++
       console.warn(`[retry ${config._retryCount}/${MAX_RETRIES}] ${config.url}`)
-
-      // 等待后重试
       await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
       return client(config)
     }

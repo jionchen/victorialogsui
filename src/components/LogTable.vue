@@ -124,6 +124,7 @@
 import { ref, computed, watch } from 'vue'
 import { useLogStore } from '../stores/logs.js'
 import { useFieldStore } from '../stores/fields.js'
+import { useQueryStore } from '../stores/query.js'
 import { useSettingsStore } from '../stores/settings.js'
 import { formatTimestamp } from '../utils/timeUtils.js'
 import { getStreamLabel } from '../utils/formatters.js'
@@ -132,6 +133,7 @@ import LogContextModal from './LogContextModal.vue'
 
 const logStore = useLogStore()
 const fieldStore = useFieldStore()
+const queryStore = useQueryStore()
 const settingsStore = useSettingsStore()
 
 const expandedIndex = ref(-1)
@@ -185,6 +187,7 @@ function toggleExpand(index) {
 
 function onLimitChange(val) {
   settingsStore.setResultLimit(val)
+  queryStore.executeQuery()
 }
 
 function exportJSON() {

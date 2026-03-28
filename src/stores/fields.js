@@ -71,8 +71,8 @@ export const useFieldStore = defineStore('fields', () => {
     cache.loading = true
 
     try {
-      // Always use getFieldValues
-      const values = await getFieldValues({ query, field, start, end, filter, limit: 30 })
+      const valuesFetcher = isStream ? getStreamFieldValues : getFieldValues
+      const values = await valuesFetcher({ query, field, start, end, filter, limit: 30 })
       
       if (id !== valuesFetchIds[field]) return
 

@@ -92,6 +92,7 @@ export const useQueryStore = defineStore('query', () => {
 
   // Manual override: if user directly edits the query box
   const manualQuery = ref('')
+  const manualDraft = ref('')
   const isManualMode = ref(false)
 
   const effectiveQuery = computed(() => {
@@ -108,12 +109,34 @@ export const useQueryStore = defineStore('query', () => {
 
   function setManualQuery(q) {
     manualQuery.value = q
+    manualDraft.value = q
+    isManualMode.value = true
+  }
+
+  function updateManualDraft(q) {
+    manualDraft.value = q
+  }
+
+  function submitQueryDraft() {
+    const draft = manualDraft.value.trim()
+    const built = logsQL.value.trim()
+
+    if (!draft || draft === built) {
+      manualQuery.value = ''
+      manualDraft.value = ''
+      isManualMode.value = false
+      return
+    }
+
+    manualQuery.value = draft
+    manualDraft.value = draft
     isManualMode.value = true
   }
 
   function exitManualMode() {
     isManualMode.value = false
     manualQuery.value = ''
+    manualDraft.value = ''
   }
 
   // Auto-refresh
@@ -181,7 +204,10 @@ export const useQueryStore = defineStore('query', () => {
       }
       if (state.ft !== undefined) freeTextQuery.value = state.ft
       if (state.m !== undefined) isManualMode.value = state.m
-      if (state.mq !== undefined) manualQuery.value = state.mq
+      if (state.mq !== undefined) {
+        manualQuery.value = state.mq
+        manualDraft.value = state.mq
+      }
     } catch (e) {
       console.error('Failed to parse URL state', e)
     }
@@ -193,7 +219,8 @@ export const useQueryStore = defineStore('query', () => {
     filters, addFilter, removeFilter, removeFilterValue,
     toggleFilterDisabled, toggleFilterNegated, clearAllFilters,
     freeTextQuery, logsQL,
-    manualQuery, isManualMode, effectiveQuery, setManualQuery, exitManualMode,
+    manualQuery, manualDraft, isManualMode, effectiveQuery,
+    setManualQuery, updateManualDraft, submitQueryDraft, exitManualMode,
     autoRefreshInterval, setAutoRefresh,
     queryVersion, executeQuery,
     getUrlState, loadUrlState,
