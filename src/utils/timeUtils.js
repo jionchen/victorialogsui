@@ -2,18 +2,9 @@
  * Time utility functions
  */
 
-// Preset time ranges
-export const TIME_PRESETS = [
-  { label: '5m', value: '5m', ms: 5 * 60 * 1000 },
-  { label: '15m', value: '15m', ms: 15 * 60 * 1000 },
-  { label: '30m', value: '30m', ms: 30 * 60 * 1000 },
-  { label: '1h', value: '1h', ms: 60 * 60 * 1000 },
-  { label: '3h', value: '3h', ms: 3 * 60 * 60 * 1000 },
-  { label: '6h', value: '6h', ms: 6 * 60 * 60 * 1000 },
-  { label: '12h', value: '12h', ms: 12 * 60 * 60 * 1000 },
-  { label: '1d', value: '1d', ms: 24 * 60 * 60 * 1000 },
-  { label: '7d', value: '7d', ms: 7 * 24 * 60 * 60 * 1000 },
-]
+import { TIME_PRESETS } from '../../config/uiConfig.js'
+
+export { TIME_PRESETS }
 
 /**
  * Calculate appropriate histogram step based on time range

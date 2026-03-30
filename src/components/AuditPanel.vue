@@ -1,8 +1,16 @@
 <template>
-  <div class="settings-drawer__section">
-    <div class="settings-drawer__label">最近审计事件</div>
+  <div class="audit-panel-wrapper">
+    <div v-if="showToolbar" class="audit-panel__toolbar">
+      <div>
+        <div class="audit-panel__heading">{{ title }}</div>
+        <div class="audit-panel__caption">{{ caption }}</div>
+      </div>
+      <button v-if="showClear && settingsStore.auditEvents.length > 0" class="audit-panel__clear" @click="settingsStore.clearAuditEvents()">
+        清空
+      </button>
+    </div>
     <div v-if="settingsStore.auditEvents.length === 0" class="saved-views-menu__empty">
-      暂无事件
+      {{ emptyText }}
     </div>
     <div v-else class="audit-panel">
       <div v-for="event in settingsStore.auditEvents" :key="event.id" class="audit-panel__row">
@@ -15,6 +23,29 @@
 </template>
 
 <script setup>
+defineProps({
+  title: {
+    type: String,
+    default: '最近活动',
+  },
+  caption: {
+    type: String,
+    default: '记录最近的查询、保存和切换操作。',
+  },
+  emptyText: {
+    type: String,
+    default: '暂无事件',
+  },
+  showToolbar: {
+    type: Boolean,
+    default: true,
+  },
+  showClear: {
+    type: Boolean,
+    default: false,
+  },
+})
+
 import { useSettingsStore } from '../stores/settings.js'
 
 const settingsStore = useSettingsStore()

@@ -2,10 +2,12 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { buildLogsQL, isLogsQLSyntax } from '../utils/queryBuilder.js'
 import { getTimeRange, calculateStep } from '../utils/timeUtils.js'
+import { DEFAULT_TIME_PRESET, MAX_QUERY_HISTORY } from '../../config/appConfig.js'
+import { STORAGE_KEYS } from '../../config/storageKeys.js'
 
 export const useQueryStore = defineStore('query', () => {
   // Time range
-  const timePreset = ref('5m')
+  const timePreset = ref(DEFAULT_TIME_PRESET)
   const customStart = ref('')
   const customEnd = ref('')
 
@@ -151,7 +153,7 @@ export const useQueryStore = defineStore('query', () => {
   
   // Query History
   const queryHistory = ref(
-    JSON.parse(localStorage.getItem('vlogs_query_history') || '[]')
+    JSON.parse(localStorage.getItem(STORAGE_KEYS.queryHistory) || '[]')
   )
 
   function addQueryToHistory(q) {
@@ -161,16 +163,16 @@ export const useQueryStore = defineStore('query', () => {
     history = history.filter(item => item !== q)
     history.unshift(q)
     // Keep max 20
-    if (history.length > 20) {
-      history = history.slice(0, 20)
+    if (history.length > MAX_QUERY_HISTORY) {
+      history = history.slice(0, MAX_QUERY_HISTORY)
     }
     queryHistory.value = history
-    localStorage.setItem('vlogs_query_history', JSON.stringify(history))
+    localStorage.setItem(STORAGE_KEYS.queryHistory, JSON.stringify(history))
   }
 
   function clearQueryHistory() {
     queryHistory.value = []
-    localStorage.removeItem('vlogs_query_history')
+    localStorage.removeItem(STORAGE_KEYS.queryHistory)
   }
 
   function executeQuery() {

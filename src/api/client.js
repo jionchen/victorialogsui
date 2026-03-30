@@ -1,8 +1,16 @@
 import axios from 'axios'
+import { DEFAULT_AUTH_CREDENTIALS } from '../../config/appConfig.js'
+import {
+  DEFAULT_PROXY_TARGET,
+  MAX_API_RETRIES,
+  API_RETRY_DELAY_MS,
+  API_PROXY_BASE_PATH,
+  API_REQUEST_TIMEOUT_MS,
+} from '../../config/proxyConfig.js'
+import { STORAGE_KEYS, SESSION_STORAGE_KEYS } from '../../config/storageKeys.js'
 
-const DEFAULT_AUTH = { username: '', password: '' }
-const DEFAULT_PROXY_TARGET = 'http://172.19.0.176:19428'
 const RAW_ALLOWED_PROXY_TARGETS = import.meta.env?.VITE_ALLOWED_PROXY_TARGETS || ''
+const STRICT_PROXY_TARGETS = import.meta.env?.VITE_STRICT_PROXY_TARGETS === 'true'
 
 export function normalizeProxyTarget(raw) {
   if (raw === undefined || raw === null) return ''
@@ -38,24 +46,30 @@ export function getAllowedProxyTargets() {
   return [...ALLOWED_PROXY_TARGETS]
 }
 
-export function isAllowedProxyTarget(raw) {
+export function isStrictProxyMode() {
+  return STRICT_PROXY_TARGETS
+}
+
+export function isAllowedProxyTarget(raw, options = {}) {
+  const strict = options.strict ?? STRICT_PROXY_TARGETS
   const normalized = normalizeProxyTarget(raw)
   if (normalized === '') return true
   if (!normalized) return false
+  if (!strict) return true
   return ALLOWED_PROXY_TARGETS.includes(normalized)
 }
 
 // axios 始终通过 /api 代理发送请求，避免跨域问题
 const client = axios.create({
-  baseURL: '/api',
-  timeout: 60000,
+  baseURL: API_PROXY_BASE_PATH,
+  timeout: API_REQUEST_TIMEOUT_MS,
 })
 
 // ======== 目标地址管理 ========
 // 存储用户选择的实际 VictoriaLogs 地址，通过请求头传递给代理
 function getTargetUrl() {
   try {
-    const stored = localStorage.getItem('vlogs_target_url') || ''
+    const stored = localStorage.getItem(STORAGE_KEYS.targetUrl) || ''
     const normalized = normalizeProxyTarget(stored)
     return isAllowedProxyTarget(normalized) ? normalized : ''
   } catch {
@@ -68,7 +82,7 @@ export function setApiBaseUrl(url) {
   const safeUrl = normalized && isAllowedProxyTarget(normalized) ? normalized : ''
 
   try {
-    localStorage.setItem('vlogs_target_url', safeUrl)
+    localStorage.setItem(STORAGE_KEYS.targetUrl, safeUrl)
   } catch { /* ignore */ }
 }
 
@@ -79,23 +93,23 @@ export function getApiBaseUrl() {
 // ======== 认证管理 ========
 function getAuth() {
   try {
-    const saved = sessionStorage.getItem('vlogs_auth')
+    const saved = sessionStorage.getItem(SESSION_STORAGE_KEYS.auth)
     if (saved) return JSON.parse(saved)
   } catch { /* ignore */ }
-  return DEFAULT_AUTH
+  return DEFAULT_AUTH_CREDENTIALS
 }
 
 export function setAuth(username, password) {
   const auth = { username, password }
   try {
     if (!username && !password) {
-      sessionStorage.removeItem('vlogs_auth')
-      localStorage.removeItem('vlogs_auth')
+      sessionStorage.removeItem(SESSION_STORAGE_KEYS.auth)
+      localStorage.removeItem(SESSION_STORAGE_KEYS.auth)
       return
     }
 
-    sessionStorage.setItem('vlogs_auth', JSON.stringify(auth))
-    localStorage.removeItem('vlogs_auth')
+    sessionStorage.setItem(SESSION_STORAGE_KEYS.auth, JSON.stringify(auth))
+    localStorage.removeItem(SESSION_STORAGE_KEYS.auth)
   } catch { /* ignore */ }
 }
 
@@ -139,9 +153,6 @@ client.interceptors.request.use((config) => {
 })
 
 // ======== 响应拦截器 (含自动重试) ========
-const MAX_RETRIES = 2
-const RETRY_DELAY = 1000 // ms
-
 client.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -159,10 +170,10 @@ client.interceptors.response.use(
       error.response.status === 502 ||
       error.response.status === 503
 
-    if (isRetryable && config._retryCount < MAX_RETRIES) {
+    if (isRetryable && config._retryCount < MAX_API_RETRIES) {
       config._retryCount++
-      console.warn(`[retry ${config._retryCount}/${MAX_RETRIES}] ${config.url}`)
-      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
+      console.warn(`[retry ${config._retryCount}/${MAX_API_RETRIES}] ${config.url}`)
+      await new Promise(resolve => setTimeout(resolve, API_RETRY_DELAY_MS))
       return client(config)
     }
 

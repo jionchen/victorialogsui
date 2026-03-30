@@ -22,6 +22,10 @@ export function validateQuery(query) {
   return { level: 'valid', message: 'LogsQL 语法看起来正常。' }
 }
 
+export function shouldShowValidationBadge(validation) {
+  return validation?.level === 'valid' || validation?.level === 'warning' || validation?.level === 'error'
+}
+
 function hasBalancedBraces(text) {
   let depth = 0
   for (const char of text) {

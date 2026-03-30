@@ -31,6 +31,13 @@ test('normalizeProxyTarget strips path and rejects credentials or query fragment
 test('allowed proxy targets must come from the configured allowlist', async () => {
   const { isAllowedProxyTarget } = await import('../api/client.js')
 
-  assert.equal(isAllowedProxyTarget('http://172.19.0.176:19428'), true)
-  assert.equal(isAllowedProxyTarget('https://evil.example.com'), false)
+  assert.equal(isAllowedProxyTarget('http://172.19.0.176:19428', { strict: true }), true)
+  assert.equal(isAllowedProxyTarget('https://evil.example.com', { strict: true }), false)
+})
+
+test('non-strict proxy mode allows any normalized http target', async () => {
+  const { isAllowedProxyTarget } = await import('../api/client.js')
+
+  assert.equal(isAllowedProxyTarget('https://logs.internal.example.com', { strict: false }), true)
+  assert.equal(isAllowedProxyTarget('https://user:pass@logs.internal.example.com', { strict: false }), false)
 })

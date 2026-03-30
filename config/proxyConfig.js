@@ -1,0 +1,6 @@
+export const DEFAULT_PROXY_TARGET = 'http://invalid-target:9428'
+export const MAX_API_RETRIES = 2
+export const API_RETRY_DELAY_MS = 1000
+export const API_PROXY_BASE_PATH = '/api'
+export const API_REQUEST_TIMEOUT_MS = 60000
+export const API_CONNECTION_TEST_TIMEOUT_MS = 5000

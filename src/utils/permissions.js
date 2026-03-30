@@ -1,6 +1,8 @@
-const ANALYST_HIDDEN_FIELDS = new Set(['_stream_id'])
+import { ANALYST_HIDDEN_FIELDS } from '../../config/securityConfig.js'
+
+const ANALYST_HIDDEN_FIELD_SET = new Set(ANALYST_HIDDEN_FIELDS)
 
 export function canViewField(field, role = 'admin') {
   if (role === 'admin') return true
-  return !ANALYST_HIDDEN_FIELDS.has(field)
+  return !ANALYST_HIDDEN_FIELD_SET.has(field)
 }

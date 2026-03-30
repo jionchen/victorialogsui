@@ -37,6 +37,7 @@ import { useLogStore } from '../stores/logs.js'
 import { useQueryStore } from '../stores/query.js'
 import { useSettingsStore } from '../stores/settings.js'
 import { formatNumber } from '../utils/formatters.js'
+import { LOG_LEVEL_COLORS } from '../../config/uiConfig.js'
 
 use([BarChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer])
 
@@ -50,14 +51,6 @@ const totalFromHistogram = ref(0)
 const totalHitsDisplay = computed(() => {
   return totalFromHistogram.value || logStore.totalHits
 })
-
-const LEVEL_COLORS = {
-  error: '#f87171',
-  warn: '#fbbf24',
-  warning: '#fbbf24',
-  info: '#60a5fa',
-  debug: '#a0a0c0',
-}
 
 // Read theme-aware colors from CSS variables
 function getThemeColors() {
@@ -102,7 +95,7 @@ const chartOption = computed(() => {
     for (const hit of hits) {
       const level = hit.fields?.level || 'other'
       if (!seriesMap[level]) {
-        seriesMap[level] = { name: level, type: 'bar', stack: 'total', data: [], itemStyle: { color: LEVEL_COLORS[level] || '#7c6ef0' } }
+        seriesMap[level] = { name: level, type: 'bar', stack: 'total', data: [], itemStyle: { color: LOG_LEVEL_COLORS[level] || '#7c6ef0' } }
       }
       const timestamps = hit.timestamps || []
       const values = hit.values || []

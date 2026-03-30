@@ -38,9 +38,19 @@
           </template>
         </template>
       </a-dropdown>
-    </div>
-    <div class="query-editor__hint" :class="[`is-${validation.level}`]">
-      {{ validation.message }}
+      <a-tooltip v-if="showValidationBadge" :content="validation.message" position="bottom">
+        <span class="query-editor__status" :class="[`is-${validation.level}`]" :aria-label="validation.message">
+          <svg v-if="validation.level === 'valid'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+          <svg v-else-if="validation.level === 'warning'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <path d="M12 3 2 21h20L12 3z"/><path d="M12 9v5"/><path d="M12 18h.01"/>
+          </svg>
+          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6"/><path d="m9 9 6 6"/>
+          </svg>
+        </span>
+      </a-tooltip>
     </div>
   </div>
 </template>
@@ -48,7 +58,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useQueryStore } from '../stores/query.js'
-import { validateQuery } from '../utils/queryValidation.js'
+import { shouldShowValidationBadge, validateQuery } from '../utils/queryValidation.js'
 
 const queryStore = useQueryStore()
 const queryText = computed({
@@ -64,6 +74,7 @@ const queryText = computed({
 })
 
 const validation = computed(() => validateQuery(queryText.value))
+const showValidationBadge = computed(() => shouldShowValidationBadge(validation.value))
 
 function onInput() {
   queryStore.updateManualDraft(queryText.value)

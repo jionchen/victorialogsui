@@ -16,3 +16,12 @@ test('validateQuery warns when plain text will be converted to substring search'
   assert.equal(result.level, 'warning')
   assert.match(result.message, /子串|LogsQL/i)
 })
+
+test('validation badge is hidden for info state and shown for actionable states', async () => {
+  const { shouldShowValidationBadge } = await import('../utils/queryValidation.js')
+
+  assert.equal(shouldShowValidationBadge({ level: 'info' }), false)
+  assert.equal(shouldShowValidationBadge({ level: 'valid' }), true)
+  assert.equal(shouldShowValidationBadge({ level: 'warning' }), true)
+  assert.equal(shouldShowValidationBadge({ level: 'error' }), true)
+})

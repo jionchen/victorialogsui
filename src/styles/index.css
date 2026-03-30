@@ -716,13 +716,14 @@ html, body, #app {
 /* ===== Query Editor ===== */
 .query-editor {
   flex: 1;
+  min-width: 0;
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
+  align-items: center;
 }
 
 .query-editor__main {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -761,22 +762,36 @@ html, body, #app {
   border-color: var(--success);
 }
 
-.query-editor__hint {
-  font-size: 11px;
+.query-editor__status {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text-muted);
-  padding-left: 2px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  flex-shrink: 0;
+  cursor: help;
 }
 
-.query-editor__hint.is-error {
+.query-editor__status.is-error {
   color: var(--danger);
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.08);
 }
 
-.query-editor__hint.is-warning {
+.query-editor__status.is-warning {
   color: var(--warning);
+  border-color: rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.08);
 }
 
-.query-editor__hint.is-valid {
+.query-editor__status.is-valid {
   color: var(--success);
+  border-color: rgba(74, 222, 128, 0.4);
+  background: rgba(74, 222, 128, 0.08);
 }
 
 .saved-views-btn {
@@ -807,6 +822,31 @@ html, body, #app {
   gap: 8px;
 }
 
+.audit-panel-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.audit-panel__toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.audit-panel__heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.audit-panel__caption {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
 .audit-panel__row {
   padding: 8px 10px;
   border: 1px solid var(--border-color);
@@ -823,6 +863,42 @@ html, body, #app {
 .audit-panel__time {
   font-size: 11px;
   color: var(--text-muted);
+}
+
+.audit-panel__clear {
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.audit-panel__clear:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.activity-btn {
+  position: relative;
+}
+
+.activity-btn__count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  padding: 0 4px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+  border: 2px solid var(--bg-secondary);
 }
 
 /* ===== Time Range Picker ===== */

@@ -4,18 +4,34 @@ import {
   setApiBaseUrl,
   getApiBaseUrl,
   getAllowedProxyTargets,
+  isStrictProxyMode,
   isAllowedProxyTarget,
   normalizeProxyTarget,
 } from '../api/client.js'
+import {
+  DEFAULT_PINNED_FIELDS,
+  DEFAULT_RESULT_LIMIT,
+  DEFAULT_SECURITY_ROLE,
+  DEFAULT_REDACTION_ENABLED,
+  DEFAULT_TABLE_COLUMNS,
+  DEFAULT_THEME,
+  MAX_AUDIT_EVENTS,
+  MAX_SAVED_QUERIES,
+  MAX_SAVED_VIEWS,
+} from '../../config/appConfig.js'
+import { STORAGE_KEYS } from '../../config/storageKeys.js'
 
 function buildDefaultApiList() {
-  return [
-    { name: '默认 (代理配置)', url: '' },
-    ...getAllowedProxyTargets().map((url) => ({
+  const defaults = [{ name: '默认 (代理配置)', url: '' }]
+  if (!isStrictProxyMode()) {
+    return defaults
+  }
+  return defaults.concat(
+    getAllowedProxyTargets().map((url) => ({
       name: new URL(url).host,
       url,
-    })),
-  ]
+    }))
+  )
 }
 
 function sanitizeApiList(items) {
@@ -36,7 +52,7 @@ function sanitizeApiList(items) {
 }
 
 export const useSettingsStore = defineStore('settings', () => {
-  const theme = ref(localStorage.getItem('vlogs_theme') || 'dark')
+  const theme = ref(localStorage.getItem(STORAGE_KEYS.theme) || DEFAULT_THEME)
   
   function setTheme(newTheme) {
     theme.value = newTheme
@@ -46,7 +62,7 @@ export const useSettingsStore = defineStore('settings', () => {
     } else {
       document.body.removeAttribute('arco-theme')
     }
-    localStorage.setItem('vlogs_theme', newTheme)
+    localStorage.setItem(STORAGE_KEYS.theme, newTheme)
   }
 
   function initTheme() {
@@ -54,12 +70,13 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   const apiBaseUrlList = ref(
-    sanitizeApiList(JSON.parse(localStorage.getItem('vlogs_api_url_list') || 'null'))
+    sanitizeApiList(JSON.parse(localStorage.getItem(STORAGE_KEYS.apiUrlList) || 'null'))
   )
   const apiBaseUrl = ref(getApiBaseUrl())
 
+
   function saveUrlList() {
-    localStorage.setItem('vlogs_api_url_list', JSON.stringify(apiBaseUrlList.value))
+    localStorage.setItem(STORAGE_KEYS.apiUrlList, JSON.stringify(apiBaseUrlList.value))
   }
 
   function updateApiBaseUrl(url) {
@@ -96,45 +113,38 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
-  const DEFAULT_PINNED = [
-    'src_k8s.namespace.name',
-    'src_container.name',
-    'src_k8s.pod.name',
-  ]
-
   const pinnedFields = ref(
-    JSON.parse(localStorage.getItem('vlogs_pinned_fields') || 'null') || [...DEFAULT_PINNED]
+    JSON.parse(localStorage.getItem(STORAGE_KEYS.pinnedFields) || 'null') || [...DEFAULT_PINNED_FIELDS]
   )
 
   function setPinnedFields(fields) {
     pinnedFields.value = fields
-    localStorage.setItem('vlogs_pinned_fields', JSON.stringify(fields))
+    localStorage.setItem(STORAGE_KEYS.pinnedFields, JSON.stringify(fields))
   }
 
   const resultLimit = ref(
-    parseInt(localStorage.getItem('vlogs_result_limit') || '500', 10)
+    parseInt(localStorage.getItem(STORAGE_KEYS.resultLimit) || String(DEFAULT_RESULT_LIMIT), 10)
   )
 
   function setResultLimit(limit) {
     resultLimit.value = limit
-    localStorage.setItem('vlogs_result_limit', String(limit))
+    localStorage.setItem(STORAGE_KEYS.resultLimit, String(limit))
   }
 
-  const DEFAULT_COLUMNS = ['level', '_stream']
   const tableColumns = ref(
-    JSON.parse(localStorage.getItem('vlogs_table_columns') || 'null') || [...DEFAULT_COLUMNS]
+    JSON.parse(localStorage.getItem(STORAGE_KEYS.tableColumns) || 'null') || [...DEFAULT_TABLE_COLUMNS]
   )
-  const securityRole = ref(localStorage.getItem('vlogs_security_role') || 'admin')
-  const redactionEnabled = ref(localStorage.getItem('vlogs_redaction_enabled') !== 'false')
+  const securityRole = ref(localStorage.getItem(STORAGE_KEYS.securityRole) || DEFAULT_SECURITY_ROLE)
+  const redactionEnabled = ref(localStorage.getItem(STORAGE_KEYS.redactionEnabled) !== 'false' ? DEFAULT_REDACTION_ENABLED : false)
   const auditEvents = ref(
-    JSON.parse(localStorage.getItem('vlogs_audit_events') || '[]')
+    JSON.parse(localStorage.getItem(STORAGE_KEYS.auditEvents) || '[]')
   )
 
   const savedViews = ref(
-    JSON.parse(localStorage.getItem('vlogs_saved_views') || '[]')
+    JSON.parse(localStorage.getItem(STORAGE_KEYS.savedViews) || '[]')
   )
   const savedQueries = ref(
-    JSON.parse(localStorage.getItem('vlogs_saved_queries') || '[]')
+    JSON.parse(localStorage.getItem(STORAGE_KEYS.savedQueries) || '[]')
   )
 
   function toggleTableColumn(field) {
@@ -144,22 +154,22 @@ export const useSettingsStore = defineStore('settings', () => {
     } else {
       tableColumns.value.push(field)
     }
-    localStorage.setItem('vlogs_table_columns', JSON.stringify(tableColumns.value))
+    localStorage.setItem(STORAGE_KEYS.tableColumns, JSON.stringify(tableColumns.value))
   }
 
   function resetTableColumns() {
-    tableColumns.value = [...DEFAULT_COLUMNS]
-    localStorage.removeItem('vlogs_table_columns')
+    tableColumns.value = [...DEFAULT_TABLE_COLUMNS]
+    localStorage.removeItem(STORAGE_KEYS.tableColumns)
   }
 
   function setSecurityRole(role) {
     securityRole.value = role
-    localStorage.setItem('vlogs_security_role', role)
+    localStorage.setItem(STORAGE_KEYS.securityRole, role)
   }
 
   function setRedactionEnabled(value) {
     redactionEnabled.value = value
-    localStorage.setItem('vlogs_redaction_enabled', String(value))
+    localStorage.setItem(STORAGE_KEYS.redactionEnabled, String(value))
   }
 
   function logAuditEvent(action, summary) {
@@ -169,8 +179,13 @@ export const useSettingsStore = defineStore('settings', () => {
       summary,
       timestamp: new Date().toISOString(),
     }
-    auditEvents.value = [event, ...auditEvents.value].slice(0, 20)
-    localStorage.setItem('vlogs_audit_events', JSON.stringify(auditEvents.value))
+    auditEvents.value = [event, ...auditEvents.value].slice(0, MAX_AUDIT_EVENTS)
+    localStorage.setItem(STORAGE_KEYS.auditEvents, JSON.stringify(auditEvents.value))
+  }
+
+  function clearAuditEvents() {
+    auditEvents.value = []
+    localStorage.setItem(STORAGE_KEYS.auditEvents, JSON.stringify(auditEvents.value))
   }
 
   function upsertSavedView(view) {
@@ -184,14 +199,14 @@ export const useSettingsStore = defineStore('settings', () => {
     savedViews.value = [
       item,
       ...savedViews.value.filter(existing => existing.id !== item.id),
-    ].slice(0, 20)
-    localStorage.setItem('vlogs_saved_views', JSON.stringify(savedViews.value))
+    ].slice(0, MAX_SAVED_VIEWS)
+    localStorage.setItem(STORAGE_KEYS.savedViews, JSON.stringify(savedViews.value))
     logAuditEvent('保存视图', view.name)
   }
 
   function removeSavedView(id) {
     savedViews.value = savedViews.value.filter(item => item.id !== id)
-    localStorage.setItem('vlogs_saved_views', JSON.stringify(savedViews.value))
+    localStorage.setItem(STORAGE_KEYS.savedViews, JSON.stringify(savedViews.value))
   }
 
   function upsertSavedQuery(item) {
@@ -204,26 +219,28 @@ export const useSettingsStore = defineStore('settings', () => {
     savedQueries.value = [
       saved,
       ...savedQueries.value.filter(existing => existing.id !== saved.id),
-    ].slice(0, 20)
-    localStorage.setItem('vlogs_saved_queries', JSON.stringify(savedQueries.value))
+    ].slice(0, MAX_SAVED_QUERIES)
+    localStorage.setItem(STORAGE_KEYS.savedQueries, JSON.stringify(savedQueries.value))
     logAuditEvent('保存查询', item.name)
   }
 
   function removeSavedQuery(id) {
     savedQueries.value = savedQueries.value.filter(item => item.id !== id)
-    localStorage.setItem('vlogs_saved_queries', JSON.stringify(savedQueries.value))
+    localStorage.setItem(STORAGE_KEYS.savedQueries, JSON.stringify(savedQueries.value))
   }
 
   return {
     theme, setTheme, initTheme,
     apiBaseUrl, updateApiBaseUrl, apiBaseUrlList, addApiBaseUrl, removeApiBaseUrl,
+
+
     pinnedFields, setPinnedFields,
     resultLimit, setResultLimit,
     savedViews, upsertSavedView, removeSavedView,
     savedQueries, upsertSavedQuery, removeSavedQuery,
     securityRole, setSecurityRole,
     redactionEnabled, setRedactionEnabled,
-    auditEvents, logAuditEvent,
+    auditEvents, logAuditEvent, clearAuditEvents,
     tableColumns, toggleTableColumn, resetTableColumns,
   }
 })

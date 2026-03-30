@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { createProxyMiddleware } from 'http-proxy-middleware'
+import { APP_BASE_PATH, DEV_SERVER_HOST, DEV_SERVER_PORT } from './config/appConfig.js'
+import { DEFAULT_PROXY_TARGET } from './config/proxyConfig.js'
 
-const DEFAULT_TARGET = 'http://172.19.0.176:19428'
+const STRICT_PROXY_TARGETS = process.env.VITE_STRICT_PROXY_TARGETS === 'true'
 
 function normalizeTarget(raw) {
   if (!raw) return null
@@ -18,7 +20,7 @@ function normalizeTarget(raw) {
 }
 
 const ALLOWED_TARGETS = new Set([
-  DEFAULT_TARGET,
+  DEFAULT_PROXY_TARGET,
   ...(process.env.VITE_ALLOWED_PROXY_TARGETS || '')
     .split(',')
     .map(item => item.trim())
@@ -32,17 +34,17 @@ function dynamicProxyPlugin() {
     name: 'dynamic-proxy',
     configureServer(server) {
       const apiProxy = createProxyMiddleware({
-        target: DEFAULT_TARGET,
+        target: DEFAULT_PROXY_TARGET,
         changeOrigin: true,
         secure: false,
         router(req) {
           const rawTarget = req.headers['x-proxy-target'] || req.headers['X-Proxy-Target'] || req.headers['x-target-url']
           const target = normalizeTarget(rawTarget)
-          if (target && ALLOWED_TARGETS.has(target)) {
+          if (target && (!STRICT_PROXY_TARGETS || ALLOWED_TARGETS.has(target))) {
             console.log(`[Vite Proxy Router] Routing to Target: ${target}`)
             return target
           }
-          return DEFAULT_TARGET
+          return DEFAULT_PROXY_TARGET
         },
         pathRewrite: {
           '^/api': '',
@@ -50,7 +52,7 @@ function dynamicProxyPlugin() {
         onProxyReq(proxyReq, req) {
           const rawTarget = req.headers['x-proxy-target'] || req.headers['X-Proxy-Target'] || req.headers['x-target-url']
           const target = normalizeTarget(rawTarget)
-          if (target && ALLOWED_TARGETS.has(target)) {
+          if (target && (!STRICT_PROXY_TARGETS || ALLOWED_TARGETS.has(target))) {
             const parsedTarget = new URL(target)
             proxyReq.setHeader('Host', parsedTarget.host)
           }
@@ -67,10 +69,10 @@ function dynamicProxyPlugin() {
 
 export default defineConfig({
   plugins: [vue(), dynamicProxyPlugin()],
-  base: '/vlogs-ui/',
+  base: APP_BASE_PATH,
   server: {
-    port: 5173,
-    host: '127.0.0.1',
+    port: DEV_SERVER_PORT,
+    host: DEV_SERVER_HOST,
     proxy: {},
   },
 })

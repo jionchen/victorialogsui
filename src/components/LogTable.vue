@@ -135,6 +135,7 @@ import { getStreamLabel } from '../utils/formatters.js'
 import { calculateVirtualWindow } from '../utils/virtualList.js'
 import LogDetail from './LogDetail.vue'
 import LogContextModal from './LogContextModal.vue'
+import { LOG_ROW_HEIGHT } from '../../config/uiConfig.js'
 
 const logStore = useLogStore()
 const fieldStore = useFieldStore()
@@ -152,13 +153,12 @@ const scrollTop = ref(0)
 // Pre-computed skeleton widths to avoid Math.random() in templates
 const skeletonWidths = Array.from({ length: 15 }, (_, i) => 30 + ((i * 17 + 7) % 60))
 
-const ROW_HEIGHT = 40
 const virtualWindow = computed(() => {
   return calculateVirtualWindow({
     total: logStore.logs.length,
     scrollTop: scrollTop.value,
     containerHeight: scrollContainer.value?.clientHeight || 400,
-    itemHeight: ROW_HEIGHT,
+    itemHeight: LOG_ROW_HEIGHT,
     overscan: 6,
   })
 })
@@ -173,7 +173,7 @@ const visibleLogs = computed(() => {
 })
 
 const bottomSpacerHeight = computed(() => {
-  return Math.max(0, virtualWindow.value.totalHeight - virtualWindow.value.offsetTop - (visibleLogs.value.length * ROW_HEIGHT))
+  return Math.max(0, virtualWindow.value.totalHeight - virtualWindow.value.offsetTop - (visibleLogs.value.length * LOG_ROW_HEIGHT))
 })
 
 watch(() => logStore.logs, () => {

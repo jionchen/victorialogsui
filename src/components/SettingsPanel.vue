@@ -25,9 +25,9 @@
       </div>
 
       <div style="margin-top: 6px; font-size: 11px; color: var(--text-muted);">
-        提示: 点击地址切换。仅允许切换到部署配置声明过的后端地址。
+        {{ strictProxyMode ? '提示: 当前为受控模式，仅允许切换到部署配置声明过的后端地址。' : '提示: 当前为内网自由连接模式，可直接填写合法的 VictoriaLogs 地址。' }}
       </div>
-      <div style="margin-top: 6px; font-size: 11px; color: var(--text-muted);">
+      <div v-if="strictProxyMode" style="margin-top: 6px; font-size: 11px; color: var(--text-muted);">
         允许列表: {{ allowedTargets.join(' / ') || '仅默认代理' }}
       </div>
       <div v-if="addApiError" style="margin-top: 6px; font-size: 11px; color: var(--danger);">
@@ -106,8 +106,6 @@
         {{ testResult.message }}
       </div>
     </div>
-
-    <AuditPanel />
   </div>
 </template>
 
@@ -115,11 +113,12 @@
 import { ref, computed } from 'vue'
 import { useSettingsStore } from '../stores/settings.js'
 import { useQueryStore } from '../stores/query.js'
-import AuditPanel from './AuditPanel.vue'
+import { API_CONNECTION_TEST_TIMEOUT_MS } from '../../config/proxyConfig.js'
 import client, {
   getAuthCredentials,
   setAuth,
   getAllowedProxyTargets,
+  isStrictProxyMode,
   normalizeProxyTarget,
 } from '../api/client.js'
 
@@ -142,6 +141,7 @@ const testing = ref(false)
 const testResult = ref(null)
 const addApiError = ref('')
 const allowedTargets = getAllowedProxyTargets()
+const strictProxyMode = isStrictProxyMode()
 
 function selectApi(url) {
   settingsStore.updateApiBaseUrl(url)
@@ -162,7 +162,9 @@ function addNewApi() {
   const normalized = normalizeProxyTarget(sanitizedUrl)
   const ok = settingsStore.addApiBaseUrl(newApiName.value || '未命名', normalized)
   if (!ok) {
-    addApiError.value = '该地址未在允许列表中，请先在部署配置中声明允许的后端地址。'
+    addApiError.value = strictProxyMode
+      ? '该地址未在允许列表中，请先在部署配置中声明允许的后端地址。'
+      : '请输入合法的 http/https 地址，且不要包含路径、账号密码或查询参数。'
     return
   }
 
@@ -215,7 +217,7 @@ async function testConnection() {
     params.set('end', 'now')
     await client.post('/select/logsql/query', params.toString(), {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      timeout: 5000,
+      timeout: API_CONNECTION_TEST_TIMEOUT_MS,
     })
     testResult.value = { ok: true, message: '连接成功' }
   } catch (e) {

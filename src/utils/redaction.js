@@ -1,13 +1,6 @@
-const DEFAULT_PATTERNS = [
-  /token/i,
-  /secret/i,
-  /password/i,
-  /authorization/i,
-  /cookie/i,
-  /email/i,
-]
+import { REDACTION_PATTERNS } from '../../config/securityConfig.js'
 
-export function redactSensitiveFields(record = {}, patterns = DEFAULT_PATTERNS) {
+export function redactSensitiveFields(record = {}, patterns = REDACTION_PATTERNS) {
   return Object.fromEntries(
     Object.entries(record).map(([key, value]) => {
       const shouldRedact = patterns.some((pattern) => pattern.test(key))

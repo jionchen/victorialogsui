@@ -14,6 +14,12 @@
       </div>
       <div class="app-header__spacer" />
       <div class="app-header__actions">
+        <button class="icon-btn activity-btn" @click="showActivity = true" title="活动记录">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M3 12h4l3 8 4-16 3 8h4"/>
+          </svg>
+          <span v-if="activityCount > 0" class="activity-btn__count">{{ activityCount }}</span>
+        </button>
         <button class="icon-btn" @click="toggleTheme" :title="settingsStore.theme === 'dark' ? '切换为浅色' : '切换为深色'">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
             <template v-if="settingsStore.theme === 'dark'">
@@ -64,6 +70,8 @@
     >
       <SettingsPanel />
     </a-drawer>
+
+    <ActivityDrawer v-model:visible="showActivity" />
   </div>
 </template>
 
@@ -74,6 +82,7 @@ import { useQueryStore } from './stores/query.js'
 import { useFieldStore } from './stores/fields.js'
 import { useLogStore } from './stores/logs.js'
 
+
 import TimeRangePicker from './components/TimeRangePicker.vue'
 import QueryEditor from './components/QueryEditor.vue'
 import SavedViewsPanel from './components/SavedViewsPanel.vue'
@@ -83,6 +92,7 @@ import FieldSidebar from './components/FieldSidebar.vue'
 import HitsHistogram from './components/HitsHistogram.vue'
 import LogTable from './components/LogTable.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
+import ActivityDrawer from './components/ActivityDrawer.vue'
 
 const settingsStore = useSettingsStore()
 const queryStore = useQueryStore()
@@ -91,9 +101,12 @@ const logStore = useLogStore()
 
 const showSettings = ref(false)
 
+const showActivity = ref(false)
+
 const currentApi = computed(() => {
   return settingsStore.apiBaseUrlList.find(item => item.url === settingsStore.apiBaseUrl)
 })
+const activityCount = computed(() => Math.min(settingsStore.auditEvents.length, 99))
 
 function toggleTheme() {
   settingsStore.setTheme(settingsStore.theme === 'dark' ? 'light' : 'dark')
@@ -182,6 +195,7 @@ onMounted(() => {
   }
 
   queryStore.executeQuery()
+
 
   // Global Keyboard Shortcuts
   window.addEventListener('keydown', onGlobalKeydown)
