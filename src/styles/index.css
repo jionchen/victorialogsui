@@ -225,6 +225,24 @@ html, body, #app {
   color: var(--text-muted);
 }
 
+.field-sidebar__error,
+.histogram-panel__error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--danger);
+  font-size: 12px;
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.22);
+  border-radius: var(--radius-sm);
+}
+
+.field-sidebar__error {
+  margin: 8px 12px;
+  padding: 8px;
+}
+
 .field-sidebar__resize-handle {
   position: absolute;
   right: 0;
@@ -544,6 +562,26 @@ html, body, #app {
   flex: 1;
 }
 
+.histogram-panel__error {
+  height: 100%;
+  padding: 0 12px;
+}
+
+.link-btn {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 4px;
+}
+
+.link-btn:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
 /* ===== Log Table ===== */
 .log-panel {
   flex: 1;
@@ -609,6 +647,39 @@ html, body, #app {
   color: var(--text-muted);
 }
 
+.log-row__time-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: color var(--transition), background var(--transition);
+}
+
+.log-row__time-header:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.log-row__time-header-label {
+  flex-shrink: 0;
+}
+
+.log-row__time-sort-arrow {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+  transform: rotate(0deg);
+  transition: transform var(--transition), color var(--transition);
+}
+
+.log-row__time-sort-arrow.is-asc {
+  transform: rotate(180deg);
+}
+
 .log-row__level {
   width: 60px;
   font-weight: 600;
@@ -630,6 +701,28 @@ html, body, #app {
   flex: 1;
   color: var(--text-primary);
   min-width: 0;
+  white-space: normal;
+  overflow: hidden;
+}
+
+.log-row__msg-preview {
+  display: -webkit-box;
+  width: 100%;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 7;
+}
+
+.text-highlight {
+  background: color-mix(in srgb, var(--warning) 28%, transparent);
+  color: inherit;
+  padding: 0 1px;
+  border-radius: 3px;
+  font-weight: 600;
 }
 
 /* ===== Log Detail ===== */
@@ -795,7 +888,7 @@ html, body, #app {
 }
 
 .saved-views-btn {
-  min-width: 56px;
+  min-width: 68px;
 }
 
 .saved-views-menu {
@@ -901,6 +994,162 @@ html, body, #app {
   border: 2px solid var(--bg-secondary);
 }
 
+/* ===== Keyword Stats ===== */
+.keyword-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.keyword-stats__input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.keyword-stats__input-row .arco-input-wrapper {
+  flex: 1;
+}
+
+.keyword-stats__add-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.keyword-stats__add-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.keyword-stats__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.keyword-stats__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+}
+
+.keyword-stats__tag--custom {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.keyword-stats__tag-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  font-size: 12px;
+  line-height: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition);
+}
+
+.keyword-stats__tag-remove:hover {
+  color: var(--danger);
+}
+
+.keyword-stats__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.keyword-stats__row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.keyword-stats__info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.keyword-stats__name {
+  font-size: 12px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.keyword-stats__count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.keyword-stats__bar {
+  width: 100%;
+  height: 6px;
+  background: var(--hit-bar-bg);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.keyword-stats__bar-fill {
+  height: 100%;
+  background: var(--hit-bar-fill);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.keyword-stats__empty {
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.keyword-stats__summary {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-color);
+}
+
+.keyword-stats__loading,
+.keyword-stats__error {
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.keyword-stats__loading {
+  color: var(--text-secondary);
+}
+
+.keyword-stats__error {
+  color: var(--danger);
+}
+
 /* ===== Time Range Picker ===== */
 .time-picker {
   display: flex;
@@ -914,8 +1163,8 @@ html, body, #app {
 }
 
 .time-preset-btn {
-  padding: 4px 8px;
-  font-size: 11px;
+  padding: 6px 12px;
+  font-size: 12px;
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
@@ -955,8 +1204,8 @@ html, body, #app {
 .font-mono { font-family: var(--font-mono); }
 
 .icon-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -974,12 +1223,12 @@ html, body, #app {
 }
 
 .btn-primary {
-  padding: 6px 16px;
+  padding: 8px 20px;
   background: var(--accent);
   color: #fff;
   border: none;
   border-radius: var(--radius-sm);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   display: flex;

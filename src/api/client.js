@@ -93,7 +93,7 @@ export function getApiBaseUrl() {
 // ======== 认证管理 ========
 function getAuth() {
   try {
-    const saved = sessionStorage.getItem(SESSION_STORAGE_KEYS.auth)
+    const saved = localStorage.getItem(SESSION_STORAGE_KEYS.auth)
     if (saved) return JSON.parse(saved)
   } catch { /* ignore */ }
   return DEFAULT_AUTH_CREDENTIALS
@@ -103,13 +103,13 @@ export function setAuth(username, password) {
   const auth = { username, password }
   try {
     if (!username && !password) {
-      sessionStorage.removeItem(SESSION_STORAGE_KEYS.auth)
       localStorage.removeItem(SESSION_STORAGE_KEYS.auth)
+      sessionStorage.removeItem(SESSION_STORAGE_KEYS.auth)
       return
     }
 
-    sessionStorage.setItem(SESSION_STORAGE_KEYS.auth, JSON.stringify(auth))
-    localStorage.removeItem(SESSION_STORAGE_KEYS.auth)
+    localStorage.setItem(SESSION_STORAGE_KEYS.auth, JSON.stringify(auth))
+    sessionStorage.removeItem(SESSION_STORAGE_KEYS.auth)
   } catch { /* ignore */ }
 }
 
@@ -168,12 +168,16 @@ client.interceptors.response.use(
     const isRetryable =
       !error.response ||
       error.response.status === 502 ||
-      error.response.status === 503
+      error.response.status === 503 ||
+      error.response.status === 504
 
     if (isRetryable && config._retryCount < MAX_API_RETRIES) {
       config._retryCount++
       console.warn(`[retry ${config._retryCount}/${MAX_API_RETRIES}] ${config.url}`)
-      await new Promise(resolve => setTimeout(resolve, API_RETRY_DELAY_MS))
+      const baseDelay = config.retryDelayMs ?? API_RETRY_DELAY_MS
+      const retryDelay = baseDelay * (2 ** (config._retryCount - 1))
+      const jitter = baseDelay > 0 ? Math.floor(Math.random() * 100) : 0
+      await new Promise(resolve => setTimeout(resolve, retryDelay + jitter))
       return client(config)
     }
 

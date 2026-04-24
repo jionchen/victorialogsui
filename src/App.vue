@@ -14,7 +14,7 @@
       </div>
       <div class="app-header__spacer" />
       <div class="app-header__actions">
-        <button class="icon-btn activity-btn" @click="showActivity = true" title="活动记录">
+        <button class="icon-btn activity-btn" @click="showActivity = true" title="关键字统计">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
             <path d="M3 12h4l3 8 4-16 3 8h4"/>
           </svg>
@@ -93,6 +93,8 @@ import HitsHistogram from './components/HitsHistogram.vue'
 import LogTable from './components/LogTable.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import ActivityDrawer from './components/ActivityDrawer.vue'
+import { createSearchExecutor } from './utils/searchOrchestration.js'
+import { DEFAULT_KEYWORDS, countKeywordMatches } from './utils/keywordStats.js'
 
 const settingsStore = useSettingsStore()
 const queryStore = useQueryStore()
@@ -106,7 +108,19 @@ const showActivity = ref(false)
 const currentApi = computed(() => {
   return settingsStore.apiBaseUrlList.find(item => item.url === settingsStore.apiBaseUrl)
 })
-const activityCount = computed(() => Math.min(settingsStore.auditEvents.length, 99))
+const activityCount = computed(() => {
+  const stats = countKeywordMatches(logStore.logs, DEFAULT_KEYWORDS)
+  const active = stats.filter(s => s.count > 0).length
+  return Math.min(active, 99)
+})
+const searchExecutor = createSearchExecutor({
+  fetchLogs: (params) => logStore.fetchLogs(params),
+  fetchHistogram: (params) => logStore.fetchHistogram(params),
+  loadFieldNames: (params) => fieldStore.loadFieldNames(params),
+  onAuxiliaryError: (source, error) => {
+    console.warn(`[executeSearch] auxiliary ${source} failed:`, error)
+  },
+})
 
 function toggleTheme() {
   settingsStore.setTheme(settingsStore.theme === 'dark' ? 'light' : 'dark')
@@ -117,11 +131,14 @@ async function executeSearch() {
   const query = queryStore.effectiveQuery
   const limit = settingsStore.resultLimit
 
-  await Promise.all([
-    logStore.fetchLogs({ query, limit, start, end }),
-    logStore.fetchHistogram({ query, start, end, step: queryStore.histogramStep }),
-    fieldStore.loadFieldNames({ query, start, end }),
-  ])
+  await searchExecutor.execute({
+    query,
+    limit,
+    start,
+    end,
+    step: queryStore.histogramStep,
+    rangeMs: queryStore.timeRange.rangeMs,
+  })
 }
 
 function submitSearch() {
@@ -147,6 +164,7 @@ watch(
 watch(
   () => queryStore.queryVersion,
   () => {
+    fieldStore.clearCache()
     const state = queryStore.getUrlState()
     const url = new URL(window.location)
     url.searchParams.set('s', state)

@@ -12,11 +12,12 @@ export const MAX_AUDIT_EVENTS = 200
 export const MAX_QUERY_HISTORY = 20
 export const MAX_SAVED_VIEWS = 20
 export const MAX_SAVED_QUERIES = 20
+export const DEFAULTS_MIGRATION_VERSION = '2026-04-10-defaults-v1'
 
 export const DEFAULT_PINNED_FIELDS = [
-  'src_k8s.namespace.name',
-  'src_container.name',
-  'src_k8s.pod.name',
+  'src_namespace',
+  'src_container_name',
+  'src_pod_name',
 ]
 
-export const DEFAULT_TABLE_COLUMNS = ['level', '_stream']
+export const DEFAULT_TABLE_COLUMNS = ['_stream']

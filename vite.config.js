@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { createProxyMiddleware } from 'http-proxy-middleware'
 import { APP_BASE_PATH, DEV_SERVER_HOST, DEV_SERVER_PORT } from './config/appConfig.js'
-import { DEFAULT_PROXY_TARGET } from './config/proxyConfig.js'
+import { API_PROXY_TIMEOUT_MS, DEFAULT_PROXY_TARGET } from './config/proxyConfig.js'
 
 const STRICT_PROXY_TARGETS = process.env.VITE_STRICT_PROXY_TARGETS === 'true'
 
@@ -37,6 +37,8 @@ function dynamicProxyPlugin() {
         target: DEFAULT_PROXY_TARGET,
         changeOrigin: true,
         secure: false,
+        timeout: API_PROXY_TIMEOUT_MS,
+        proxyTimeout: API_PROXY_TIMEOUT_MS,
         router(req) {
           const rawTarget = req.headers['x-proxy-target'] || req.headers['X-Proxy-Target'] || req.headers['x-target-url']
           const target = normalizeTarget(rawTarget)
@@ -59,6 +61,13 @@ function dynamicProxyPlugin() {
           proxyReq.removeHeader('x-proxy-target')
           proxyReq.removeHeader('X-Proxy-Target')
           proxyReq.removeHeader('x-target-url')
+        },
+        onError(err, req, res) {
+          console.error('[Vite Proxy Error]', err.message)
+          if (!res.headersSent) {
+            res.writeHead(504, { 'Content-Type': 'application/json; charset=utf-8' })
+          }
+          res.end(JSON.stringify({ error: 'Proxy request failed', message: err.message }))
         },
       })
 

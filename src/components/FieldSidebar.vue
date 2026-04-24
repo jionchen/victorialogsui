@@ -18,6 +18,11 @@
       </template>
 
       <template v-else>
+        <div v-if="fieldStore.error" class="field-sidebar__error">
+          <span>字段加载失败，可重试</span>
+          <button class="link-btn" @click="retryFieldNames">重试</button>
+        </div>
+
         <!-- Pinned Fields Section -->
         <div v-if="pinnedFieldItems.length > 0">
           <div class="field-sidebar__section-title">置顶字段</div>
@@ -74,10 +79,12 @@
 import { ref, computed } from 'vue'
 import { useFieldStore } from '../stores/fields.js'
 import { useSettingsStore } from '../stores/settings.js'
+import { useQueryStore } from '../stores/query.js'
 import FieldItem from './FieldItem.vue'
 
 const fieldStore = useFieldStore()
 const settingsStore = useSettingsStore()
+const queryStore = useQueryStore()
 
 const searchText = ref('')
 const sidebarWidth = ref(280)
@@ -126,6 +133,15 @@ const filteredLogFields = computed(() => {
 function matchSearch(name) {
   if (!searchText.value) return true
   return name.toLowerCase().includes(searchText.value.toLowerCase())
+}
+
+function retryFieldNames() {
+  const { start, end } = queryStore.timeRange
+  fieldStore.loadFieldNames({
+    query: queryStore.effectiveQuery,
+    start,
+    end,
+  })
 }
 
 // Resize logic

@@ -9,6 +9,7 @@ import {
   normalizeProxyTarget,
 } from '../api/client.js'
 import {
+  DEFAULTS_MIGRATION_VERSION,
   DEFAULT_PINNED_FIELDS,
   DEFAULT_RESULT_LIMIT,
   DEFAULT_SECURITY_ROLE,
@@ -51,7 +52,19 @@ function sanitizeApiList(items) {
   return Array.from(byUrl.values())
 }
 
+function applyDefaultsMigration() {
+  if (localStorage.getItem(STORAGE_KEYS.defaultsVersion) === DEFAULTS_MIGRATION_VERSION) {
+    return
+  }
+
+  localStorage.setItem(STORAGE_KEYS.pinnedFields, JSON.stringify(DEFAULT_PINNED_FIELDS))
+  localStorage.setItem(STORAGE_KEYS.tableColumns, JSON.stringify(DEFAULT_TABLE_COLUMNS))
+  localStorage.setItem(STORAGE_KEYS.defaultsVersion, DEFAULTS_MIGRATION_VERSION)
+}
+
 export const useSettingsStore = defineStore('settings', () => {
+  applyDefaultsMigration()
+
   const theme = ref(localStorage.getItem(STORAGE_KEYS.theme) || DEFAULT_THEME)
   
   function setTheme(newTheme) {
@@ -159,7 +172,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
   function resetTableColumns() {
     tableColumns.value = [...DEFAULT_TABLE_COLUMNS]
-    localStorage.removeItem(STORAGE_KEYS.tableColumns)
+    localStorage.setItem(STORAGE_KEYS.tableColumns, JSON.stringify(tableColumns.value))
   }
 
   function setSecurityRole(role) {

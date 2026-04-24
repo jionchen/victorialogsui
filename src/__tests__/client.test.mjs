@@ -31,7 +31,7 @@ test('normalizeProxyTarget strips path and rejects credentials or query fragment
 test('allowed proxy targets must come from the configured allowlist', async () => {
   const { isAllowedProxyTarget } = await import('../api/client.js')
 
-  assert.equal(isAllowedProxyTarget('http://172.19.0.176:19428', { strict: true }), true)
+  assert.equal(isAllowedProxyTarget('http://invalid-target:9428', { strict: true }), true)
   assert.equal(isAllowedProxyTarget('https://evil.example.com', { strict: true }), false)
 })
 
@@ -40,4 +40,35 @@ test('non-strict proxy mode allows any normalized http target', async () => {
 
   assert.equal(isAllowedProxyTarget('https://logs.internal.example.com', { strict: false }), true)
   assert.equal(isAllowedProxyTarget('https://user:pass@logs.internal.example.com', { strict: false }), false)
+})
+
+test('client retries gateway timeout responses before succeeding', async () => {
+  const { default: client } = await import('../api/client.js')
+  const originalAdapter = client.defaults.adapter
+  let attempts = 0
+
+  client.defaults.adapter = async (config) => {
+    attempts += 1
+    if (attempts === 1) {
+      const error = new Error('gateway timeout')
+      error.config = config
+      error.response = { status: 504, data: 'timeout' }
+      throw error
+    }
+    return {
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config,
+      data: { ok: true },
+    }
+  }
+
+  try {
+    const response = await client.get('/retry-504', { retryDelayMs: 0 })
+    assert.equal(response.data.ok, true)
+    assert.equal(attempts, 2)
+  } finally {
+    client.defaults.adapter = originalAdapter
+  }
 })

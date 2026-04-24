@@ -1,0 +1,157 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import { createPinia, setActivePinia } from 'pinia'
+
+function deferred() {
+  let resolve
+  let reject
+  const promise = new Promise((res, rej) => {
+    resolve = res
+    reject = rej
+  })
+  return { promise, resolve, reject }
+}
+
+test('field store retries once and records an error state when loading values fails', async () => {
+  setActivePinia(createPinia())
+  const { createFieldsStore } = await import('../stores/fields.js')
+
+  let attempts = 0
+  const useFieldStore = createFieldsStore({
+    getFieldNames: async () => [],
+    getStreamFieldNames: async () => [],
+    getFieldValues: async () => {
+      attempts += 1
+      throw new Error('network down')
+    },
+    getStreamFieldValues: async () => [],
+  })
+
+  const store = useFieldStore()
+  await store.loadFieldValues({ field: 'src_container.name', isStream: false, query: '*', start: '24h', end: 'now' })
+
+  const state = store.getCachedValues({
+    field: 'src_container.name',
+    isStream: false,
+    query: '*',
+    start: '24h',
+    end: 'now',
+  })
+
+  assert.equal(attempts, 2)
+  assert.equal(state.status, 'error')
+  assert.equal(state.error, 'network down')
+  assert.deepEqual(state.values, [])
+})
+
+test('field store keeps the previous successful values when a refresh fails after retry', async () => {
+  setActivePinia(createPinia())
+  const { createFieldsStore } = await import('../stores/fields.js')
+
+  let attempts = 0
+  const useFieldStore = createFieldsStore({
+    getFieldNames: async () => [{ value: 'src_container.name', hits: 10 }],
+    getStreamFieldNames: async () => [],
+    getFieldValues: async () => {
+      attempts += 1
+      if (attempts === 1) {
+        return [{ value: 'deployment-rule-engine', hits: 10 }]
+      }
+      throw new Error('timeout')
+    },
+    getStreamFieldValues: async () => [],
+  })
+
+  const store = useFieldStore()
+  const params = { field: 'src_container.name', isStream: false, query: '*', start: '24h', end: 'now' }
+
+  await store.loadFieldValues(params)
+  await store.loadFieldValues(params)
+
+  const state = store.getCachedValues(params)
+  assert.equal(attempts, 3)
+  assert.equal(state.status, 'error')
+  assert.equal(state.error, 'timeout')
+  assert.deepEqual(state.values, [{ value: 'deployment-rule-engine', hits: 10 }])
+})
+
+test('field store ignores stale responses from older requests for the same cache key', async () => {
+  setActivePinia(createPinia())
+  const { createFieldsStore } = await import('../stores/fields.js')
+
+  const first = deferred()
+  const second = deferred()
+  let attempts = 0
+  const useFieldStore = createFieldsStore({
+    getFieldNames: async () => [{ value: 'src_container.name', hits: 20 }],
+    getStreamFieldNames: async () => [],
+    getFieldValues: async () => {
+      attempts += 1
+      return attempts === 1 ? first.promise : second.promise
+    },
+    getStreamFieldValues: async () => [],
+  })
+
+  const store = useFieldStore()
+  const params = { field: 'src_container.name', isStream: false, query: '*', start: '24h', end: 'now' }
+
+  const older = store.loadFieldValues(params)
+  const newer = store.loadFieldValues(params)
+  second.resolve([{ value: 'deployment-new', hits: 12 }])
+  await newer
+  first.resolve([{ value: 'deployment-old', hits: 5 }])
+  await older
+
+  const state = store.getCachedValues(params)
+  assert.equal(state.status, 'success')
+  assert.deepEqual(state.values, [{ value: 'deployment-new', hits: 12 }])
+})
+
+test('field store records field name failures without clearing existing field value cache', async () => {
+  setActivePinia(createPinia())
+  const { createFieldsStore } = await import('../stores/fields.js')
+
+  const useFieldStore = createFieldsStore({
+    getFieldNames: async () => {
+      throw new Error('field names gateway timeout')
+    },
+    getStreamFieldNames: async () => [],
+    getFieldValues: async () => [{ value: 'paas', hits: 8 }],
+    getStreamFieldValues: async () => [],
+  })
+
+  const store = useFieldStore()
+  const params = { field: 'src_namespace', isStream: false, query: '*', start: '24h', end: 'now' }
+
+  await store.loadFieldValues(params)
+  await store.loadFieldNames({ query: '*', start: '24h', end: 'now' })
+
+  assert.equal(store.error, 'field names gateway timeout')
+  assert.deepEqual(store.getCachedValues(params).values, [{ value: 'paas', hits: 8 }])
+})
+
+test('field store increments names version only after field names load successfully', async () => {
+  setActivePinia(createPinia())
+  const { createFieldsStore } = await import('../stores/fields.js')
+
+  let shouldFail = true
+  const useFieldStore = createFieldsStore({
+    getFieldNames: async () => {
+      if (shouldFail) throw new Error('field names timeout')
+      return [{ value: 'src_namespace', hits: 10 }]
+    },
+    getStreamFieldNames: async () => [],
+    getFieldValues: async () => [],
+    getStreamFieldValues: async () => [],
+  })
+
+  const store = useFieldStore()
+  assert.equal(store.namesVersion, 0)
+
+  await store.loadFieldNames({ query: '*', start: '24h', end: 'now' })
+  assert.equal(store.namesVersion, 0)
+
+  shouldFail = false
+  await store.loadFieldNames({ query: '*', start: '24h', end: 'now' })
+  assert.equal(store.namesVersion, 1)
+})

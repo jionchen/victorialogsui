@@ -1,4 +1,5 @@
 import client from './client.js'
+import { API_FIELD_QUERY_TIMEOUT_MS } from '../../config/proxyConfig.js'
 
 /**
  * Get field names
@@ -13,6 +14,7 @@ export async function getFieldNames({ query = '*', start, end, filter } = {}) {
 
   const response = await client.post('/select/logsql/field_names', params.toString(), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    timeout: API_FIELD_QUERY_TIMEOUT_MS,
   })
   return response.data?.values || []
 }
@@ -32,6 +34,7 @@ export async function getFieldValues({ query = '*', field, start, end, filter, l
 
   const response = await client.post('/select/logsql/field_values', params.toString(), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    timeout: API_FIELD_QUERY_TIMEOUT_MS,
   })
   return response.data?.values || []
 }
@@ -49,6 +52,7 @@ export async function getStreamFieldNames({ query = '*', start, end, filter } = 
 
   const response = await client.post('/select/logsql/stream_field_names', params.toString(), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    timeout: API_FIELD_QUERY_TIMEOUT_MS,
   })
   return response.data?.values || []
 }
@@ -68,6 +72,7 @@ export async function getStreamFieldValues({ query = '*', field, start, end, fil
 
   const response = await client.post('/select/logsql/stream_field_values', params.toString(), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    timeout: API_FIELD_QUERY_TIMEOUT_MS,
   })
   return response.data?.values || []
 }

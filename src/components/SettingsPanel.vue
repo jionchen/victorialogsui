@@ -17,9 +17,9 @@
       </div>
 
       <div class="add-api-form">
-        <a-input v-model="newApiName" placeholder="名称 (如: 生产集群)" size="small" />
-        <a-input v-model="newApiUrl" placeholder="http://IP:端口" size="small" />
-        <a-button type="primary" size="small" @click="addNewApi" :disabled="!newApiUrl">
+        <a-input v-model="newApiName" placeholder="名称 (如: 生产集群)" />
+        <a-input v-model="newApiUrl" placeholder="http://IP:端口" />
+        <a-button type="primary" @click="addNewApi" :disabled="!newApiUrl">
           添加
         </a-button>
       </div>
@@ -52,7 +52,7 @@
         />
       </div>
       <div style="margin-top: 6px; font-size: 11px; color: var(--text-muted);">
-        凭证仅保存在当前浏览器会话中，关闭页面后失效。
+        凭证保存在本地浏览器中，关闭页面后仍保留。
       </div>
     </div>
 
@@ -71,7 +71,7 @@
       <a-textarea
         v-model="pinnedFieldsText"
         :auto-size="{ minRows: 3, maxRows: 6 }"
-        placeholder="src_k8s.namespace.name, src_container.name, src_k8s.pod.name"
+        placeholder="src_namespace, src_container_name, src_pod_name"
         @change="onPinnedChange"
       />
       <div style="margin-top: 6px; font-size: 11px; color: var(--text-muted);">

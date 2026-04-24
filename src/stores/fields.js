@@ -2,121 +2,188 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getFieldNames, getFieldValues, getStreamFieldNames, getStreamFieldValues } from '../api/fields.js'
 
-export const useFieldStore = defineStore('fields', () => {
-  // All field names: [{value, hits}]
-  const streamFieldNames = ref([])
-  const logFieldNames = ref([])
-  const loading = ref(false)
-  const error = ref(null)
+const FIELD_VALUE_RETRY_ATTEMPTS = 1
 
-  // Field values cache: { fieldName: { values: [{value, hits}], loading, total } }
-  const fieldValuesCache = ref({})
-
-  // Track latest request to avoid race conditions
-  let namesFetchId = 0
-  const valuesFetchIds = {}
-
-  /**
-   * Load all field names for current query/time
-   */
-  async function loadFieldNames({ query, start, end }) {
-    const id = ++namesFetchId
-    loading.value = true
-    error.value = null
-    try {
-      // Try to load stream fields, but gracefully handle empty results
-      let streams = []
-      try {
-        streams = await getStreamFieldNames({ query, start, end })
-      } catch { /* ignore */ }
-
-      if (id !== namesFetchId) return
-
-      const fields = await getFieldNames({ query, start, end })
-      
-      if (id !== namesFetchId) return
-
-      streamFieldNames.value = streams.sort((a, b) => b.hits - a.hits)
-      
-      // Exclude stream fields and internal fields from log fields list
-      const streamNames = new Set(streams.map(s => s.value))
-      const internalFields = new Set(['_msg', '_time', '_stream', '_stream_id'])
-      logFieldNames.value = fields
-        .filter(f => !streamNames.has(f.value) && !internalFields.has(f.value))
-        .sort((a, b) => b.hits - a.hits)
-    } catch (e) {
-      if (id !== namesFetchId) return
-      if (e.cancelled) return
-      error.value = e.message || 'Failed to load fields'
-      console.error('Failed to load field names:', e)
-    } finally {
-      if (id === namesFetchId) {
-        loading.value = false
-      }
-    }
-  }
-
-  /**
-   * Load values for a specific field
-   */
-  async function loadFieldValues({ field, isStream, query, start, end, filter }) {
-    const id = (valuesFetchIds[field] || 0) + 1
-    valuesFetchIds[field] = id
-
-    const key = field
-    if (!fieldValuesCache.value[key]) {
-      fieldValuesCache.value[key] = { values: [], loading: false, total: 0 }
-    }
-    const cache = fieldValuesCache.value[key]
-    cache.loading = true
-
-    try {
-      const valuesFetcher = isStream ? getStreamFieldValues : getFieldValues
-      const values = await valuesFetcher({ query, field, start, end, filter, limit: 30 })
-      
-      if (id !== valuesFetchIds[field]) return
-
-      // field_values API may return hits=0; show values regardless
-      const fieldInfo = logFieldNames.value.find(f => f.value === field)
-      const totalHits = fieldInfo?.hits || 0
-      
-      const hasHits = values.some(v => v.hits > 0)
-      if (!hasHits && values.length > 0 && totalHits > 0) {
-        const perValue = Math.floor(totalHits / values.length)
-        values.forEach(v => { v.hits = perValue })
-      }
-      
-      cache.values = values.sort((a, b) => b.hits - a.hits)
-      cache.total = values.reduce((sum, v) => sum + (v.hits || 0), 0)
-    } catch (e) {
-      if (id !== valuesFetchIds[field]) return
-      if (e.cancelled) return
-      console.error(`Failed to load values for ${field}:`, e)
-    } finally {
-      if (id === valuesFetchIds[field]) {
-        cache.loading = false
-      }
-    }
-  }
-
-  /**
-   * Clear field values cache
-   */
-  function clearCache() {
-    fieldValuesCache.value = {}
-  }
-
-  /**
-   * Get cached values for a field
-   */
-  function getCachedValues(field) {
-    return fieldValuesCache.value[field] || { values: [], loading: false, total: 0 }
-  }
-
+function createEmptyFieldValueState(overrides = {}) {
   return {
-    streamFieldNames, logFieldNames, loading, error,
-    fieldValuesCache,
-    loadFieldNames, loadFieldValues,
-    clearCache, getCachedValues,
+    values: [],
+    loading: false,
+    total: 0,
+    status: 'idle',
+    error: null,
+    ...overrides,
   }
-})
+}
+
+function createFieldValueCacheKey({ field, isStream = false, query = '*', start = '', end = '', filter = '' }) {
+  return JSON.stringify([field, isStream ? 'stream' : 'log', query || '*', start || '', end || '', filter || ''])
+}
+
+function createFieldValueBaseKey({ field, isStream = false, query = '*', start = '', end = '' }) {
+  return JSON.stringify([field, isStream ? 'stream' : 'log', query || '*', start || '', end || ''])
+}
+
+function cloneValues(values = []) {
+  return values.map(item => ({ ...item }))
+}
+
+export function createFieldsStore(fetchers = {
+  getFieldNames,
+  getFieldValues,
+  getStreamFieldNames,
+  getStreamFieldValues,
+}) {
+  return defineStore('fields', () => {
+    const streamFieldNames = ref([])
+    const logFieldNames = ref([])
+    const loading = ref(false)
+    const error = ref(null)
+    const fieldValuesCache = ref({})
+    const namesVersion = ref(0)
+
+    let namesFetchId = 0
+    const valuesFetchIds = {}
+    const lastSuccessfulValuesByBaseKey = {}
+
+    async function loadFieldNames({ query, start, end }) {
+      const id = ++namesFetchId
+      loading.value = true
+      error.value = null
+      try {
+        let streams = []
+        try {
+          streams = await fetchers.getStreamFieldNames({ query, start, end })
+        } catch { /* ignore */ }
+
+        if (id !== namesFetchId) return
+
+        const fields = await fetchers.getFieldNames({ query, start, end })
+
+        if (id !== namesFetchId) return
+
+        streamFieldNames.value = streams.sort((a, b) => b.hits - a.hits)
+
+        const streamNames = new Set(streams.map(s => s.value))
+        const internalFields = new Set(['_msg', '_time', '_stream', '_stream_id'])
+        logFieldNames.value = fields
+          .filter(f => !streamNames.has(f.value) && !internalFields.has(f.value))
+          .sort((a, b) => b.hits - a.hits)
+        namesVersion.value += 1
+      } catch (e) {
+        if (id !== namesFetchId || e.cancelled) return
+        error.value = e.message || 'Failed to load fields'
+        console.error('Failed to load field names:', e)
+      } finally {
+        if (id === namesFetchId) {
+          loading.value = false
+        }
+      }
+    }
+
+    async function loadFieldValues({ field, isStream, query, start, end, filter }) {
+      const request = { field, isStream, query, start, end, filter }
+      const key = createFieldValueCacheKey(request)
+      const baseKey = createFieldValueBaseKey(request)
+      const id = (valuesFetchIds[key] || 0) + 1
+      valuesFetchIds[key] = id
+
+      const fallback = fieldValuesCache.value[key] || lastSuccessfulValuesByBaseKey[baseKey]
+      if (!fieldValuesCache.value[key]) {
+        fieldValuesCache.value[key] = createEmptyFieldValueState(
+          fallback ? {
+            values: cloneValues(fallback.values),
+            total: fallback.total,
+            status: fallback.status === 'idle' ? 'idle' : 'success',
+          } : {}
+        )
+      }
+
+      const cache = fieldValuesCache.value[key]
+      cache.loading = true
+      cache.error = null
+      if (cache.values.length === 0) {
+        cache.status = 'loading'
+      }
+
+      try {
+        const valuesFetcher = isStream ? fetchers.getStreamFieldValues : fetchers.getFieldValues
+
+        for (let attempt = 0; attempt <= FIELD_VALUE_RETRY_ATTEMPTS; attempt += 1) {
+          try {
+            const values = await valuesFetcher({ query, field, start, end, filter, limit: 30 })
+
+            if (id !== valuesFetchIds[key]) return
+
+            const fieldInfo = (isStream ? streamFieldNames.value : logFieldNames.value)
+              .find(item => item.value === field)
+            const totalHits = fieldInfo?.hits || 0
+            const normalizedValues = cloneValues(values)
+            const hasHits = normalizedValues.some(v => v.hits > 0)
+
+            if (!hasHits && normalizedValues.length > 0 && totalHits > 0) {
+              const perValue = Math.floor(totalHits / normalizedValues.length)
+              normalizedValues.forEach(v => { v.hits = perValue })
+            }
+
+            cache.values = normalizedValues.sort((a, b) => b.hits - a.hits)
+            cache.total = cache.values.reduce((sum, v) => sum + (v.hits || 0), 0)
+            cache.status = 'success'
+            cache.error = null
+            lastSuccessfulValuesByBaseKey[baseKey] = {
+              values: cloneValues(cache.values),
+              total: cache.total,
+              status: 'success',
+            }
+            return
+          } catch (e) {
+            if (id !== valuesFetchIds[key]) return
+            if (e.cancelled) return
+            if (attempt === FIELD_VALUE_RETRY_ATTEMPTS) {
+              throw e
+            }
+          }
+        }
+      } catch (e) {
+        if (id !== valuesFetchIds[key] || e.cancelled) return
+        cache.status = 'error'
+        cache.error = e.message || '加载失败'
+        console.error(`Failed to load values for ${field}:`, e)
+      } finally {
+        if (id === valuesFetchIds[key]) {
+          cache.loading = false
+        }
+      }
+    }
+
+    function clearCache() {
+      fieldValuesCache.value = {}
+      for (const key of Object.keys(lastSuccessfulValuesByBaseKey)) {
+        delete lastSuccessfulValuesByBaseKey[key]
+      }
+    }
+
+    function getCachedValues(input) {
+      if (typeof input === 'string') {
+        return Object.values(fieldValuesCache.value).find(item => item?.field === input) || createEmptyFieldValueState()
+      }
+
+      const key = createFieldValueCacheKey(input)
+      return fieldValuesCache.value[key] || createEmptyFieldValueState()
+    }
+
+    return {
+      streamFieldNames,
+      logFieldNames,
+      loading,
+      error,
+      namesVersion,
+      fieldValuesCache,
+      loadFieldNames,
+      loadFieldValues,
+      clearCache,
+      getCachedValues,
+    }
+  })
+}
+
+export const useFieldStore = createFieldsStore()

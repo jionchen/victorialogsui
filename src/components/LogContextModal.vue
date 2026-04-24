@@ -11,17 +11,17 @@
       <!-- Toolbar -->
       <div class="context-toolbar">
         <div v-if="log" class="context-toolbar__info">
-          正在查看 <strong>{{ formatDateTime(log._time) }}</strong> 前后 ±{{ windowMinutes }} 分钟
+          正在查看 <strong>{{ formatLogTimestamp(getLogDisplayTimestamp(log)) }}</strong> 前后 ±{{ windowMinutes }} 分钟
           <span style="color: var(--text-muted); margin-left: 8px;">(所属流: <span class="context-toolbar__stream-tag">{{ getStreamLabel(log) }}</span>)</span>
         </div>
 
         <div class="context-toolbar__actions">
-          <a-select v-model="windowMinutes" @change="fetchContext" style="width: 100px;" size="small">
+          <a-select v-model="windowMinutes" @change="fetchContext" style="width: 100px;">
             <a-option :value="1">± 1 分钟</a-option>
             <a-option :value="5">± 5 分钟</a-option>
             <a-option :value="15">± 15 分钟</a-option>
           </a-select>
-          <a-button type="primary" size="small" @click="fetchContext" :loading="loading">
+          <a-button type="primary" @click="fetchContext" :loading="loading">
             刷新
           </a-button>
         </div>
@@ -49,9 +49,9 @@
               :class="{ 'is-anchor': isAnchor(item) }"
               class="log-row"
             >
-              <td class="log-cell timestamp">{{ formatDateTime(item._time) }}</td>
+              <td class="log-cell timestamp">{{ formatLogTimestamp(getLogDisplayTimestamp(item)) }}</td>
               <td class="log-cell"><span class="level-indicator" :class="getLevel(item)" /></td>
-              <td class="log-cell message"><pre>{{ getMessage(item) }}</pre></td>
+              <td class="log-cell message"><pre><HighlightedText :text="getMessage(item)" :terms="highlightTerms" /></pre></td>
             </tr>
           </tbody>
         </table>
@@ -61,9 +61,13 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import { queryLogs } from '../api/logs.js'
-import { getStreamLabel, formatDateTime } from '../utils/formatters.js'
+import { getStreamLabel } from '../utils/formatters.js'
+import { getHighlightTerms } from '../utils/highlighting.js'
+import { formatLogTimestamp, getLogDisplayTimestamp } from '../utils/logTime.js'
+import { useQueryStore } from '../stores/query.js'
+import HighlightedText from './HighlightedText.vue'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -72,9 +76,16 @@ const props = defineProps({
 
 const emit = defineEmits(['update:visible'])
 
+const queryStore = useQueryStore()
 const loading = ref(false)
 const contextLogs = ref([])
 const windowMinutes = ref(5)
+const highlightTerms = computed(() => getHighlightTerms({
+  isManualMode: queryStore.isManualMode,
+  freeTextQuery: queryStore.freeTextQuery,
+  manualQuery: queryStore.manualQuery,
+  effectiveQuery: queryStore.effectiveQuery,
+}))
 
 function close() {
   emit('update:visible', false)

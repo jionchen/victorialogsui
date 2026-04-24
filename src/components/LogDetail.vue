@@ -35,13 +35,16 @@
           <tr v-for="[key, value] in sortedFields" :key="key">
             <td>{{ key }}</td>
             <td>
-              <template v-if="isJsonValue(value)">
+              <template v-if="key === '_msg' && typeof value === 'string'">
+                <HighlightedText :text="value" :terms="highlightTerms" />
+              </template>
+              <template v-else-if="isJsonValue(value)">
                 <pre style="margin: 0; white-space: pre-wrap; font-size: 11px;">{{ formatJsonValue(value) }}</pre>
               </template>
               <template v-else>{{ value }}</template>
             </td>
             <td>
-              <div class="field-value-row__actions" style="opacity: 1;">
+              <div v-if="canFilterField(key)" class="field-value-row__actions" style="opacity: 1;">
                 <button
                   class="field-value-row__action-btn"
                   title="包含此值"
@@ -73,6 +76,9 @@ import { useSettingsStore } from '../stores/settings.js'
 import { redactSensitiveFields } from '../utils/redaction.js'
 import { canViewField } from '../utils/permissions.js'
 import { tryFormatJSON } from '../utils/formatters.js'
+import { getHighlightTerms } from '../utils/highlighting.js'
+import { formatLogTimestamp, getLogDisplayTimestamp } from '../utils/logTime.js'
+import HighlightedText from './HighlightedText.vue'
 
 const props = defineProps({
   log: { type: Object, required: true },
@@ -85,6 +91,12 @@ const queryStore = useQueryStore()
 const settingsStore = useSettingsStore()
 const activeTab = ref('table')
 const copied = ref(false)
+const highlightTerms = computed(() => getHighlightTerms({
+  isManualMode: queryStore.isManualMode,
+  freeTextQuery: queryStore.freeTextQuery,
+  manualQuery: queryStore.manualQuery,
+  effectiveQuery: queryStore.effectiveQuery,
+}))
 
 function copyLog() {
   navigator.clipboard.writeText(jsonFormatted.value).then(() => {
@@ -95,17 +107,24 @@ function copyLog() {
   })
 }
 
-// Sort fields: _time first, then stream fields, then others, _msg last
+// Sort fields: display log time first, then collection time, stream fields, and _msg last.
 const sortedFields = computed(() => {
   const visibleRecord = settingsStore.redactionEnabled
     ? redactSensitiveFields(props.log)
     : props.log
-  const entries = Object.entries(visibleRecord)
+  const entries = [
+    ['日志时间', formatLogTimestamp(getLogDisplayTimestamp(props.log))],
+    ...Object.entries(visibleRecord).map(([key, value]) => [
+      key === '_time' ? '采集时间 (_time)' : key,
+      key === '_time' ? formatLogTimestamp(value) : value,
+    ]),
+  ]
     .filter(([key]) => canViewField(key, settingsStore.securityRole))
   return entries.sort((a, b) => {
     const order = (key) => {
-      if (key === '_time') return 0
-      if (key.startsWith('src_')) return 1
+      if (key === '日志时间') return 0
+      if (key === '采集时间 (_time)') return 1
+      if (key.startsWith('src_')) return 2
       if (key === 'level') return 2
       if (key === '_stream') return 8
       if (key === '_stream_id') return 9
@@ -127,6 +146,10 @@ function isJsonValue(value) {
 
 function formatJsonValue(value) {
   return tryFormatJSON(value) || value
+}
+
+function canFilterField(field) {
+  return field !== '日志时间' && field !== '采集时间 (_time)'
 }
 
 function addFilter(field, value, negated) {

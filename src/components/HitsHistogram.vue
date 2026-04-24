@@ -10,6 +10,10 @@
       <div v-if="logStore.histogramLoading" class="loading-spinner" style="height: 100%;">
         <a-spin />
       </div>
+      <div v-else-if="logStore.histogramError" class="histogram-panel__error">
+        <span>统计加载失败，可重试</span>
+        <button class="link-btn" @click="retryHistogram">重试</button>
+      </div>
       <v-chart
         ref="echartsInstanceRef"
         v-else-if="chartOption"
@@ -150,6 +154,16 @@ function buildChartOption(series) {
     },
     series,
   }
+}
+
+function retryHistogram() {
+  const { start, end } = queryStore.timeRange
+  logStore.fetchHistogram({
+    query: queryStore.effectiveQuery,
+    start,
+    end,
+    step: queryStore.histogramStep,
+  })
 }
 
 // Brush select for zoom (simplified)

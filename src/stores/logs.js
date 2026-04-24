@@ -2,88 +2,130 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { queryLogs, queryHits } from '../api/logs.js'
 import { getApiBaseUrl } from '../api/client.js'
+import { getLogDisplayTimestamp } from '../utils/logTime.js'
 
-export const useLogStore = defineStore('logs', () => {
-  // Logs data
-  const logs = ref([])
-  const loading = ref(false)
-  const error = ref(null)
-  const totalHits = ref(0)
+export function sortLogsByTime(entries = [], order = 'desc') {
+  const direction = order === 'asc' ? 1 : -1
 
-  // Histogram data
-  const histogramData = ref(null)
-  const histogramLoading = ref(false)
+  return [...entries]
+    .map((log, index) => ({
+      log,
+      index,
+      time: new Date(getLogDisplayTimestamp(log)).getTime(),
+    }))
+    .sort((a, b) => {
+      const aValid = Number.isFinite(a.time)
+      const bValid = Number.isFinite(b.time)
 
-  // Track latest request to avoid race conditions
-  let fetchId = 0
-  let histogramId = 0
+      if (aValid && bValid && a.time !== b.time) {
+        return (a.time - b.time) * direction
+      }
 
-  /**
-   * Fetch logs
-   */
-  async function fetchLogs({ query, limit, start, end }) {
-    const id = ++fetchId
-    loading.value = true
-    error.value = null
-    try {
-      const targetUrl = getApiBaseUrl()
-      const data = await queryLogs({ query, limit, start, end })
-      
-      // If a newer request has started, ignore this one
-      if (id !== fetchId) return
+      if (aValid !== bValid) {
+        return aValid ? -1 : 1
+      }
 
-      console.log(`[fetchLogs] id=${id}, target=${targetUrl}, results=${data.length}`)
-      logs.value = data
-      totalHits.value = data.length
-    } catch (e) {
-      if (id !== fetchId) return
-      if (e.cancelled) return
-      error.value = e.message || 'Query failed'
+      return a.index - b.index
+    })
+    .map(entry => entry.log)
+}
+
+export function createLogsStore(deps = {}) {
+  const {
+    queryLogs: queryLogsImpl = queryLogs,
+    queryHits: queryHitsImpl = queryHits,
+    getApiBaseUrl: getApiBaseUrlImpl = getApiBaseUrl,
+  } = deps
+
+  return defineStore('logs', () => {
+    const logs = ref([])
+    const loading = ref(false)
+    const error = ref(null)
+    const totalHits = ref(0)
+    const sortOrder = ref('desc')
+
+    const histogramData = ref(null)
+    const histogramLoading = ref(false)
+    const histogramError = ref(null)
+
+    let fetchId = 0
+    let histogramId = 0
+
+    async function fetchLogs({ query, limit, start, end }) {
+      const id = ++fetchId
+      loading.value = true
+      error.value = null
+      try {
+        const targetUrl = getApiBaseUrlImpl()
+        const data = await queryLogsImpl({ query, limit, start, end })
+
+        if (id !== fetchId) return
+
+        console.log(`[fetchLogs] id=${id}, target=${targetUrl}, results=${data.length}`)
+        logs.value = sortLogsByTime(data, sortOrder.value)
+        totalHits.value = data.length
+      } catch (e) {
+        if (id !== fetchId) return
+        if (e.cancelled) return
+        error.value = e.message || 'Query failed'
+        logs.value = []
+        totalHits.value = 0
+      } finally {
+        if (id === fetchId) {
+          loading.value = false
+        }
+      }
+    }
+
+    async function fetchHistogram({ query, start, end, step, field }) {
+      const id = ++histogramId
+      histogramLoading.value = true
+      histogramError.value = null
+      try {
+        const data = await queryHitsImpl({ query, start, end, step, field })
+
+        if (id !== histogramId) return
+
+        histogramData.value = data
+        if (data?.hits) {
+          totalHits.value = data.hits.reduce((sum, h) => sum + (h.total || 0), 0)
+        }
+      } catch (e) {
+        if (id !== histogramId) return
+        if (e.cancelled) return
+        histogramData.value = null
+        histogramError.value = e.message || '统计加载失败'
+      } finally {
+        if (id === histogramId) {
+          histogramLoading.value = false
+        }
+      }
+    }
+
+    function clearLogs() {
       logs.value = []
       totalHits.value = 0
-    } finally {
-      if (id === fetchId) {
-        loading.value = false
-      }
-    }
-  }
-
-  /**
-   * Fetch histogram data
-   */
-  async function fetchHistogram({ query, start, end, step, field }) {
-    const id = ++histogramId
-    histogramLoading.value = true
-    try {
-      const data = await queryHits({ query, start, end, step, field })
-      
-      if (id !== histogramId) return
-
-      histogramData.value = data
-      // Calculate total from histogram
-      if (data?.hits) {
-        totalHits.value = data.hits.reduce((sum, h) => sum + (h.total || 0), 0)
-      }
-    } catch (e) {
-      if (id !== histogramId) return
-      if (e.cancelled) return
       histogramData.value = null
-    } finally {
-      if (id === histogramId) {
-        histogramLoading.value = false
-      }
+      histogramError.value = null
     }
-  }
 
-  function clearLogs() {
-    logs.value = []
-    totalHits.value = 0
-    histogramData.value = null
-  }
+    function setSortOrder(order) {
+      if (order !== 'asc' && order !== 'desc') return
+      sortOrder.value = order
+      logs.value = sortLogsByTime(logs.value, sortOrder.value)
+    }
 
-  return {
-    logs, loading, error, totalHits,
-    histogramData, histogramLoading,
-    fetchLogs, fetchHistogram, clearLogs,
-  }
-})
+    function toggleSortOrder() {
+      setSortOrder(sortOrder.value === 'desc' ? 'asc' : 'desc')
+    }
+
+    return {
+      logs, loading, error, totalHits, sortOrder,
+      histogramData, histogramLoading, histogramError,
+      fetchLogs, fetchHistogram, clearLogs,
+      setSortOrder, toggleSortOrder,
+    }
+  })
+}
+
+export const useLogStore = createLogsStore()

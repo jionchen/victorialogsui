@@ -58,10 +58,15 @@ export function debounce(fn, delay = 300) {
  * Extract meaningful stream label from log entry
  */
 export function getStreamLabel(log) {
-  const ns = log['src_k8s.namespace.name'] || ''
-  const container = log['src_container.name'] || ''
-  if (ns || container) return `${ns}/${container}`
-  return log._stream || '-'
+  const candidates = [
+    log['src_container.name'],
+    log.src_container_name,
+    log['src_k8s.pod.name'],
+    log.src_pod_name,
+    log['host.name'],
+    log._stream,
+  ]
+  return candidates.find(Boolean) || '-'
 }
 
 /**

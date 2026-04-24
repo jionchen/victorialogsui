@@ -1,4 +1,8 @@
 import client, { axios } from './client.js'
+import {
+  API_LOG_QUERY_TIMEOUT_MS,
+  API_STATS_QUERY_TIMEOUT_MS,
+} from '../../config/proxyConfig.js'
 
 let currentQueryController = null
 let currentHitsController = null
@@ -42,7 +46,7 @@ export async function queryLogs({ query, limit = 100, start, end }) {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     signal: currentQueryController.signal,
     transformResponse: [(data) => data], // keep raw
-    timeout: 120000, // 120s for large queries
+    timeout: API_LOG_QUERY_TIMEOUT_MS,
   })
 
   const { items, remainder } = parseNdjsonChunk(response.data, '')
@@ -73,6 +77,7 @@ export async function queryHits({ query, start, end, step, field }) {
   const response = await client.post('/select/logsql/hits', params.toString(), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     signal: currentHitsController.signal,
+    timeout: API_STATS_QUERY_TIMEOUT_MS,
   })
   return response.data
 }

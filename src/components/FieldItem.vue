@@ -21,7 +21,7 @@
     <!-- Field Values (expanded) -->
     <div v-if="expanded" class="field-values">
       <!-- Search within values -->
-      <div v-if="cachedData.values.length > 5" class="field-values__search">
+      <div v-if="cachedData.values.length > 5 || valueSearch" class="field-values__search">
         <input
           v-model="valueSearch"
           placeholder="搜索值..."
@@ -30,12 +30,25 @@
       </div>
 
       <!-- Loading -->
-      <div v-if="cachedData.loading" class="loading-spinner">
+      <div v-if="cachedData.loading && cachedData.values.length === 0" class="loading-spinner">
         <a-spin :size="16" />
       </div>
 
       <!-- Values list -->
       <template v-else>
+        <div
+          v-if="cachedData.error"
+          style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; font-size: 11px; color: var(--danger);"
+        >
+          <span>{{ cachedData.values.length > 0 ? '加载失败，展示上次结果。' : '加载失败，请重试。' }}</span>
+          <button class="field-value-row__action-btn" title="重试加载" @click.stop="retryLoad">重试</button>
+        </div>
+        <div
+          v-else-if="cachedData.loading && cachedData.values.length > 0"
+          style="padding: 4px 0; font-size: 11px; color: var(--text-muted);"
+        >
+          正在更新...
+        </div>
         <div
           v-for="val in displayedValues"
           :key="val.value"
@@ -64,7 +77,7 @@
         </div>
 
         <!-- No values -->
-        <div v-if="cachedData.values.length === 0 && !cachedData.loading" style="padding: 4px 0; font-size: 11px; color: var(--text-muted);">
+        <div v-if="cachedData.status === 'success' && cachedData.values.length === 0 && !cachedData.loading" style="padding: 4px 0; font-size: 11px; color: var(--text-muted);">
           暂无数据
         </div>
 
@@ -96,8 +109,17 @@ const settingsStore = useSettingsStore()
 
 const expanded = ref(props.defaultExpanded)
 const valueSearch = ref('')
+const remoteFilter = computed(() => valueSearch.value.length >= 2 ? valueSearch.value : '')
+const lastLoadedContext = ref('')
 
-const cachedData = computed(() => fieldStore.getCachedValues(props.field.value))
+const cachedData = computed(() => fieldStore.getCachedValues({
+  field: props.field.value,
+  isStream: props.isStream,
+  query: queryStore.effectiveQuery,
+  start: queryStore.timeRange.start,
+  end: queryStore.timeRange.end,
+  filter: remoteFilter.value,
+}))
 
 const maxHits = computed(() => {
   const vals = cachedData.value.values
@@ -118,6 +140,15 @@ const isColumnActive = computed(() => {
   return settingsStore.tableColumns.includes(props.field.value)
 })
 
+const currentLoadContext = computed(() => JSON.stringify([
+  props.field.value,
+  props.isStream ? 'stream' : 'log',
+  queryStore.effectiveQuery,
+  queryStore.timeRange.start,
+  queryStore.timeRange.end,
+  remoteFilter.value,
+]))
+
 function getBarWidth(hits) {
   return Math.max(2, (hits / maxHits.value) * 100)
 }
@@ -130,16 +161,20 @@ function toggleExpand() {
 }
 
 function loadValues(filter) {
-  const { start, end } = queryStore.timeRange
-  const query = queryStore.effectiveQuery
+  lastLoadedContext.value = currentLoadContext.value
   fieldStore.loadFieldValues({
     field: props.field.value,
     isStream: props.isStream,
-    query,
-    start,
-    end,
+    query: queryStore.effectiveQuery,
+    start: queryStore.timeRange.start,
+    end: queryStore.timeRange.end,
     filter,
   })
+}
+
+function retryLoad() {
+  lastLoadedContext.value = ''
+  loadValues(remoteFilter.value)
 }
 
 function addIncludeFilter(value) {
@@ -153,22 +188,43 @@ function addExcludeFilter(value) {
 }
 
 const onValueSearch = debounce(() => {
-  if (valueSearch.value.length >= 2) {
-    loadValues(valueSearch.value)
+  if (valueSearch.value.length === 0 || valueSearch.value.length >= 2) {
+    loadValues(remoteFilter.value)
   }
 }, 400)
 
-// Auto-load if default expanded
+function loadExpandedValuesIfReady() {
+  if (!expanded.value) return
+  if (fieldStore.loading || props.field.hits <= 0) return
+  if (lastLoadedContext.value === currentLoadContext.value) return
+  loadValues(remoteFilter.value)
+}
+
+// Default pinned fields wait until field_names succeeds, so they don't compete with the main log query.
 onMounted(() => {
-  if (props.defaultExpanded) {
-    loadValues()
+  loadExpandedValuesIfReady()
+})
+
+watch(() => fieldStore.namesVersion, () => {
+  loadExpandedValuesIfReady()
+})
+
+watch(() => props.field.hits, () => {
+  loadExpandedValuesIfReady()
+})
+
+watch(currentLoadContext, () => {
+  lastLoadedContext.value = ''
+})
+
+watch(() => fieldStore.loading, (loading) => {
+  if (!loading) {
+    loadExpandedValuesIfReady()
   }
 })
 
 // Reload values when query changes (filter linkage)
 watch(() => queryStore.queryVersion, () => {
-  if (expanded.value) {
-    loadValues()
-  }
+  lastLoadedContext.value = ''
 })
 </script>

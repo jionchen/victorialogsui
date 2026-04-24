@@ -10,7 +10,7 @@
         @input="onInput"
       />
       <a-dropdown trigger="click" position="br">
-        <button class="icon-btn" title="查询历史" style="margin-left: -32px; z-index: 2;" @click.prevent>
+        <button class="icon-btn" title="查询历史" style="margin-left: -36px; z-index: 2;" @click.prevent>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
             <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
           </svg>

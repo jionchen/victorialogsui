@@ -61,3 +61,23 @@ test('settings store keeps only the most recent 200 audit events', async () => {
   const persisted = JSON.parse(localStorage.getItem('vlogs_audit_events'))
   assert.equal(persisted.length, 200)
 })
+
+test('settings store force-migrates persisted defaults to the new pinned fields and table columns', async () => {
+  localStorage.clear()
+  localStorage.setItem('vlogs_pinned_fields', JSON.stringify([
+    'src_k8s.namespace.name',
+    'src_container.name',
+    'src_k8s.pod.name',
+  ]))
+  localStorage.setItem('vlogs_table_columns', JSON.stringify(['level', '_stream']))
+
+  setActivePinia(createPinia())
+  const { useSettingsStore } = await import('../stores/settings.js')
+  const store = useSettingsStore()
+
+  assert.deepEqual(store.pinnedFields, ['src_namespace', 'src_container_name', 'src_pod_name'])
+  assert.deepEqual(store.tableColumns, ['_stream'])
+  assert.equal(localStorage.getItem('vlogs_defaults_version'), '2026-04-10-defaults-v1')
+  assert.equal(localStorage.getItem('vlogs_pinned_fields'), JSON.stringify(['src_namespace', 'src_container_name', 'src_pod_name']))
+  assert.equal(localStorage.getItem('vlogs_table_columns'), JSON.stringify(['_stream']))
+})

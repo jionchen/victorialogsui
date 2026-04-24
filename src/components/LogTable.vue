@@ -13,7 +13,6 @@
       <div class="log-panel__actions">
         <a-select
           v-model="displayLimit"
-          size="small"
           style="width: 90px;"
           @change="onLimitChange"
         >
@@ -63,7 +62,22 @@
       <template v-else>
         <!-- Header Row -->
         <div class="log-row log-row--header">
-          <div class="log-row__cell log-row__time">时间</div>
+          <button
+            type="button"
+            class="log-row__cell log-row__time log-row__time-header"
+            :aria-label="logStore.sortOrder === 'desc' ? '按时间倒序，点击切换为正序' : '按时间正序，点击切换为倒序'"
+            @click="logStore.toggleSortOrder()"
+          >
+            <span class="log-row__time-header-label">时间</span>
+            <svg
+              class="log-row__time-sort-arrow"
+              :class="{ 'is-asc': logStore.sortOrder === 'asc' }"
+              viewBox="0 0 12 12"
+              aria-hidden="true"
+            >
+              <path d="M3 4.5 6 7.5 9 4.5" />
+            </svg>
+          </button>
           <div
             v-for="col in settingsStore.tableColumns"
             :key="col"
@@ -77,14 +91,15 @@
 
         <div :style="{ height: `${virtualWindow.offsetTop}px` }" />
 
-        <template v-for="({ log, index }) in visibleLogs" :key="index">
+        <template v-for="({ log, index, renderKey }) in visibleLogs" :key="renderKey">
           <div
             class="log-row"
             :class="{ expanded: expandedIndex === index }"
+            :ref="setLogRowRef(log)"
             @click="toggleExpand(index)"
           >
-            <div class="log-row__cell log-row__time">
-              {{ formatTimestamp(log._time) }}
+            <div class="log-row__cell log-row__time" :title="getLogTimeTitle(log)">
+              {{ formatLogTimestamp(getLogDisplayTimestamp(log)) }}
             </div>
 
             <!-- Dynamic Data Columns -->
@@ -99,7 +114,9 @@
             </div>
 
             <div class="log-row__cell log-row__msg">
-              {{ log._msg || '' }}
+              <div class="log-row__msg-preview">
+                <HighlightedText :text="log._msg || ''" :terms="highlightTerms" />
+              </div>
             </div>
           </div>
 
@@ -125,14 +142,16 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { useLogStore } from '../stores/logs.js'
 import { useFieldStore } from '../stores/fields.js'
 import { useQueryStore } from '../stores/query.js'
 import { useSettingsStore } from '../stores/settings.js'
-import { formatTimestamp } from '../utils/timeUtils.js'
 import { getStreamLabel } from '../utils/formatters.js'
-import { calculateVirtualWindow } from '../utils/virtualList.js'
+import { getHighlightTerms } from '../utils/highlighting.js'
+import { formatLogTimestamp, getLogDisplayTimestamp, getLogTimeTitle } from '../utils/logTime.js'
+import { calculateDynamicVirtualWindow } from '../utils/virtualList.js'
+import HighlightedText from './HighlightedText.vue'
 import LogDetail from './LogDetail.vue'
 import LogContextModal from './LogContextModal.vue'
 import { LOG_ROW_HEIGHT } from '../../config/uiConfig.js'
@@ -149,16 +168,24 @@ const scrollContainer = ref(null)
 const contextVisible = ref(false)
 const contextLog = ref(null)
 const scrollTop = ref(0)
+const rowHeights = ref(new Map())
+const rowObservers = new Map()
+const logRenderKeys = new WeakMap()
+let nextRenderKey = 0
 
 // Pre-computed skeleton widths to avoid Math.random() in templates
 const skeletonWidths = Array.from({ length: 15 }, (_, i) => 30 + ((i * 17 + 7) % 60))
 
+const measuredHeights = computed(() => {
+  return logStore.logs.map(log => rowHeights.value.get(log) ?? LOG_ROW_HEIGHT)
+})
+
 const virtualWindow = computed(() => {
-  return calculateVirtualWindow({
-    total: logStore.logs.length,
+  return calculateDynamicVirtualWindow({
+    itemHeights: measuredHeights.value,
+    estimatedItemHeight: LOG_ROW_HEIGHT,
     scrollTop: scrollTop.value,
     containerHeight: scrollContainer.value?.clientHeight || 400,
-    itemHeight: LOG_ROW_HEIGHT,
     overscan: 6,
   })
 })
@@ -169,16 +196,26 @@ const visibleLogs = computed(() => {
     .map((log, offset) => ({
       log,
       index: virtualWindow.value.start + offset,
+      renderKey: getLogRenderKey(log),
     }))
 })
 
+const highlightTerms = computed(() => getHighlightTerms({
+  isManualMode: queryStore.isManualMode,
+  freeTextQuery: queryStore.freeTextQuery,
+  manualQuery: queryStore.manualQuery,
+  effectiveQuery: queryStore.effectiveQuery,
+}))
+
 const bottomSpacerHeight = computed(() => {
-  return Math.max(0, virtualWindow.value.totalHeight - virtualWindow.value.offsetTop - (visibleLogs.value.length * LOG_ROW_HEIGHT))
+  return Math.max(0, virtualWindow.value.totalHeight - virtualWindow.value.offsetTop - virtualWindow.value.visibleHeight)
 })
 
 watch(() => logStore.logs, () => {
   expandedIndex.value = -1
   scrollTop.value = 0
+  disconnectRowObservers()
+  rowHeights.value = new Map()
   if (scrollContainer.value) {
     scrollContainer.value.scrollTop = 0
   }
@@ -204,6 +241,64 @@ function isStreamField(fieldName) {
 function toggleExpand(index) {
   expandedIndex.value = expandedIndex.value === index ? -1 : index
 }
+
+function getLogRenderKey(log) {
+  if (!logRenderKeys.has(log)) {
+    logRenderKeys.set(log, `log-row-${nextRenderKey++}`)
+  }
+  return logRenderKeys.get(log)
+}
+
+function updateRowHeight(log, height) {
+  const nextHeight = Math.max(1, Math.ceil(height || 0))
+  const currentHeight = rowHeights.value.get(log)
+  if (currentHeight === nextHeight) return
+
+  const nextMap = new Map(rowHeights.value)
+  nextMap.set(log, nextHeight)
+  rowHeights.value = nextMap
+}
+
+function observeRow(log, el) {
+  const currentObserver = rowObservers.get(log)
+  if (currentObserver) {
+    currentObserver.disconnect()
+    rowObservers.delete(log)
+  }
+
+  if (!el) return
+
+  updateRowHeight(log, el.offsetHeight)
+
+  if (typeof ResizeObserver === 'undefined') return
+
+  const observer = new ResizeObserver(entries => {
+    const entry = entries[0]
+    if (!entry) return
+
+    const boxSize = Array.isArray(entry.borderBoxSize) ? entry.borderBoxSize[0] : entry.borderBoxSize
+    const measuredHeight = boxSize?.blockSize || entry.contentRect?.height || el.offsetHeight
+    updateRowHeight(log, measuredHeight)
+  })
+
+  observer.observe(el)
+  rowObservers.set(log, observer)
+}
+
+function setLogRowRef(log) {
+  return (el) => observeRow(log, el)
+}
+
+function disconnectRowObservers() {
+  for (const observer of rowObservers.values()) {
+    observer.disconnect()
+  }
+  rowObservers.clear()
+}
+
+onBeforeUnmount(() => {
+  disconnectRowObservers()
+})
 
 function onLimitChange(val) {
   settingsStore.setResultLimit(val)

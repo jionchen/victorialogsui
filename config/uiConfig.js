@@ -14,4 +14,4 @@ export const LOG_LEVEL_COLORS = {
   debug: '#a0a0c0',
 }
 
-export const LOG_ROW_HEIGHT = 40
+export const LOG_ROW_HEIGHT = 136
