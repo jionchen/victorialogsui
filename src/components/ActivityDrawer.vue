@@ -58,7 +58,7 @@
       </div>
 
       <div class="keyword-stats__summary">
-        时间范围：{{ timeRangeLabel }}，共 {{ statsLogs.length }} 条日志，命中 {{ matchedLogCount }} 条
+        查询范围：{{ queryLabel }}；时间范围：{{ timeRangeLabel }}；共 {{ statsLogs.length }} 条日志，命中 {{ matchedLogCount }} 条
       </div>
     </div>
   </a-drawer>
@@ -70,7 +70,12 @@ import { useQueryStore } from '../stores/query.js'
 import { useSettingsStore } from '../stores/settings.js'
 import client from '../api/client.js'
 import { parseNdjsonChunk } from '../api/logs.js'
-import { DEFAULT_KEYWORDS, countKeywordMatches, extractLogText } from '../utils/keywordStats.js'
+import {
+  DEFAULT_KEYWORDS,
+  buildKeywordStatsParams,
+  countKeywordMatches,
+  extractLogText,
+} from '../utils/keywordStats.js'
 import { STORAGE_KEYS } from '../../config/storageKeys.js'
 import { API_LOG_QUERY_TIMEOUT_MS } from '../../config/proxyConfig.js'
 
@@ -144,6 +149,8 @@ const timeRangeLabel = computed(() => {
   return '全部时间'
 })
 
+const queryLabel = computed(() => queryStore.effectiveQuery || '*')
+
 async function fetchStatsLogs() {
   const { start, end } = queryStore.timeRange
   const limit = settingsStore.resultLimit
@@ -157,11 +164,12 @@ async function fetchStatsLogs() {
   statsError.value = null
 
   try {
-    const params = new URLSearchParams()
-    params.set('query', '*')
-    if (limit) params.set('limit', String(limit))
-    if (start) params.set('start', start)
-    if (end) params.set('end', end)
+    const params = buildKeywordStatsParams({
+      query: queryStore.effectiveQuery,
+      limit,
+      start,
+      end,
+    })
 
     const response = await client.post('/select/logsql/query', params.toString(), {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -194,7 +202,7 @@ watch(
 )
 
 watch(
-  () => [queryStore.timeRange.start, queryStore.timeRange.end],
+  () => [queryStore.timeRange.start, queryStore.timeRange.end, queryStore.queryVersion],
   () => {
     if (props.visible) {
       fetchStatsLogs()

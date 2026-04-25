@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { queryLogs, queryHits } from '../api/logs.js'
 import { getApiBaseUrl } from '../api/client.js'
+import { classifyConnectionError } from '../utils/connectionStatus.js'
 import { getLogDisplayTimestamp } from '../utils/logTime.js'
 
 export function sortLogsByTime(entries = [], order = 'desc') {
@@ -41,6 +42,7 @@ export function createLogsStore(deps = {}) {
     const logs = ref([])
     const loading = ref(false)
     const error = ref(null)
+    const connectionError = ref(null)
     const totalHits = ref(0)
     const sortOrder = ref('desc')
 
@@ -55,6 +57,7 @@ export function createLogsStore(deps = {}) {
       const id = ++fetchId
       loading.value = true
       error.value = null
+      connectionError.value = null
       try {
         const targetUrl = getApiBaseUrlImpl()
         const data = await queryLogsImpl({ query, limit, start, end })
@@ -68,6 +71,7 @@ export function createLogsStore(deps = {}) {
         if (id !== fetchId) return
         if (e.cancelled) return
         error.value = e.message || 'Query failed'
+        connectionError.value = classifyConnectionError(e)
         logs.value = []
         totalHits.value = 0
       } finally {
@@ -105,6 +109,8 @@ export function createLogsStore(deps = {}) {
     function clearLogs() {
       logs.value = []
       totalHits.value = 0
+      error.value = null
+      connectionError.value = null
       histogramData.value = null
       histogramError.value = null
     }
@@ -120,7 +126,7 @@ export function createLogsStore(deps = {}) {
     }
 
     return {
-      logs, loading, error, totalHits, sortOrder,
+      logs, loading, error, connectionError, totalHits, sortOrder,
       histogramData, histogramLoading, histogramError,
       fetchLogs, fetchHistogram, clearLogs,
       setSortOrder, toggleSortOrder,

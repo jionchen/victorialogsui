@@ -1130,7 +1130,7 @@ html, body, #app {
 .keyword-stats__summary {
   font-size: 11px;
   color: var(--text-muted);
-  text-align: right;
+  text-align: left;
   padding-top: 4px;
   border-top: 1px solid var(--border-color);
 }
@@ -1186,6 +1186,12 @@ html, body, #app {
 }
 
 /* ===== Settings Panel ===== */
+.settings-drawer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .settings-drawer__section {
   margin-bottom: 20px;
 }
@@ -1195,6 +1201,12 @@ html, body, #app {
   color: var(--text-secondary);
   margin-bottom: 6px;
   font-weight: 500;
+}
+
+.settings-drawer__hint {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 /* ===== Utilities ===== */
@@ -1241,6 +1253,11 @@ html, body, #app {
   background: var(--accent-hover);
 }
 
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -1263,6 +1280,64 @@ html, body, #app {
 .empty-state__hint {
   font-size: 12px;
   color: var(--text-muted);
+}
+
+.connection-recovery {
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.connection-recovery__icon {
+  font-size: 34px;
+  color: var(--danger);
+  opacity: 0.75;
+}
+
+.connection-recovery__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.connection-recovery__detail {
+  max-width: 520px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.connection-recovery__meta {
+  font-size: 12px;
+  color: var(--danger);
+  font-family: var(--font-mono);
+}
+
+.connection-recovery__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.connection-recovery__secondary {
+  padding: 8px 14px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.connection-recovery__secondary:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .loading-spinner {
@@ -1417,6 +1492,63 @@ html, body, #app {
   color: var(--danger);
 }
 
+/* ===== Saved View Modal ===== */
+.saved-view-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.saved-view-modal__label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.saved-view-modal__input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.saved-view-modal__summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+
+.saved-view-modal__summary div {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.saved-view-modal__summary span {
+  color: var(--text-muted);
+}
+
+.saved-view-modal__summary code {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.saved-view-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 /* ===== Skeleton Placeholder ===== */
 .skeleton-row {
   padding: 5px 12px;
@@ -1431,6 +1563,37 @@ html, body, #app {
 .settings-auth-row {
   display: flex;
   gap: 8px;
+}
+
+.settings-connection-status {
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+
+.settings-connection-status.is-ok {
+  border-color: rgba(74, 222, 128, 0.45);
+  background: rgba(74, 222, 128, 0.08);
+}
+
+.settings-connection-status.is-error {
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.settings-connection-status__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+.settings-connection-status__detail {
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
 /* ===== Field No Values ===== */

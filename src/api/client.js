@@ -93,14 +93,18 @@ export function getApiBaseUrl() {
 // ======== 认证管理 ========
 function getAuth() {
   try {
+    const sessionSaved = sessionStorage.getItem(SESSION_STORAGE_KEYS.auth)
+    if (sessionSaved) return JSON.parse(sessionSaved)
+
     const saved = localStorage.getItem(SESSION_STORAGE_KEYS.auth)
     if (saved) return JSON.parse(saved)
   } catch { /* ignore */ }
   return DEFAULT_AUTH_CREDENTIALS
 }
 
-export function setAuth(username, password) {
+export function setAuth(username, password, options = {}) {
   const auth = { username, password }
+  const persist = options.persist === true
   try {
     if (!username && !password) {
       localStorage.removeItem(SESSION_STORAGE_KEYS.auth)
@@ -108,13 +112,25 @@ export function setAuth(username, password) {
       return
     }
 
-    localStorage.setItem(SESSION_STORAGE_KEYS.auth, JSON.stringify(auth))
-    sessionStorage.removeItem(SESSION_STORAGE_KEYS.auth)
+    if (persist) {
+      localStorage.setItem(SESSION_STORAGE_KEYS.auth, JSON.stringify(auth))
+      sessionStorage.removeItem(SESSION_STORAGE_KEYS.auth)
+    } else {
+      sessionStorage.setItem(SESSION_STORAGE_KEYS.auth, JSON.stringify(auth))
+      localStorage.removeItem(SESSION_STORAGE_KEYS.auth)
+    }
   } catch { /* ignore */ }
 }
 
 export function getAuthCredentials() {
   return getAuth()
+}
+
+export function getAuthStorageMode() {
+  try {
+    if (localStorage.getItem(SESSION_STORAGE_KEYS.auth)) return 'persistent'
+  } catch { /* ignore */ }
+  return 'session'
 }
 
 // ======== 请求拦截器 ========

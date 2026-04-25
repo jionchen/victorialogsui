@@ -72,3 +72,25 @@ test('client retries gateway timeout responses before succeeding', async () => {
     client.defaults.adapter = originalAdapter
   }
 })
+
+test('auth credentials are saved to session storage by default', async () => {
+  const sessionData = new Map()
+  const localData = new Map()
+  globalThis.sessionStorage = {
+    getItem(key) { return sessionData.get(key) || null },
+    setItem(key, value) { sessionData.set(key, String(value)) },
+    removeItem(key) { sessionData.delete(key) },
+  }
+  globalThis.localStorage = {
+    getItem(key) { return localData.get(key) || null },
+    setItem(key, value) { localData.set(key, String(value)) },
+    removeItem(key) { localData.delete(key) },
+  }
+
+  const { getAuthCredentials, setAuth } = await import(`../api/client.js?auth-default-${Date.now()}`)
+  setAuth('paas', 'secret')
+
+  assert.deepEqual(getAuthCredentials(), { username: 'paas', password: 'secret' })
+  assert.equal(sessionData.has('vlogs_auth'), true)
+  assert.equal(localData.has('vlogs_auth'), false)
+})

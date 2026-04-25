@@ -51,3 +51,12 @@ export function countKeywordMatches(logs, keywords) {
     .map(([keyword, count]) => ({ keyword, count }))
     .sort((a, b) => b.count - a.count)
 }
+
+export function buildKeywordStatsParams({ query, limit, start, end }) {
+  const params = new URLSearchParams()
+  params.set('query', query || '*')
+  if (limit) params.set('limit', String(limit))
+  if (start) params.set('start', start)
+  if (end) params.set('end', end)
+  return params
+}

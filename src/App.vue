@@ -57,7 +57,10 @@
       <FieldSidebar />
       <div class="main-content">
         <HitsHistogram />
-        <LogTable />
+        <LogTable
+          @configure-connection="openConnectionSettings"
+          @retry-query="submitSearch"
+        />
       </div>
     </div>
 
@@ -144,6 +147,10 @@ async function executeSearch() {
 function submitSearch() {
   queryStore.submitQueryDraft()
   queryStore.executeQuery()
+}
+
+function openConnectionSettings() {
+  showSettings.value = true
 }
 // Watch for filter changes → auto execute and update URL
 let searchTimer = null

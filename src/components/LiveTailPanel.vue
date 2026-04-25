@@ -5,7 +5,7 @@
     </button>
     <template #content>
       <div class="saved-views-menu">
-        <div class="saved-views-menu__header">实时模式</div>
+        <div class="saved-views-menu__header">自动刷新</div>
         <a-doption @click="setLive(0)">关闭</a-doption>
         <a-doption @click="setLive(5000)">5 秒轮询</a-doption>
         <a-doption @click="setLive(10000)">10 秒轮询</a-doption>
@@ -23,8 +23,8 @@ const queryStore = useQueryStore()
 
 const isLive = computed(() => queryStore.autoRefreshInterval > 0)
 const liveLabel = computed(() => {
-  if (!isLive.value) return '实时'
-  return `实时 ${Math.round(queryStore.autoRefreshInterval / 1000)}s`
+  if (!isLive.value) return '自动刷新'
+  return `自动刷新 ${Math.round(queryStore.autoRefreshInterval / 1000)}s`
 })
 
 function setLive(interval) {

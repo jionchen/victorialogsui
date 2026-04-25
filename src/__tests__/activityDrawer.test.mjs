@@ -1,6 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { DEFAULT_KEYWORDS, countKeywordMatches, extractLogText } from '../utils/keywordStats.js'
+import {
+  DEFAULT_KEYWORDS,
+  buildKeywordStatsParams,
+  countKeywordMatches,
+  extractLogText,
+} from '../utils/keywordStats.js'
 
 test('DEFAULT_KEYWORDS contains expected error keywords', () => {
   assert.deepEqual(DEFAULT_KEYWORDS, [
@@ -117,4 +122,18 @@ test('extractLogText handles primitives and nulls gracefully', () => {
   assert.equal(extractLogText(undefined), '')
   assert.equal(extractLogText('plain text'), 'plain text')
   assert.equal(extractLogText(42), '42')
+})
+
+test('keyword stats request uses the current effective query and time range', () => {
+  const params = buildKeywordStatsParams({
+    query: 'level:error',
+    limit: 500,
+    start: '2026-04-24T01:00:00Z',
+    end: '2026-04-24T01:05:00Z',
+  })
+
+  assert.equal(params.get('query'), 'level:error')
+  assert.equal(params.get('limit'), '500')
+  assert.equal(params.get('start'), '2026-04-24T01:00:00Z')
+  assert.equal(params.get('end'), '2026-04-24T01:05:00Z')
 })

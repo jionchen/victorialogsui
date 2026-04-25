@@ -45,6 +45,24 @@
       </template>
 
       <!-- Error state -->
+      <div v-else-if="logStore.error && recoverableConnectionError.recoverable" class="connection-recovery">
+        <div class="connection-recovery__icon">--</div>
+        <div class="connection-recovery__title">{{ recoverableConnectionError.title }}</div>
+        <div class="connection-recovery__detail">
+          {{ recoverableConnectionError.detail }}
+        </div>
+        <div v-if="recoverableConnectionError.status" class="connection-recovery__meta">
+          HTTP {{ recoverableConnectionError.status }} · {{ logStore.error }}
+        </div>
+        <div class="connection-recovery__actions">
+          <button class="btn-primary" @click="emit('configure-connection')">
+            配置 VictoriaLogs 地址
+          </button>
+          <button class="connection-recovery__secondary" @click="emit('retry-query')">
+            重试查询
+          </button>
+        </div>
+      </div>
       <div v-else-if="logStore.error" class="empty-state">
         <div class="empty-state__icon">--</div>
         <div class="empty-state__text text-danger">{{ logStore.error }}</div>
@@ -149,6 +167,7 @@ import { useQueryStore } from '../stores/query.js'
 import { useSettingsStore } from '../stores/settings.js'
 import { getStreamLabel } from '../utils/formatters.js'
 import { getHighlightTerms } from '../utils/highlighting.js'
+import { classifyConnectionError } from '../utils/connectionStatus.js'
 import { formatLogTimestamp, getLogDisplayTimestamp, getLogTimeTitle } from '../utils/logTime.js'
 import { calculateDynamicVirtualWindow } from '../utils/virtualList.js'
 import HighlightedText from './HighlightedText.vue'
@@ -160,6 +179,7 @@ const logStore = useLogStore()
 const fieldStore = useFieldStore()
 const queryStore = useQueryStore()
 const settingsStore = useSettingsStore()
+const emit = defineEmits(['configure-connection', 'retry-query'])
 
 const expandedIndex = ref(-1)
 const displayLimit = ref(settingsStore.resultLimit)
@@ -209,6 +229,10 @@ const highlightTerms = computed(() => getHighlightTerms({
 
 const bottomSpacerHeight = computed(() => {
   return Math.max(0, virtualWindow.value.totalHeight - virtualWindow.value.offsetTop - virtualWindow.value.visibleHeight)
+})
+
+const recoverableConnectionError = computed(() => {
+  return logStore.connectionError || classifyConnectionError({ message: logStore.error })
 })
 
 watch(() => logStore.logs, () => {

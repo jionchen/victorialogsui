@@ -1,7 +1,16 @@
 <template>
-  <div style="display: flex; flex-direction: column; gap: 20px;">
+  <div class="settings-drawer">
     <div class="settings-drawer__section">
-      <div class="settings-drawer__label">VictoriaLogs 地址列表</div>
+      <div class="settings-drawer__label">VictoriaLogs 连接</div>
+      <div class="settings-connection-status" :class="{ 'is-ok': testResult?.ok, 'is-error': testResult && !testResult.ok }">
+        <div class="settings-connection-status__title">
+          {{ currentTargetLabel }}
+        </div>
+        <div class="settings-connection-status__detail">
+          {{ testResult ? testResult.message : '配置地址后可测试连接，查询会通过 /api 代理发送。' }}
+        </div>
+      </div>
+      <div class="settings-drawer__label">地址列表</div>
       <div v-for="item in settingsStore.apiBaseUrlList" :key="item.url" class="api-list-item" :class="{ active: item.url === apiUrl }">
         <div class="api-list-item__info" @click="selectApi(item.url)">
           <div class="api-list-item__name">{{ item.name }}</div>
@@ -51,8 +60,11 @@
           @change="onAuthChange"
         />
       </div>
-      <div style="margin-top: 6px; font-size: 11px; color: var(--text-muted);">
-        凭证保存在本地浏览器中，关闭页面后仍保留。
+      <a-checkbox v-model="persistAuth" @change="onAuthChange" style="margin-top: 10px;">
+        关闭浏览器后仍保留凭证
+      </a-checkbox>
+      <div class="settings-drawer__hint">
+        默认仅保存在当前浏览器会话中；勾选后会持久保存在本地浏览器。
       </div>
     </div>
 
@@ -116,6 +128,7 @@ import { useQueryStore } from '../stores/query.js'
 import { API_CONNECTION_TEST_TIMEOUT_MS } from '../../config/proxyConfig.js'
 import client, {
   getAuthCredentials,
+  getAuthStorageMode,
   setAuth,
   getAllowedProxyTargets,
   isStrictProxyMode,
@@ -132,6 +145,7 @@ const newApiUrl = ref('')
 const savedAuth = getAuthCredentials()
 const authUsername = ref(savedAuth.username || '')
 const authPassword = ref(savedAuth.password || '')
+const persistAuth = ref(getAuthStorageMode() === 'persistent')
 const resultLimit = ref(settingsStore.resultLimit)
 const pinnedFieldsText = ref(settingsStore.pinnedFields.join(', '))
 const theme = ref(settingsStore.theme)
@@ -142,6 +156,9 @@ const testResult = ref(null)
 const addApiError = ref('')
 const allowedTargets = getAllowedProxyTargets()
 const strictProxyMode = isStrictProxyMode()
+const currentTargetLabel = computed(() => {
+  return apiUrl.value || '使用默认代理地址'
+})
 
 function selectApi(url) {
   settingsStore.updateApiBaseUrl(url)
@@ -178,7 +195,7 @@ function removeApi(url) {
 }
 
 function onAuthChange() {
-  setAuth(authUsername.value, authPassword.value)
+  setAuth(authUsername.value, authPassword.value, { persist: persistAuth.value })
 }
 
 function onLimitChange() {
