@@ -12,8 +12,6 @@ import {
   DEFAULTS_MIGRATION_VERSION,
   DEFAULT_PINNED_FIELDS,
   DEFAULT_RESULT_LIMIT,
-  DEFAULT_SECURITY_ROLE,
-  DEFAULT_REDACTION_ENABLED,
   DEFAULT_TABLE_COLUMNS,
   DEFAULT_THEME,
   MAX_AUDIT_EVENTS,
@@ -147,8 +145,6 @@ export const useSettingsStore = defineStore('settings', () => {
   const tableColumns = ref(
     JSON.parse(localStorage.getItem(STORAGE_KEYS.tableColumns) || 'null') || [...DEFAULT_TABLE_COLUMNS]
   )
-  const securityRole = ref(localStorage.getItem(STORAGE_KEYS.securityRole) || DEFAULT_SECURITY_ROLE)
-  const redactionEnabled = ref(localStorage.getItem(STORAGE_KEYS.redactionEnabled) !== 'false' ? DEFAULT_REDACTION_ENABLED : false)
   const auditEvents = ref(
     JSON.parse(localStorage.getItem(STORAGE_KEYS.auditEvents) || '[]')
   )
@@ -173,16 +169,6 @@ export const useSettingsStore = defineStore('settings', () => {
   function resetTableColumns() {
     tableColumns.value = [...DEFAULT_TABLE_COLUMNS]
     localStorage.setItem(STORAGE_KEYS.tableColumns, JSON.stringify(tableColumns.value))
-  }
-
-  function setSecurityRole(role) {
-    securityRole.value = role
-    localStorage.setItem(STORAGE_KEYS.securityRole, role)
-  }
-
-  function setRedactionEnabled(value) {
-    redactionEnabled.value = value
-    localStorage.setItem(STORAGE_KEYS.redactionEnabled, String(value))
   }
 
   function logAuditEvent(action, summary) {
@@ -251,8 +237,6 @@ export const useSettingsStore = defineStore('settings', () => {
     resultLimit, setResultLimit,
     savedViews, upsertSavedView, removeSavedView,
     savedQueries, upsertSavedQuery, removeSavedQuery,
-    securityRole, setSecurityRole,
-    redactionEnabled, setRedactionEnabled,
     auditEvents, logAuditEvent, clearAuditEvents,
     tableColumns, toggleTableColumn, resetTableColumns,
   }

@@ -1,7 +1,5 @@
 export const DEFAULT_THEME = 'dark'
 export const DEFAULT_RESULT_LIMIT = 500
-export const DEFAULT_SECURITY_ROLE = 'admin'
-export const DEFAULT_REDACTION_ENABLED = true
 export const DEFAULT_AUTH_CREDENTIALS = Object.freeze({ username: '', password: '' })
 export const DEFAULT_TIME_PRESET = '5m'
 export const APP_BASE_PATH = '/vlogs-ui/'

@@ -9,7 +9,7 @@
       "source_file": "vite.config.js",
       "source_location": "L1",
       "id": "vite_config_js",
-      "community": 17,
+      "community": 18,
       "norm_label": "vite.config.js"
     },
     {
@@ -18,7 +18,7 @@
       "source_file": "vite.config.js",
       "source_location": "L9",
       "id": "vite_config_normalizetarget",
-      "community": 17,
+      "community": 18,
       "norm_label": "normalizetarget()"
     },
     {
@@ -27,7 +27,7 @@
       "source_file": "vite.config.js",
       "source_location": "L32",
       "id": "vite_config_dynamicproxyplugin",
-      "community": 17,
+      "community": 18,
       "norm_label": "dynamicproxyplugin()"
     },
     {
@@ -36,7 +36,7 @@
       "source_file": "config/appConfig.js",
       "source_location": "L1",
       "id": "config_appconfig_js",
-      "community": 25,
+      "community": 27,
       "norm_label": "appconfig.js"
     },
     {
@@ -45,7 +45,7 @@
       "source_file": "config/securityConfig.js",
       "source_location": "L1",
       "id": "config_securityconfig_js",
-      "community": 26,
+      "community": 28,
       "norm_label": "securityconfig.js"
     },
     {
@@ -54,7 +54,7 @@
       "source_file": "config/proxyConfig.js",
       "source_location": "L1",
       "id": "config_proxyconfig_js",
-      "community": 27,
+      "community": 29,
       "norm_label": "proxyconfig.js"
     },
     {
@@ -63,7 +63,7 @@
       "source_file": "config/storageKeys.js",
       "source_location": "L1",
       "id": "config_storagekeys_js",
-      "community": 28,
+      "community": 30,
       "norm_label": "storagekeys.js"
     },
     {
@@ -72,7 +72,7 @@
       "source_file": "config/uiConfig.js",
       "source_location": "L1",
       "id": "config_uiconfig_js",
-      "community": 29,
+      "community": 31,
       "norm_label": "uiconfig.js"
     },
     {
@@ -81,7 +81,7 @@
       "source_file": "src/App.vue",
       "source_location": "L1",
       "id": "src_app_vue",
-      "community": 19,
+      "community": 20,
       "norm_label": "app.vue"
     },
     {
@@ -90,7 +90,7 @@
       "source_file": "src/main.js",
       "source_location": "L1",
       "id": "src_main_js",
-      "community": 19,
+      "community": 20,
       "norm_label": "main.js"
     },
     {
@@ -99,7 +99,7 @@
       "source_file": "src/stores/query.js",
       "source_location": "L1",
       "id": "src_stores_query_js",
-      "community": 30,
+      "community": 32,
       "norm_label": "query.js"
     },
     {
@@ -108,7 +108,7 @@
       "source_file": "src/stores/fields.js",
       "source_location": "L1",
       "id": "src_stores_fields_js",
-      "community": 7,
+      "community": 6,
       "norm_label": "fields.js"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "src/stores/fields.js",
       "source_location": "L7",
       "id": "fields_createemptyfieldvaluestate",
-      "community": 7,
+      "community": 6,
       "norm_label": "createemptyfieldvaluestate()"
     },
     {
@@ -126,7 +126,7 @@
       "source_file": "src/stores/fields.js",
       "source_location": "L18",
       "id": "fields_createfieldvaluecachekey",
-      "community": 7,
+      "community": 6,
       "norm_label": "createfieldvaluecachekey()"
     },
     {
@@ -135,7 +135,7 @@
       "source_file": "src/stores/fields.js",
       "source_location": "L22",
       "id": "fields_createfieldvaluebasekey",
-      "community": 7,
+      "community": 6,
       "norm_label": "createfieldvaluebasekey()"
     },
     {
@@ -144,7 +144,7 @@
       "source_file": "src/stores/fields.js",
       "source_location": "L26",
       "id": "fields_clonevalues",
-      "community": 7,
+      "community": 6,
       "norm_label": "clonevalues()"
     },
     {
@@ -153,7 +153,7 @@
       "source_file": "src/stores/fields.js",
       "source_location": "L30",
       "id": "fields_createfieldsstore",
-      "community": 7,
+      "community": 6,
       "norm_label": "createfieldsstore()"
     },
     {
@@ -162,25 +162,25 @@
       "source_file": "src/stores/logs.js",
       "source_location": "L1",
       "id": "src_stores_logs_js",
-      "community": 18,
+      "community": 19,
       "norm_label": "logs.js"
     },
     {
       "label": "sortLogsByTime()",
       "file_type": "code",
       "source_file": "src/stores/logs.js",
-      "source_location": "L7",
+      "source_location": "L8",
       "id": "logs_sortlogsbytime",
-      "community": 18,
+      "community": 19,
       "norm_label": "sortlogsbytime()"
     },
     {
       "label": "createLogsStore()",
       "file_type": "code",
       "source_file": "src/stores/logs.js",
-      "source_location": "L33",
+      "source_location": "L34",
       "id": "logs_createlogsstore",
-      "community": 18,
+      "community": 19,
       "norm_label": "createlogsstore()"
     },
     {
@@ -225,7 +225,7 @@
       "source_file": "src/utils/queryValidation.js",
       "source_location": "L1",
       "id": "src_utils_queryvalidation_js",
-      "community": 10,
+      "community": 9,
       "norm_label": "queryvalidation.js"
     },
     {
@@ -234,7 +234,7 @@
       "source_file": "src/utils/queryValidation.js",
       "source_location": "L3",
       "id": "queryvalidation_validatequery",
-      "community": 10,
+      "community": 9,
       "norm_label": "validatequery()"
     },
     {
@@ -243,7 +243,7 @@
       "source_file": "src/utils/queryValidation.js",
       "source_location": "L25",
       "id": "queryvalidation_shouldshowvalidationbadge",
-      "community": 10,
+      "community": 9,
       "norm_label": "shouldshowvalidationbadge()"
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "src/utils/queryValidation.js",
       "source_location": "L29",
       "id": "queryvalidation_hasbalancedbraces",
-      "community": 10,
+      "community": 9,
       "norm_label": "hasbalancedbraces()"
     },
     {
@@ -261,7 +261,7 @@
       "source_file": "src/utils/queryValidation.js",
       "source_location": "L39",
       "id": "queryvalidation_hasbalancedquotes",
-      "community": 10,
+      "community": 9,
       "norm_label": "hasbalancedquotes()"
     },
     {
@@ -270,7 +270,7 @@
       "source_file": "src/utils/logTime.js",
       "source_location": "L1",
       "id": "src_utils_logtime_js",
-      "community": 1,
+      "community": 2,
       "norm_label": "logtime.js"
     },
     {
@@ -279,7 +279,7 @@
       "source_file": "src/utils/logTime.js",
       "source_location": "L20",
       "id": "logtime_normalizemillis",
-      "community": 1,
+      "community": 2,
       "norm_label": "normalizemillis()"
     },
     {
@@ -288,7 +288,7 @@
       "source_file": "src/utils/logTime.js",
       "source_location": "L25",
       "id": "logtime_toisofromparts",
-      "community": 1,
+      "community": 2,
       "norm_label": "toisofromparts()"
     },
     {
@@ -297,7 +297,7 @@
       "source_file": "src/utils/logTime.js",
       "source_location": "L40",
       "id": "logtime_parseoffsetminutes",
-      "community": 1,
+      "community": 2,
       "norm_label": "parseoffsetminutes()"
     },
     {
@@ -306,7 +306,7 @@
       "source_file": "src/utils/logTime.js",
       "source_location": "L48",
       "id": "logtime_normalizeisocandidate",
-      "community": 1,
+      "community": 2,
       "norm_label": "normalizeisocandidate()"
     },
     {
@@ -315,7 +315,7 @@
       "source_file": "src/utils/logTime.js",
       "source_location": "L54",
       "id": "logtime_parsejavabrackettime",
-      "community": 1,
+      "community": 2,
       "norm_label": "parsejavabrackettime()"
     },
     {
@@ -324,7 +324,7 @@
       "source_file": "src/utils/logTime.js",
       "source_location": "L69",
       "id": "logtime_parsenginxtime",
-      "community": 1,
+      "community": 2,
       "norm_label": "parsenginxtime()"
     },
     {
@@ -333,7 +333,7 @@
       "source_file": "src/utils/logTime.js",
       "source_location": "L87",
       "id": "logtime_parseisotime",
-      "community": 1,
+      "community": 2,
       "norm_label": "parseisotime()"
     },
     {
@@ -342,7 +342,7 @@
       "source_file": "src/utils/logTime.js",
       "source_location": "L92",
       "id": "logtime_extractlogmessagetime",
-      "community": 1,
+      "community": 2,
       "norm_label": "extractlogmessagetime()"
     },
     {
@@ -351,7 +351,7 @@
       "source_file": "src/utils/logTime.js",
       "source_location": "L99",
       "id": "logtime_getlogdisplaytimestamp",
-      "community": 1,
+      "community": 2,
       "norm_label": "getlogdisplaytimestamp()"
     },
     {
@@ -360,7 +360,7 @@
       "source_file": "src/utils/logTime.js",
       "source_location": "L103",
       "id": "logtime_formatlogtimestamp",
-      "community": 1,
+      "community": 2,
       "norm_label": "formatlogtimestamp()"
     },
     {
@@ -369,7 +369,7 @@
       "source_file": "src/utils/logTime.js",
       "source_location": "L113",
       "id": "logtime_getlogtimetitle",
-      "community": 1,
+      "community": 2,
       "norm_label": "getlogtimetitle()"
     },
     {
@@ -378,7 +378,7 @@
       "source_file": "src/utils/redaction.js",
       "source_location": "L1",
       "id": "src_utils_redaction_js",
-      "community": 20,
+      "community": 21,
       "norm_label": "redaction.js"
     },
     {
@@ -387,7 +387,7 @@
       "source_file": "src/utils/redaction.js",
       "source_location": "L3",
       "id": "redaction_redactsensitivefields",
-      "community": 20,
+      "community": 21,
       "norm_label": "redactsensitivefields()"
     },
     {
@@ -396,7 +396,7 @@
       "source_file": "src/utils/formatters.js",
       "source_location": "L1",
       "id": "src_utils_formatters_js",
-      "community": 4,
+      "community": 3,
       "norm_label": "formatters.js"
     },
     {
@@ -405,7 +405,7 @@
       "source_file": "src/utils/formatters.js",
       "source_location": "L4",
       "id": "formatters_formatnumber",
-      "community": 4,
+      "community": 3,
       "norm_label": "formatnumber()"
     },
     {
@@ -414,7 +414,7 @@
       "source_file": "src/utils/formatters.js",
       "source_location": "L15",
       "id": "formatters_calcpercentage",
-      "community": 4,
+      "community": 3,
       "norm_label": "calcpercentage()"
     },
     {
@@ -423,7 +423,7 @@
       "source_file": "src/utils/formatters.js",
       "source_location": "L23",
       "id": "formatters_tryformatjson",
-      "community": 4,
+      "community": 3,
       "norm_label": "tryformatjson()"
     },
     {
@@ -432,7 +432,7 @@
       "source_file": "src/utils/formatters.js",
       "source_location": "L40",
       "id": "formatters_truncate",
-      "community": 4,
+      "community": 3,
       "norm_label": "truncate()"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "src/utils/formatters.js",
       "source_location": "L49",
       "id": "formatters_debounce",
-      "community": 4,
+      "community": 3,
       "norm_label": "debounce()"
     },
     {
@@ -450,7 +450,7 @@
       "source_file": "src/utils/formatters.js",
       "source_location": "L60",
       "id": "formatters_getstreamlabel",
-      "community": 4,
+      "community": 3,
       "norm_label": "getstreamlabel()"
     },
     {
@@ -459,7 +459,7 @@
       "source_file": "src/utils/formatters.js",
       "source_location": "L75",
       "id": "formatters_formatdatetime",
-      "community": 4,
+      "community": 3,
       "norm_label": "formatdatetime()"
     },
     {
@@ -468,7 +468,7 @@
       "source_file": "src/utils/virtualList.js",
       "source_location": "L1",
       "id": "src_utils_virtuallist_js",
-      "community": 6,
+      "community": 5,
       "norm_label": "virtuallist.js"
     },
     {
@@ -477,7 +477,7 @@
       "source_file": "src/utils/virtualList.js",
       "source_location": "L1",
       "id": "virtuallist_calculatevirtualwindow",
-      "community": 6,
+      "community": 5,
       "norm_label": "calculatevirtualwindow()"
     },
     {
@@ -486,7 +486,7 @@
       "source_file": "src/utils/virtualList.js",
       "source_location": "L24",
       "id": "virtuallist_sanitizeheight",
-      "community": 6,
+      "community": 5,
       "norm_label": "sanitizeheight()"
     },
     {
@@ -495,7 +495,7 @@
       "source_file": "src/utils/virtualList.js",
       "source_location": "L29",
       "id": "virtuallist_buildprefixoffsets",
-      "community": 6,
+      "community": 5,
       "norm_label": "buildprefixoffsets()"
     },
     {
@@ -504,7 +504,7 @@
       "source_file": "src/utils/virtualList.js",
       "source_location": "L40",
       "id": "virtuallist_findfirstprefixatorabove",
-      "community": 6,
+      "community": 5,
       "norm_label": "findfirstprefixatorabove()"
     },
     {
@@ -513,7 +513,7 @@
       "source_file": "src/utils/virtualList.js",
       "source_location": "L56",
       "id": "virtuallist_finditemindexatoffset",
-      "community": 6,
+      "community": 5,
       "norm_label": "finditemindexatoffset()"
     },
     {
@@ -522,7 +522,7 @@
       "source_file": "src/utils/virtualList.js",
       "source_location": "L64",
       "id": "virtuallist_calculatedynamicvirtualwindow",
-      "community": 6,
+      "community": 5,
       "norm_label": "calculatedynamicvirtualwindow()"
     },
     {
@@ -666,7 +666,7 @@
       "source_file": "src/utils/queryBuilder.js",
       "source_location": "L1",
       "id": "src_utils_querybuilder_js",
-      "community": 8,
+      "community": 7,
       "norm_label": "querybuilder.js"
     },
     {
@@ -675,7 +675,7 @@
       "source_file": "src/utils/queryBuilder.js",
       "source_location": "L12",
       "id": "querybuilder_buildlogsql",
-      "community": 8,
+      "community": 7,
       "norm_label": "buildlogsql()"
     },
     {
@@ -684,7 +684,7 @@
       "source_file": "src/utils/queryBuilder.js",
       "source_location": "L81",
       "id": "querybuilder_islogsqlsyntax",
-      "community": 8,
+      "community": 7,
       "norm_label": "islogsqlsyntax()"
     },
     {
@@ -693,7 +693,7 @@
       "source_file": "src/utils/queryBuilder.js",
       "source_location": "L90",
       "id": "querybuilder_escaperegex",
-      "community": 8,
+      "community": 7,
       "norm_label": "escaperegex()"
     },
     {
@@ -702,7 +702,7 @@
       "source_file": "src/utils/queryBuilder.js",
       "source_location": "L94",
       "id": "querybuilder_quoteifneeded",
-      "community": 8,
+      "community": 7,
       "norm_label": "quoteifneeded()"
     },
     {
@@ -711,7 +711,7 @@
       "source_file": "src/utils/queryBuilder.js",
       "source_location": "L104",
       "id": "querybuilder_parsebasiclogsql",
-      "community": 8,
+      "community": 7,
       "norm_label": "parsebasiclogsql()"
     },
     {
@@ -720,7 +720,7 @@
       "source_file": "src/utils/timeUtils.js",
       "source_location": "L1",
       "id": "src_utils_timeutils_js",
-      "community": 11,
+      "community": 10,
       "norm_label": "timeutils.js"
     },
     {
@@ -729,7 +729,7 @@
       "source_file": "src/utils/timeUtils.js",
       "source_location": "L12",
       "id": "timeutils_calculatestep",
-      "community": 11,
+      "community": 10,
       "norm_label": "calculatestep()"
     },
     {
@@ -738,7 +738,7 @@
       "source_file": "src/utils/timeUtils.js",
       "source_location": "L24",
       "id": "timeutils_gettimerange",
-      "community": 11,
+      "community": 10,
       "norm_label": "gettimerange()"
     },
     {
@@ -747,7 +747,7 @@
       "source_file": "src/utils/timeUtils.js",
       "source_location": "L33",
       "id": "timeutils_formattimestamp",
-      "community": 11,
+      "community": 10,
       "norm_label": "formattimestamp()"
     },
     {
@@ -756,8 +756,62 @@
       "source_file": "src/utils/timeUtils.js",
       "source_location": "L47",
       "id": "timeutils_formattimeshort",
-      "community": 11,
+      "community": 10,
       "norm_label": "formattimeshort()"
+    },
+    {
+      "label": "connectionStatus.js",
+      "file_type": "code",
+      "source_file": "src/utils/connectionStatus.js",
+      "source_location": "L1",
+      "id": "src_utils_connectionstatus_js",
+      "community": 22,
+      "norm_label": "connectionstatus.js"
+    },
+    {
+      "label": "classifyConnectionError()",
+      "file_type": "code",
+      "source_file": "src/utils/connectionStatus.js",
+      "source_location": "L3",
+      "id": "connectionstatus_classifyconnectionerror",
+      "community": 22,
+      "norm_label": "classifyconnectionerror()"
+    },
+    {
+      "label": "keywordStats.js",
+      "file_type": "code",
+      "source_file": "src/utils/keywordStats.js",
+      "source_location": "L1",
+      "id": "src_utils_keywordstats_js",
+      "community": 16,
+      "norm_label": "keywordstats.js"
+    },
+    {
+      "label": "extractLogText()",
+      "file_type": "code",
+      "source_file": "src/utils/keywordStats.js",
+      "source_location": "L13",
+      "id": "keywordstats_extractlogtext",
+      "community": 16,
+      "norm_label": "extractlogtext()"
+    },
+    {
+      "label": "countKeywordMatches()",
+      "file_type": "code",
+      "source_file": "src/utils/keywordStats.js",
+      "source_location": "L34",
+      "id": "keywordstats_countkeywordmatches",
+      "community": 16,
+      "norm_label": "countkeywordmatches()"
+    },
+    {
+      "label": "buildKeywordStatsParams()",
+      "file_type": "code",
+      "source_file": "src/utils/keywordStats.js",
+      "source_location": "L55",
+      "id": "keywordstats_buildkeywordstatsparams",
+      "community": 16,
+      "norm_label": "buildkeywordstatsparams()"
     },
     {
       "label": "searchOrchestration.js",
@@ -765,7 +819,7 @@
       "source_file": "src/utils/searchOrchestration.js",
       "source_location": "L1",
       "id": "src_utils_searchorchestration_js",
-      "community": 16,
+      "community": 17,
       "norm_label": "searchorchestration.js"
     },
     {
@@ -774,7 +828,7 @@
       "source_file": "src/utils/searchOrchestration.js",
       "source_location": "L9",
       "id": "searchorchestration_delay",
-      "community": 16,
+      "community": 17,
       "norm_label": "delay()"
     },
     {
@@ -783,7 +837,7 @@
       "source_file": "src/utils/searchOrchestration.js",
       "source_location": "L13",
       "id": "searchorchestration_calculateauxiliarydelayms",
-      "community": 16,
+      "community": 17,
       "norm_label": "calculateauxiliarydelayms()"
     },
     {
@@ -792,7 +846,7 @@
       "source_file": "src/utils/searchOrchestration.js",
       "source_location": "L24",
       "id": "searchorchestration_createsearchexecutor",
-      "community": 16,
+      "community": 17,
       "norm_label": "createsearchexecutor()"
     },
     {
@@ -801,7 +855,7 @@
       "source_file": "src/utils/permissions.js",
       "source_location": "L1",
       "id": "src_utils_permissions_js",
-      "community": 21,
+      "community": 23,
       "norm_label": "permissions.js"
     },
     {
@@ -810,7 +864,7 @@
       "source_file": "src/utils/permissions.js",
       "source_location": "L5",
       "id": "permissions_canviewfield",
-      "community": 21,
+      "community": 23,
       "norm_label": "canviewfield()"
     },
     {
@@ -819,7 +873,7 @@
       "source_file": "src/components/AuditPanel.vue",
       "source_location": "L1",
       "id": "src_components_auditpanel_vue",
-      "community": 31,
+      "community": 33,
       "norm_label": "auditpanel.vue"
     },
     {
@@ -828,7 +882,7 @@
       "source_file": "src/components/LiveTailPanel.vue",
       "source_location": "L1",
       "id": "src_components_livetailpanel_vue",
-      "community": 22,
+      "community": 24,
       "norm_label": "livetailpanel.vue"
     },
     {
@@ -837,7 +891,7 @@
       "source_file": "src/components/LiveTailPanel.vue",
       "source_location": "L30",
       "id": "livetailpanel_setlive",
-      "community": 22,
+      "community": 24,
       "norm_label": "setlive()"
     },
     {
@@ -846,7 +900,7 @@
       "source_file": "src/components/QueryEditor.vue",
       "source_location": "L1",
       "id": "src_components_queryeditor_vue",
-      "community": 12,
+      "community": 11,
       "norm_label": "queryeditor.vue"
     },
     {
@@ -855,7 +909,7 @@
       "source_file": "src/components/QueryEditor.vue",
       "source_location": "L66",
       "id": "queryeditor_if",
-      "community": 12,
+      "community": 11,
       "norm_label": "if()"
     },
     {
@@ -864,7 +918,7 @@
       "source_file": "src/components/QueryEditor.vue",
       "source_location": "L79",
       "id": "queryeditor_oninput",
-      "community": 12,
+      "community": 11,
       "norm_label": "oninput()"
     },
     {
@@ -873,7 +927,7 @@
       "source_file": "src/components/QueryEditor.vue",
       "source_location": "L83",
       "id": "queryeditor_onsubmit",
-      "community": 12,
+      "community": 11,
       "norm_label": "onsubmit()"
     },
     {
@@ -882,7 +936,7 @@
       "source_file": "src/components/QueryEditor.vue",
       "source_location": "L88",
       "id": "queryeditor_applyhistory",
-      "community": 12,
+      "community": 11,
       "norm_label": "applyhistory()"
     },
     {
@@ -891,7 +945,7 @@
       "source_file": "src/components/FilterBar.vue",
       "source_location": "L1",
       "id": "src_components_filterbar_vue",
-      "community": 32,
+      "community": 34,
       "norm_label": "filterbar.vue"
     },
     {
@@ -900,7 +954,7 @@
       "source_file": "src/components/LogDetail.vue",
       "source_location": "L1",
       "id": "src_components_logdetail_vue",
-      "community": 23,
+      "community": 25,
       "norm_label": "logdetail.vue"
     },
     {
@@ -909,7 +963,7 @@
       "source_file": "src/components/LogDetail.vue",
       "source_location": "L124",
       "id": "logdetail_order",
-      "community": 23,
+      "community": 25,
       "norm_label": "order()"
     },
     {
@@ -918,7 +972,7 @@
       "source_file": "src/components/LogTable.vue",
       "source_location": "L1",
       "id": "src_components_logtable_vue",
-      "community": 33,
+      "community": 35,
       "norm_label": "logtable.vue"
     },
     {
@@ -927,7 +981,7 @@
       "source_file": "src/components/HitsHistogram.vue",
       "source_location": "L1",
       "id": "src_components_hitshistogram_vue",
-      "community": 24,
+      "community": 26,
       "norm_label": "hitshistogram.vue"
     },
     {
@@ -936,7 +990,7 @@
       "source_file": "src/components/HitsHistogram.vue",
       "source_location": "L178",
       "id": "hitshistogram_if",
-      "community": 24,
+      "community": 26,
       "norm_label": "if()"
     },
     {
@@ -945,7 +999,7 @@
       "source_file": "src/components/TimeRangePicker.vue",
       "source_location": "L1",
       "id": "src_components_timerangepicker_vue",
-      "community": 34,
+      "community": 36,
       "norm_label": "timerangepicker.vue"
     },
     {
@@ -954,98 +1008,8 @@
       "source_file": "src/components/SettingsPanel.vue",
       "source_location": "L1",
       "id": "src_components_settingspanel_vue",
-      "community": 3,
+      "community": 37,
       "norm_label": "settingspanel.vue"
-    },
-    {
-      "label": "selectApi()",
-      "file_type": "code",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L146",
-      "id": "settingspanel_selectapi",
-      "community": 3,
-      "norm_label": "selectapi()"
-    },
-    {
-      "label": "addNewApi()",
-      "file_type": "code",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L150",
-      "id": "settingspanel_addnewapi",
-      "community": 3,
-      "norm_label": "addnewapi()"
-    },
-    {
-      "label": "removeApi()",
-      "file_type": "code",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L176",
-      "id": "settingspanel_removeapi",
-      "community": 3,
-      "norm_label": "removeapi()"
-    },
-    {
-      "label": "onAuthChange()",
-      "file_type": "code",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L180",
-      "id": "settingspanel_onauthchange",
-      "community": 3,
-      "norm_label": "onauthchange()"
-    },
-    {
-      "label": "onLimitChange()",
-      "file_type": "code",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L184",
-      "id": "settingspanel_onlimitchange",
-      "community": 3,
-      "norm_label": "onlimitchange()"
-    },
-    {
-      "label": "onPinnedChange()",
-      "file_type": "code",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L189",
-      "id": "settingspanel_onpinnedchange",
-      "community": 3,
-      "norm_label": "onpinnedchange()"
-    },
-    {
-      "label": "onThemeChange()",
-      "file_type": "code",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L197",
-      "id": "settingspanel_onthemechange",
-      "community": 3,
-      "norm_label": "onthemechange()"
-    },
-    {
-      "label": "onSecurityChange()",
-      "file_type": "code",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L201",
-      "id": "settingspanel_onsecuritychange",
-      "community": 3,
-      "norm_label": "onsecuritychange()"
-    },
-    {
-      "label": "onRedactionChange()",
-      "file_type": "code",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L205",
-      "id": "settingspanel_onredactionchange",
-      "community": 3,
-      "norm_label": "onredactionchange()"
-    },
-    {
-      "label": "testConnection()",
-      "file_type": "code",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L209",
-      "id": "settingspanel_testconnection",
-      "community": 3,
-      "norm_label": "testconnection()"
     },
     {
       "label": "ActivityDrawer.vue",
@@ -1053,8 +1017,44 @@
       "source_file": "src/components/ActivityDrawer.vue",
       "source_location": "L1",
       "id": "src_components_activitydrawer_vue",
-      "community": 35,
+      "community": 12,
       "norm_label": "activitydrawer.vue"
+    },
+    {
+      "label": "loadCustomKeywords()",
+      "file_type": "code",
+      "source_file": "src/components/ActivityDrawer.vue",
+      "source_location": "L100",
+      "id": "activitydrawer_loadcustomkeywords",
+      "community": 12,
+      "norm_label": "loadcustomkeywords()"
+    },
+    {
+      "label": "fetchStatsLogs()",
+      "file_type": "code",
+      "source_file": "src/components/ActivityDrawer.vue",
+      "source_location": "L154",
+      "id": "activitydrawer_fetchstatslogs",
+      "community": 12,
+      "norm_label": "fetchstatslogs()"
+    },
+    {
+      "label": "addKeyword()",
+      "file_type": "code",
+      "source_file": "src/components/ActivityDrawer.vue",
+      "source_location": "L213",
+      "id": "activitydrawer_addkeyword",
+      "community": 12,
+      "norm_label": "addkeyword()"
+    },
+    {
+      "label": "removeKeyword()",
+      "file_type": "code",
+      "source_file": "src/components/ActivityDrawer.vue",
+      "source_location": "L226",
+      "id": "activitydrawer_removekeyword",
+      "community": 12,
+      "norm_label": "removekeyword()"
     },
     {
       "label": "HighlightedText.vue",
@@ -1062,7 +1062,7 @@
       "source_file": "src/components/HighlightedText.vue",
       "source_location": "L1",
       "id": "src_components_highlightedtext_vue",
-      "community": 36,
+      "community": 38,
       "norm_label": "highlightedtext.vue"
     },
     {
@@ -1071,7 +1071,7 @@
       "source_file": "src/components/FieldSidebar.vue",
       "source_location": "L1",
       "id": "src_components_fieldsidebar_vue",
-      "community": 37,
+      "community": 39,
       "norm_label": "fieldsidebar.vue"
     },
     {
@@ -1080,52 +1080,52 @@
       "source_file": "src/components/SavedViewsPanel.vue",
       "source_location": "L1",
       "id": "src_components_savedviewspanel_vue",
-      "community": 9,
+      "community": 8,
       "norm_label": "savedviewspanel.vue"
     },
     {
-      "label": "saveCurrentView()",
+      "label": "openSaveDialog()",
       "file_type": "code",
       "source_file": "src/components/SavedViewsPanel.vue",
-      "source_location": "L49",
-      "id": "savedviewspanel_savecurrentview",
-      "community": 9,
-      "norm_label": "savecurrentview()"
+      "source_location": "L98",
+      "id": "savedviewspanel_opensavedialog",
+      "community": 8,
+      "norm_label": "opensavedialog()"
     },
     {
-      "label": "saveCurrentQuery()",
+      "label": "confirmSave()",
       "file_type": "code",
       "source_file": "src/components/SavedViewsPanel.vue",
-      "source_location": "L60",
-      "id": "savedviewspanel_savecurrentquery",
-      "community": 9,
-      "norm_label": "savecurrentquery()"
+      "source_location": "L105",
+      "id": "savedviewspanel_confirmsave",
+      "community": 8,
+      "norm_label": "confirmsave()"
     },
     {
       "label": "applyView()",
       "file_type": "code",
       "source_file": "src/components/SavedViewsPanel.vue",
-      "source_location": "L73",
+      "source_location": "L125",
       "id": "savedviewspanel_applyview",
-      "community": 9,
+      "community": 8,
       "norm_label": "applyview()"
     },
     {
       "label": "applySavedQuery()",
       "file_type": "code",
       "source_file": "src/components/SavedViewsPanel.vue",
-      "source_location": "L78",
+      "source_location": "L130",
       "id": "savedviewspanel_applysavedquery",
-      "community": 9,
+      "community": 8,
       "norm_label": "applysavedquery()"
     },
     {
       "label": "buildDefaultViewName()",
       "file_type": "code",
       "source_file": "src/components/SavedViewsPanel.vue",
-      "source_location": "L84",
+      "source_location": "L136",
       "id": "savedviewspanel_builddefaultviewname",
-      "community": 9,
+      "community": 8,
       "norm_label": "builddefaultviewname()"
     },
     {
@@ -1134,7 +1134,7 @@
       "source_file": "src/components/LogContextModal.vue",
       "source_location": "L1",
       "id": "src_components_logcontextmodal_vue",
-      "community": 38,
+      "community": 40,
       "norm_label": "logcontextmodal.vue"
     },
     {
@@ -1143,7 +1143,7 @@
       "source_file": "src/components/FieldItem.vue",
       "source_location": "L1",
       "id": "src_components_fielditem_vue",
-      "community": 5,
+      "community": 4,
       "norm_label": "fielditem.vue"
     },
     {
@@ -1152,7 +1152,7 @@
       "source_file": "src/components/FieldItem.vue",
       "source_location": "L152",
       "id": "fielditem_getbarwidth",
-      "community": 5,
+      "community": 4,
       "norm_label": "getbarwidth()"
     },
     {
@@ -1161,7 +1161,7 @@
       "source_file": "src/components/FieldItem.vue",
       "source_location": "L156",
       "id": "fielditem_toggleexpand",
-      "community": 5,
+      "community": 4,
       "norm_label": "toggleexpand()"
     },
     {
@@ -1170,7 +1170,7 @@
       "source_file": "src/components/FieldItem.vue",
       "source_location": "L163",
       "id": "fielditem_loadvalues",
-      "community": 5,
+      "community": 4,
       "norm_label": "loadvalues()"
     },
     {
@@ -1179,7 +1179,7 @@
       "source_file": "src/components/FieldItem.vue",
       "source_location": "L175",
       "id": "fielditem_retryload",
-      "community": 5,
+      "community": 4,
       "norm_label": "retryload()"
     },
     {
@@ -1188,7 +1188,7 @@
       "source_file": "src/components/FieldItem.vue",
       "source_location": "L180",
       "id": "fielditem_addincludefilter",
-      "community": 5,
+      "community": 4,
       "norm_label": "addincludefilter()"
     },
     {
@@ -1197,7 +1197,7 @@
       "source_file": "src/components/FieldItem.vue",
       "source_location": "L185",
       "id": "fielditem_addexcludefilter",
-      "community": 5,
+      "community": 4,
       "norm_label": "addexcludefilter()"
     },
     {
@@ -1206,7 +1206,7 @@
       "source_file": "src/components/FieldItem.vue",
       "source_location": "L196",
       "id": "fielditem_loadexpandedvaluesifready",
-      "community": 5,
+      "community": 4,
       "norm_label": "loadexpandedvaluesifready()"
     },
     {
@@ -1215,7 +1215,7 @@
       "source_file": "src/api/client.js",
       "source_location": "L1",
       "id": "src_api_client_js",
-      "community": 2,
+      "community": 1,
       "norm_label": "client.js"
     },
     {
@@ -1224,7 +1224,7 @@
       "source_file": "src/api/client.js",
       "source_location": "L15",
       "id": "client_normalizeproxytarget",
-      "community": 2,
+      "community": 1,
       "norm_label": "normalizeproxytarget()"
     },
     {
@@ -1233,7 +1233,7 @@
       "source_file": "src/api/client.js",
       "source_location": "L31",
       "id": "client_parseallowedproxytargets",
-      "community": 2,
+      "community": 1,
       "norm_label": "parseallowedproxytargets()"
     },
     {
@@ -1242,7 +1242,7 @@
       "source_file": "src/api/client.js",
       "source_location": "L45",
       "id": "client_getallowedproxytargets",
-      "community": 2,
+      "community": 1,
       "norm_label": "getallowedproxytargets()"
     },
     {
@@ -1251,7 +1251,7 @@
       "source_file": "src/api/client.js",
       "source_location": "L49",
       "id": "client_isstrictproxymode",
-      "community": 2,
+      "community": 1,
       "norm_label": "isstrictproxymode()"
     },
     {
@@ -1260,7 +1260,7 @@
       "source_file": "src/api/client.js",
       "source_location": "L53",
       "id": "client_isallowedproxytarget",
-      "community": 2,
+      "community": 1,
       "norm_label": "isallowedproxytarget()"
     },
     {
@@ -1269,7 +1269,7 @@
       "source_file": "src/api/client.js",
       "source_location": "L70",
       "id": "client_gettargeturl",
-      "community": 2,
+      "community": 1,
       "norm_label": "gettargeturl()"
     },
     {
@@ -1278,7 +1278,7 @@
       "source_file": "src/api/client.js",
       "source_location": "L80",
       "id": "client_setapibaseurl",
-      "community": 2,
+      "community": 1,
       "norm_label": "setapibaseurl()"
     },
     {
@@ -1287,7 +1287,7 @@
       "source_file": "src/api/client.js",
       "source_location": "L89",
       "id": "client_getapibaseurl",
-      "community": 2,
+      "community": 1,
       "norm_label": "getapibaseurl()"
     },
     {
@@ -1296,26 +1296,35 @@
       "source_file": "src/api/client.js",
       "source_location": "L94",
       "id": "client_getauth",
-      "community": 2,
+      "community": 1,
       "norm_label": "getauth()"
     },
     {
       "label": "setAuth()",
       "file_type": "code",
       "source_file": "src/api/client.js",
-      "source_location": "L102",
+      "source_location": "L105",
       "id": "client_setauth",
-      "community": 2,
+      "community": 1,
       "norm_label": "setauth()"
     },
     {
       "label": "getAuthCredentials()",
       "file_type": "code",
       "source_file": "src/api/client.js",
-      "source_location": "L116",
+      "source_location": "L125",
       "id": "client_getauthcredentials",
-      "community": 2,
+      "community": 1,
       "norm_label": "getauthcredentials()"
+    },
+    {
+      "label": "getAuthStorageMode()",
+      "file_type": "code",
+      "source_file": "src/api/client.js",
+      "source_location": "L129",
+      "id": "client_getauthstoragemode",
+      "community": 1,
+      "norm_label": "getauthstoragemode()"
     },
     {
       "label": "fields.js",
@@ -1509,7 +1518,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/stores/logs.js",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0,
       "_src": "src_stores_logs_js",
       "_tgt": "logs_sortlogsbytime",
@@ -1521,7 +1530,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/stores/logs.js",
-      "source_location": "L33",
+      "source_location": "L34",
       "weight": 1.0,
       "_src": "src_stores_logs_js",
       "_tgt": "logs_createlogsstore",
@@ -2552,6 +2561,66 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/utils/connectionStatus.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "src_utils_connectionstatus_js",
+      "_tgt": "connectionstatus_classifyconnectionerror",
+      "source": "src_utils_connectionstatus_js",
+      "target": "connectionstatus_classifyconnectionerror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/keywordStats.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_src": "src_utils_keywordstats_js",
+      "_tgt": "keywordstats_extractlogtext",
+      "source": "src_utils_keywordstats_js",
+      "target": "keywordstats_extractlogtext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/keywordStats.js",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_src": "src_utils_keywordstats_js",
+      "_tgt": "keywordstats_countkeywordmatches",
+      "source": "src_utils_keywordstats_js",
+      "target": "keywordstats_countkeywordmatches",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/keywordStats.js",
+      "source_location": "L55",
+      "weight": 1.0,
+      "_src": "src_utils_keywordstats_js",
+      "_tgt": "keywordstats_buildkeywordstatsparams",
+      "source": "src_utils_keywordstats_js",
+      "target": "keywordstats_buildkeywordstatsparams",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/keywordStats.js",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_src": "keywordstats_countkeywordmatches",
+      "_tgt": "keywordstats_extractlogtext",
+      "source": "keywordstats_extractlogtext",
+      "target": "keywordstats_countkeywordmatches",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/utils/searchOrchestration.js",
       "source_location": "L9",
       "weight": 1.0,
@@ -2684,152 +2753,80 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L146",
+      "source_file": "src/components/ActivityDrawer.vue",
+      "source_location": "L100",
       "weight": 1.0,
-      "_src": "src_components_settingspanel_vue",
-      "_tgt": "settingspanel_selectapi",
-      "source": "src_components_settingspanel_vue",
-      "target": "settingspanel_selectapi",
+      "_src": "src_components_activitydrawer_vue",
+      "_tgt": "activitydrawer_loadcustomkeywords",
+      "source": "src_components_activitydrawer_vue",
+      "target": "activitydrawer_loadcustomkeywords",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L150",
+      "source_file": "src/components/ActivityDrawer.vue",
+      "source_location": "L154",
       "weight": 1.0,
-      "_src": "src_components_settingspanel_vue",
-      "_tgt": "settingspanel_addnewapi",
-      "source": "src_components_settingspanel_vue",
-      "target": "settingspanel_addnewapi",
+      "_src": "src_components_activitydrawer_vue",
+      "_tgt": "activitydrawer_fetchstatslogs",
+      "source": "src_components_activitydrawer_vue",
+      "target": "activitydrawer_fetchstatslogs",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L176",
+      "source_file": "src/components/ActivityDrawer.vue",
+      "source_location": "L213",
       "weight": 1.0,
-      "_src": "src_components_settingspanel_vue",
-      "_tgt": "settingspanel_removeapi",
-      "source": "src_components_settingspanel_vue",
-      "target": "settingspanel_removeapi",
+      "_src": "src_components_activitydrawer_vue",
+      "_tgt": "activitydrawer_addkeyword",
+      "source": "src_components_activitydrawer_vue",
+      "target": "activitydrawer_addkeyword",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L180",
+      "source_file": "src/components/ActivityDrawer.vue",
+      "source_location": "L226",
       "weight": 1.0,
-      "_src": "src_components_settingspanel_vue",
-      "_tgt": "settingspanel_onauthchange",
-      "source": "src_components_settingspanel_vue",
-      "target": "settingspanel_onauthchange",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L184",
-      "weight": 1.0,
-      "_src": "src_components_settingspanel_vue",
-      "_tgt": "settingspanel_onlimitchange",
-      "source": "src_components_settingspanel_vue",
-      "target": "settingspanel_onlimitchange",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L189",
-      "weight": 1.0,
-      "_src": "src_components_settingspanel_vue",
-      "_tgt": "settingspanel_onpinnedchange",
-      "source": "src_components_settingspanel_vue",
-      "target": "settingspanel_onpinnedchange",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L197",
-      "weight": 1.0,
-      "_src": "src_components_settingspanel_vue",
-      "_tgt": "settingspanel_onthemechange",
-      "source": "src_components_settingspanel_vue",
-      "target": "settingspanel_onthemechange",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L201",
-      "weight": 1.0,
-      "_src": "src_components_settingspanel_vue",
-      "_tgt": "settingspanel_onsecuritychange",
-      "source": "src_components_settingspanel_vue",
-      "target": "settingspanel_onsecuritychange",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L205",
-      "weight": 1.0,
-      "_src": "src_components_settingspanel_vue",
-      "_tgt": "settingspanel_onredactionchange",
-      "source": "src_components_settingspanel_vue",
-      "target": "settingspanel_onredactionchange",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/SettingsPanel.vue",
-      "source_location": "L209",
-      "weight": 1.0,
-      "_src": "src_components_settingspanel_vue",
-      "_tgt": "settingspanel_testconnection",
-      "source": "src_components_settingspanel_vue",
-      "target": "settingspanel_testconnection",
+      "_src": "src_components_activitydrawer_vue",
+      "_tgt": "activitydrawer_removekeyword",
+      "source": "src_components_activitydrawer_vue",
+      "target": "activitydrawer_removekeyword",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/SavedViewsPanel.vue",
-      "source_location": "L49",
+      "source_location": "L98",
       "weight": 1.0,
       "_src": "src_components_savedviewspanel_vue",
-      "_tgt": "savedviewspanel_savecurrentview",
+      "_tgt": "savedviewspanel_opensavedialog",
       "source": "src_components_savedviewspanel_vue",
-      "target": "savedviewspanel_savecurrentview",
+      "target": "savedviewspanel_opensavedialog",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/SavedViewsPanel.vue",
-      "source_location": "L60",
+      "source_location": "L105",
       "weight": 1.0,
       "_src": "src_components_savedviewspanel_vue",
-      "_tgt": "savedviewspanel_savecurrentquery",
+      "_tgt": "savedviewspanel_confirmsave",
       "source": "src_components_savedviewspanel_vue",
-      "target": "savedviewspanel_savecurrentquery",
+      "target": "savedviewspanel_confirmsave",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/SavedViewsPanel.vue",
-      "source_location": "L73",
+      "source_location": "L125",
       "weight": 1.0,
       "_src": "src_components_savedviewspanel_vue",
       "_tgt": "savedviewspanel_applyview",
@@ -2841,7 +2838,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/SavedViewsPanel.vue",
-      "source_location": "L78",
+      "source_location": "L130",
       "weight": 1.0,
       "_src": "src_components_savedviewspanel_vue",
       "_tgt": "savedviewspanel_applysavedquery",
@@ -2853,7 +2850,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/SavedViewsPanel.vue",
-      "source_location": "L84",
+      "source_location": "L136",
       "weight": 1.0,
       "_src": "src_components_savedviewspanel_vue",
       "_tgt": "savedviewspanel_builddefaultviewname",
@@ -2865,11 +2862,11 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/components/SavedViewsPanel.vue",
-      "source_location": "L50",
+      "source_location": "L101",
       "weight": 1.0,
-      "_src": "savedviewspanel_savecurrentview",
+      "_src": "savedviewspanel_opensavedialog",
       "_tgt": "savedviewspanel_builddefaultviewname",
-      "source": "savedviewspanel_savecurrentview",
+      "source": "savedviewspanel_opensavedialog",
       "target": "savedviewspanel_builddefaultviewname",
       "confidence_score": 1.0
     },
@@ -3105,7 +3102,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/api/client.js",
-      "source_location": "L102",
+      "source_location": "L105",
       "weight": 1.0,
       "_src": "src_api_client_js",
       "_tgt": "client_setauth",
@@ -3117,12 +3114,24 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/api/client.js",
-      "source_location": "L116",
+      "source_location": "L125",
       "weight": 1.0,
       "_src": "src_api_client_js",
       "_tgt": "client_getauthcredentials",
       "source": "src_api_client_js",
       "target": "client_getauthcredentials",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/api/client.js",
+      "source_location": "L129",
+      "weight": 1.0,
+      "_src": "src_api_client_js",
+      "_tgt": "client_getauthstoragemode",
+      "source": "src_api_client_js",
+      "target": "client_getauthstoragemode",
       "confidence_score": 1.0
     },
     {
@@ -3201,7 +3210,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/api/client.js",
-      "source_location": "L117",
+      "source_location": "L126",
       "weight": 1.0,
       "_src": "client_getauthcredentials",
       "_tgt": "client_getauth",

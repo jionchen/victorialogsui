@@ -72,9 +72,6 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useQueryStore } from '../stores/query.js'
-import { useSettingsStore } from '../stores/settings.js'
-import { redactSensitiveFields } from '../utils/redaction.js'
-import { canViewField } from '../utils/permissions.js'
 import { tryFormatJSON } from '../utils/formatters.js'
 import { getHighlightTerms } from '../utils/highlighting.js'
 import { formatLogTimestamp, getLogDisplayTimestamp } from '../utils/logTime.js'
@@ -88,7 +85,6 @@ const props = defineProps({
 defineEmits(['view-context'])
 
 const queryStore = useQueryStore()
-const settingsStore = useSettingsStore()
 const activeTab = ref('table')
 const copied = ref(false)
 const highlightTerms = computed(() => getHighlightTerms({
@@ -109,17 +105,13 @@ function copyLog() {
 
 // Sort fields: display log time first, then collection time, stream fields, and _msg last.
 const sortedFields = computed(() => {
-  const visibleRecord = settingsStore.redactionEnabled
-    ? redactSensitiveFields(props.log)
-    : props.log
   const entries = [
     ['日志时间', formatLogTimestamp(getLogDisplayTimestamp(props.log))],
-    ...Object.entries(visibleRecord).map(([key, value]) => [
+    ...Object.entries(props.log).map(([key, value]) => [
       key === '_time' ? '采集时间 (_time)' : key,
       key === '_time' ? formatLogTimestamp(value) : value,
     ]),
   ]
-    .filter(([key]) => canViewField(key, settingsStore.securityRole))
   return entries.sort((a, b) => {
     const order = (key) => {
       if (key === '日志时间') return 0

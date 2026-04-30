@@ -6,8 +6,6 @@ export const STORAGE_KEYS = {
   resultLimit: 'vlogs_result_limit',
   tableColumns: 'vlogs_table_columns',
   defaultsVersion: 'vlogs_defaults_version',
-  securityRole: 'vlogs_security_role',
-  redactionEnabled: 'vlogs_redaction_enabled',
   auditEvents: 'vlogs_audit_events',
   savedViews: 'vlogs_saved_views',
   savedQueries: 'vlogs_saved_queries',
