@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { buildLogsQL, isLogsQLSyntax } from '../utils/queryBuilder.js'
-import { getTimeRange, calculateStep } from '../utils/timeUtils.js'
+import { getTimeRange, calculateStep, formatTimestamp, TIME_PRESETS } from '../utils/timeUtils.js'
 import { DEFAULT_TIME_PRESET, MAX_QUERY_HISTORY } from '../../config/appConfig.js'
 import { STORAGE_KEYS } from '../../config/storageKeys.js'
 import { logger } from '../utils/logger.js'
@@ -33,6 +33,18 @@ export const useQueryStore = defineStore('query', () => {
     customEnd.value = end
     timePreset.value = ''
   }
+
+  const isCustomTime = computed(
+    () => !!(customStart.value && customEnd.value) && !timePreset.value
+  )
+
+  const timeRangeLabel = computed(() => {
+    if (isCustomTime.value) {
+      return `${formatTimestamp(customStart.value)} ~ ${formatTimestamp(customEnd.value)}`
+    }
+    const found = TIME_PRESETS.find(p => p.value === timePreset.value)
+    return found ? `最近 ${found.label}` : ''
+  })
 
   // Filters
   // Each filter: { id, field, values: [], type: 'stream'|'log', negated: boolean, disabled: boolean }
@@ -226,6 +238,7 @@ export const useQueryStore = defineStore('query', () => {
 
   return {
     timePreset, customStart, customEnd, timeRange, histogramStep,
+    isCustomTime, timeRangeLabel,
     setTimePreset, setCustomTime,
     filters, addFilter, removeFilter, removeFilterValue,
     toggleFilterDisabled, toggleFilterNegated, clearAllFilters,
