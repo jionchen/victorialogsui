@@ -53,6 +53,11 @@
             <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
           </svg>
         </button>
+        <button class="icon-btn" @click="showStats = true" title="聚合分析">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M18 20V10M12 20V4M6 20v-6"/>
+          </svg>
+        </button>
       </div>
       <FilterBar v-if="queryStore.filters.length > 0" />
     </div>
@@ -68,6 +73,16 @@
         />
       </div>
     </div>
+
+    <!-- Stats Drawer -->
+    <a-drawer
+      v-model:visible="showStats"
+      title="聚合分析"
+      :width="480"
+      placement="right"
+    >
+      <StatsPanel @close="showStats = false" />
+    </a-drawer>
 
     <!-- Settings Drawer -->
     <a-drawer
@@ -102,7 +117,11 @@ import HitsHistogram from './components/HitsHistogram.vue'
 import LogTable from './components/LogTable.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import ActivityDrawer from './components/ActivityDrawer.vue'
+import StatsPanel from './components/StatsPanel.vue'
 import { createSearchExecutor } from './utils/searchOrchestration.js'
+import { createSearchController } from './composables/searchController.js'
+import { createUrlSync } from './composables/urlSync.js'
+import { createAutoRefresh } from './composables/autoRefresh.js'
 import { DEFAULT_KEYWORDS, countKeywordMatches } from './utils/keywordStats.js'
 import { logger } from './utils/logger.js'
 
@@ -112,7 +131,7 @@ const fieldStore = useFieldStore()
 const logStore = useLogStore()
 
 const showSettings = ref(false)
-
+const showStats = ref(false)
 const showActivity = ref(false)
 
 const currentApi = computed(() => {
@@ -133,6 +152,29 @@ const searchExecutor = createSearchExecutor({
   },
 })
 
+const urlSync = createUrlSync({
+  getUrlState: () => queryStore.getUrlState(),
+  loadUrlState: (s) => queryStore.loadUrlState(s),
+  getCurrentHref: () => window.location.href,
+  getSearchString: () => window.location.search,
+  replaceState: (href) => window.history.replaceState({}, '', href),
+})
+const controller = createSearchController({
+  searchExecutor,
+  getSearchParams: () => ({
+    query: queryStore.effectiveQuery,
+    limit: settingsStore.resultLimit,
+    start: queryStore.timeRange.start,
+    end: queryStore.timeRange.end,
+    step: queryStore.histogramStep,
+    rangeMs: queryStore.timeRange.rangeMs,
+  }),
+  clearFieldCache: () => fieldStore.clearCache(),
+  writeUrlState: () => urlSync.writeState(),
+  logAudit: () => settingsStore.logAuditEvent('执行查询', queryStore.effectiveQuery),
+})
+const autoRefresh = createAutoRefresh({ onTick: () => controller.executeSearch() })
+
 function toggleTheme() {
   settingsStore.setTheme(settingsStore.theme === 'dark' ? 'light' : 'dark')
 }
@@ -143,21 +185,6 @@ function copyShareLink() {
   }).catch(err => {
     logger.error('Failed to copy link: ', err)
     Message.error('复制失败')
-  })
-}
-
-async function executeSearch() {
-  const { start, end } = queryStore.timeRange
-  const query = queryStore.effectiveQuery
-  const limit = settingsStore.resultLimit
-
-  await searchExecutor.execute({
-    query,
-    limit,
-    start,
-    end,
-    step: queryStore.histogramStep,
-    rangeMs: queryStore.timeRange.rangeMs,
   })
 }
 
@@ -187,27 +214,13 @@ watch(
 
 watch(
   () => queryStore.queryVersion,
-  () => {
-    fieldStore.clearCache()
-    const state = queryStore.getUrlState()
-    const url = new URL(window.location)
-    url.searchParams.set('s', state)
-    window.history.replaceState({}, '', url)
-    settingsStore.logAuditEvent('执行查询', queryStore.effectiveQuery)
-    executeSearch()
-  }
+  () => controller.runSearch()
 )
 
 // Auto refresh
-let autoRefreshTimer = null
 watch(
   () => queryStore.autoRefreshInterval,
-  (interval) => {
-    clearInterval(autoRefreshTimer)
-    if (interval > 0) {
-      autoRefreshTimer = setInterval(() => executeSearch(), interval)
-    }
-  }
+  (interval) => autoRefresh.sync(interval)
 )
 
 // Watch for API changes → auto re-search
@@ -230,14 +243,11 @@ onMounted(() => {
   settingsStore.initTheme()
 
   // Load from URL if present
-  const params = new URLSearchParams(window.location.search)
-  const stateStr = params.get('s')
-  if (stateStr) {
-    queryStore.loadUrlState(stateStr)
+  const loadedFromUrl = urlSync.readInitialState()
+
+  if (!loadedFromUrl) {
+    queryStore.executeQuery()
   }
-
-  queryStore.executeQuery()
-
 
   // Global Keyboard Shortcuts
   window.addEventListener('keydown', onGlobalKeydown)
@@ -255,6 +265,6 @@ function onGlobalKeydown(e) {
 onUnmounted(() => {
   window.removeEventListener('keydown', onGlobalKeydown)
   clearTimeout(searchTimer)
-  clearInterval(autoRefreshTimer)
+  autoRefresh.stop()
 })
 </script>

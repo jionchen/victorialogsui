@@ -11,7 +11,7 @@ import { STORAGE_KEYS, SESSION_STORAGE_KEYS } from '../../config/storageKeys.js'
 import { logger } from '../utils/logger.js'
 
 const RAW_ALLOWED_PROXY_TARGETS = import.meta.env?.VITE_ALLOWED_PROXY_TARGETS || ''
-const STRICT_PROXY_TARGETS = import.meta.env?.VITE_STRICT_PROXY_TARGETS === 'true'
+const STRICT_PROXY_TARGETS = import.meta.env?.VITE_STRICT_PROXY_TARGETS !== 'false'
 
 export function normalizeProxyTarget(raw) {
   if (raw === undefined || raw === null) return ''
@@ -183,10 +183,11 @@ client.interceptors.response.use(
     config._retryCount = config._retryCount || 0
 
     const isRetryable =
-      !error.response ||
-      error.response.status === 502 ||
-      error.response.status === 503 ||
-      error.response.status === 504
+      config.method?.toLowerCase() !== 'post' &&
+      (!error.response ||
+        error.response.status === 502 ||
+        error.response.status === 503 ||
+        error.response.status === 504)
 
     if (isRetryable && config._retryCount < MAX_API_RETRIES) {
       config._retryCount++

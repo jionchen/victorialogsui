@@ -51,6 +51,8 @@ export function createLogsStore(deps = {}) {
     const histogramData = ref(null)
     const histogramLoading = ref(false)
     const histogramError = ref(null)
+    const tailMode = ref(false)
+    const MAX_TAIL_LOGS = 5000
 
     const isTruncated = computed(() =>
       totalHits.value > 0 && loadedCount.value > 0 && totalHits.value > loadedCount.value
@@ -58,6 +60,28 @@ export function createLogsStore(deps = {}) {
 
     let fetchId = 0
     let histogramId = 0
+
+    function makeLogKey(log) {
+      return `${log._time || ''}|${log._msg || ''}`
+    }
+
+    function appendLogs(newEntries) {
+      const existing = new Set(logs.value.map(makeLogKey))
+      const seen = new Set(existing)
+      const unique = newEntries.filter(l => {
+        const key = makeLogKey(l)
+        if (seen.has(key)) return false
+        seen.add(key)
+        return true
+      })
+      let combined = [...logs.value, ...unique]
+      // Ring buffer: keep last MAX_TAIL_LOGS
+      if (combined.length > MAX_TAIL_LOGS) {
+        combined = combined.slice(combined.length - MAX_TAIL_LOGS)
+      }
+      logs.value = sortLogsByTime(combined, sortOrder.value)
+      loadedCount.value = logs.value.length
+    }
 
     async function fetchLogs({ query, limit, start, end }) {
       const id = ++fetchId
@@ -71,15 +95,21 @@ export function createLogsStore(deps = {}) {
         if (id !== fetchId) return
 
         logger.debug(`[fetchLogs] id=${id}, target=${targetUrl}, results=${data.length}`)
-        logs.value = sortLogsByTime(data, sortOrder.value)
-        loadedCount.value = data.length
+        if (tailMode.value) {
+          appendLogs(data)
+        } else {
+          logs.value = sortLogsByTime(data, sortOrder.value)
+          loadedCount.value = data.length
+        }
       } catch (e) {
         if (id !== fetchId) return
         if (e.cancelled) return
         error.value = e.message || 'Query failed'
         connectionError.value = classifyConnectionError(e)
-        logs.value = []
-        loadedCount.value = 0
+        if (!tailMode.value) {
+          logs.value = []
+          loadedCount.value = 0
+        }
       } finally {
         if (id === fetchId) {
           loading.value = false
@@ -132,12 +162,20 @@ export function createLogsStore(deps = {}) {
       setSortOrder(sortOrder.value === 'desc' ? 'asc' : 'desc')
     }
 
+    function setTailMode(enabled) {
+      tailMode.value = enabled
+      if (!enabled) {
+        // exiting tail mode: clear logs so next full query starts fresh
+        clearLogs()
+      }
+    }
+
     return {
       logs, loading, error, connectionError, totalHits, loadedCount, sortOrder,
-      isTruncated,
+      isTruncated, tailMode,
       histogramData, histogramLoading, histogramError,
       fetchLogs, fetchHistogram, clearLogs,
-      setSortOrder, toggleSortOrder,
+      setSortOrder, toggleSortOrder, setTailMode,
     }
   })
 }
