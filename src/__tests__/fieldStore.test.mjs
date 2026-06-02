@@ -225,7 +225,7 @@ test('loadFacets writes aligned-key cache entries with known numeric counts', as
       facets: [
         {
           field_name: 'src_namespace',
-          values: [
+          field_values: [
             { field_value: 'prod', hits: 12 },
             { field_value: 'dev', hits: 30 },
           ],
@@ -266,7 +266,7 @@ test('loadFacets coerces string hits into numbers', async () => {
       facets: [
         {
           field_name: 'level',
-          values: [
+          field_values: [
             { field_value: 'info', hits: '5' },
             { field_value: 'error', hits: '10' },
           ],
@@ -323,6 +323,7 @@ test('loadFacets classifies a stream-named field under the stream cache key', as
       facets: [
         {
           field_name: 'src_stream',
+          // legacy `values` spelling — exercises the field_values/values fallback
           values: [{ field_value: 'app-1', hits: 7 }],
         },
       ],

@@ -184,10 +184,16 @@ export function createFieldsStore(fetchers = {
         const field = entry.field_name
         if (!field) continue
 
-        const rawValues = Array.isArray(entry.values) ? entry.values : []
+        // VictoriaLogs /select/logsql/facets uses `field_values`; tolerate the
+        // `values` spelling and `value`/`field_value` entry keys across versions.
+        const rawValues = Array.isArray(entry.field_values)
+          ? entry.field_values
+          : Array.isArray(entry.values)
+            ? entry.values
+            : []
         const values = rawValues
-          .filter(v => v && v.field_value != null)
-          .map(v => ({ value: v.field_value, hits: Number(v.hits) || 0 }))
+          .map(v => ({ value: v?.field_value != null ? v.field_value : v?.value, hits: Number(v?.hits) || 0 }))
+          .filter(v => v.value != null)
           .sort((a, b) => b.hits - a.hits)
 
         const isStream = streamNames.has(field)
