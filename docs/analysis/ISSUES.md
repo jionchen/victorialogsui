@@ -39,7 +39,7 @@
 | ID | 标题 | 来源维度 | 类型 | 严重度 | 工作量 | 影响范围（推断） | 本轮 | 状态 |
 |---|---|---|---|---|---|---|---|---|
 | **S1** | 接入 facets 批量分布（`/select/logsql/facets`） | 功能/API | 新功能 | 🔴 | M | `api/logs.js`(`queryFacets`→已接入 `loadFacets`)、`stores/fields.js` | ✅ | ✅ |
-| **S2** | 查询编辑器升级为带补全/错误定位/着色 | UX/功能 | 新功能 | 🔴 | L | `components/QueryEditor.vue`、`stores/fields.js` | — | ⏸️ |
+| **S2** | 查询编辑器升级为带补全/错误定位/着色 | UX/功能 | 新功能 | 🔴 | L | `components/QueryEditor.vue`、`stores/fields.js` | ✅ | ✅(MVP: 字段名/操作符/管道关键字补全) |
 | **S3** | 新增聚合分析（stats by）模式 | 功能 | 新功能 | 🔴 | L | 新模块 + `queryBuilder.js` + ECharts | — | ⏸️ |
 | **S4** | 抽离 App.vue 编排逻辑为协调器/composable | 架构 | 技术债 | 🔴 | M | `App.vue`、新 `composables/*`、`utils/searchOrchestration.js` | ✅ | ✅ |
 | **S5** | 真正的增量实时尾随（时间游标+去重+环形缓冲） | 性能/功能 | 新功能 | 🔴 | L | `components/LiveTailPanel.vue`、`stores/logs.js`、`api/logs.js` | — | ⏸️ |
