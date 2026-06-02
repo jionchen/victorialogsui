@@ -1,7 +1,7 @@
 # S4 设计 spec — 抽离 App.vue 编排逻辑为可测工厂
 
 > 关联：[`ISSUES.md`](../../analysis/ISSUES.md)（S4）｜[`分析报告`](../../analysis/2026-06-02-VictoriaLogs-Explorer-分析报告.md)（路线图 v2.2 / App.vue 上帝编排器）
-> 分支：`fix/stoploss-guardrails-2026-06-02`（续用）
+> 分支：`feat/s4-app-orchestration`（自 develop 新建；v2.1 已并入 develop）
 > 批次：v2.2「逐个深做·地基优先」第 1 项。本轮只做 S4；后续顺序 **S4 → S2 → S5 → S3**，每项各自 spec → 实现计划 → 编码。
 
 ## 1. 背景与目标
@@ -189,7 +189,7 @@ UI（`currentApi` / `activityCount` / `toggleTheme` / `copyShareLink` / `openCon
 
 ## 12. Commit
 
-单条 commit 落在 `fix/stoploss-guardrails-2026-06-02`：
+单条 commit 落在 `feat/s4-app-orchestration`，完成后 PR 合入 develop：
 
 ```
 refactor(app): extract orchestration into DI-tested composables (S4)
