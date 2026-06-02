@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getFieldNames, getFieldValues, getStreamFieldNames, getStreamFieldValues } from '../api/fields.js'
+import { queryFacets } from '../api/logs.js'
 import { logger } from '../utils/logger.js'
 
 const FIELD_VALUE_RETRY_ATTEMPTS = 1
@@ -34,6 +35,7 @@ export function createFieldsStore(fetchers = {
   getFieldValues,
   getStreamFieldNames,
   getStreamFieldValues,
+  queryFacets,
 }) {
   return defineStore('fields', () => {
     const streamFieldNames = ref([])
@@ -152,6 +154,64 @@ export function createFieldsStore(fetchers = {
       }
     }
 
+    async function loadFacets({ query, start, end }) {
+      let response
+      try {
+        response = await fetchers.queryFacets({ query, start, end, maxValuesPerField: 30 })
+      } catch (e) {
+        if (e?.cancelled) return
+        logger.error('Failed to load facets:', e)
+        throw e
+      }
+
+      // Defensive: facets shape may vary across backend versions. Tolerate both
+      // `{ facets: [...] }` and a bare array; bail silently on anything else so
+      // the per-field loadFieldValues fallback still works.
+      const facets = Array.isArray(response)
+        ? response
+        : Array.isArray(response?.facets)
+          ? response.facets
+          : null
+      if (!facets) {
+        logger.debug('loadFacets: unparseable facets response, skipping cache write')
+        return
+      }
+
+      const streamNames = new Set(streamFieldNames.value.map(s => s.value))
+
+      for (const entry of facets) {
+        if (!entry) continue
+        const field = entry.field_name
+        if (!field) continue
+
+        const rawValues = Array.isArray(entry.values) ? entry.values : []
+        const values = rawValues
+          .filter(v => v && v.field_value != null)
+          .map(v => ({ value: v.field_value, hits: Number(v.hits) || 0 }))
+          .sort((a, b) => b.hits - a.hits)
+
+        const isStream = streamNames.has(field)
+        const request = { field, isStream, query, start, end, filter: '' }
+        const key = createFieldValueCacheKey(request)
+        const baseKey = createFieldValueBaseKey(request)
+        const total = values.reduce((sum, v) => sum + (v.hits || 0), 0)
+
+        fieldValuesCache.value[key] = createEmptyFieldValueState({
+          values,
+          total,
+          countsKnown: true,
+          status: 'success',
+          loading: false,
+          error: null,
+        })
+        lastSuccessfulValuesByBaseKey[baseKey] = {
+          values: cloneValues(values),
+          total,
+          status: 'success',
+        }
+      }
+    }
+
     function clearCache() {
       fieldValuesCache.value = {}
       for (const key of Object.keys(lastSuccessfulValuesByBaseKey)) {
@@ -177,6 +237,7 @@ export function createFieldsStore(fetchers = {
       fieldValuesCache,
       loadFieldNames,
       loadFieldValues,
+      loadFacets,
       clearCache,
       getCachedValues,
     }

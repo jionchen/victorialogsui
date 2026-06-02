@@ -127,6 +127,7 @@ const searchExecutor = createSearchExecutor({
   fetchLogs: (params) => logStore.fetchLogs(params),
   fetchHistogram: (params) => logStore.fetchHistogram(params),
   loadFieldNames: (params) => fieldStore.loadFieldNames(params),
+  loadFacets: (params) => fieldStore.loadFacets(params),
   onAuxiliaryError: (source, error) => {
     logger.warn(`[executeSearch] auxiliary ${source} failed:`, error)
   },
