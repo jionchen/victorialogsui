@@ -50,6 +50,12 @@
           正在更新...
         </div>
         <div
+          v-else-if="cachedData.status === 'success' && cachedData.values.length > 0 && !cachedData.countsKnown"
+          style="padding: 4px 0; font-size: 11px; color: var(--text-muted);"
+        >
+          分布未知（无逐值计数）
+        </div>
+        <div
           v-for="val in displayedValues"
           :key="val.value"
           class="field-value-row"
@@ -67,13 +73,15 @@
             >−</button>
           </div>
           <span class="field-value-row__label" :title="val.value">{{ val.value }}</span>
-          <div class="field-value-row__bar">
-            <div
-              class="field-value-row__bar-fill"
-              :style="{ width: getBarWidth(val.hits) + '%' }"
-            />
-          </div>
-          <span class="field-value-row__count">{{ formatNumber(val.hits) }}</span>
+          <template v-if="cachedData.countsKnown">
+            <div class="field-value-row__bar">
+              <div
+                class="field-value-row__bar-fill"
+                :style="{ width: getBarWidth(val.hits) + '%' }"
+              />
+            </div>
+            <span class="field-value-row__count">{{ formatNumber(val.hits) }}</span>
+          </template>
         </div>
 
         <!-- No values -->

@@ -9,6 +9,7 @@ function createEmptyFieldValueState(overrides = {}) {
     values: [],
     loading: false,
     total: 0,
+    countsKnown: false,
     status: 'idle',
     error: null,
     ...overrides,
@@ -114,19 +115,14 @@ export function createFieldsStore(fetchers = {
 
             if (id !== valuesFetchIds[key]) return
 
-            const fieldInfo = (isStream ? streamFieldNames.value : logFieldNames.value)
-              .find(item => item.value === field)
-            const totalHits = fieldInfo?.hits || 0
             const normalizedValues = cloneValues(values)
-            const hasHits = normalizedValues.some(v => v.hits > 0)
-
-            if (!hasHits && normalizedValues.length > 0 && totalHits > 0) {
-              const perValue = Math.floor(totalHits / normalizedValues.length)
-              normalizedValues.forEach(v => { v.hits = perValue })
-            }
+            // D35: 不再在缺少逐值计数时按总数均摊伪造等长 hits（会画出虚假的等长分布条）。
+            // 保留真实 hits（无则为 0），用 countsKnown 标注该字段是否有真实逐值计数。
+            const countsKnown = normalizedValues.some(v => v.hits > 0)
 
             cache.values = normalizedValues.sort((a, b) => b.hits - a.hits)
             cache.total = cache.values.reduce((sum, v) => sum + (v.hits || 0), 0)
+            cache.countsKnown = countsKnown
             cache.status = 'success'
             cache.error = null
             lastSuccessfulValuesByBaseKey[baseKey] = {

@@ -130,6 +130,62 @@ test('field store records field name failures without clearing existing field va
   assert.deepEqual(store.getCachedValues(params).values, [{ value: 'paas', hits: 8 }])
 })
 
+test('field store does not fabricate evenly spread hits when per-value counts are missing', async () => {
+  setActivePinia(createPinia())
+  const { createFieldsStore } = await import('../stores/fields.js')
+
+  const useFieldStore = createFieldsStore({
+    getFieldNames: async () => [{ value: 'src_container.name', hits: 99 }],
+    getStreamFieldNames: async () => [],
+    getFieldValues: async () => [
+      { value: 'a', hits: 0 },
+      { value: 'b', hits: 0 },
+      { value: 'c', hits: 0 },
+    ],
+    getStreamFieldValues: async () => [],
+  })
+
+  const store = useFieldStore()
+  const params = { field: 'src_container.name', isStream: false, query: '*', start: '24h', end: 'now' }
+
+  await store.loadFieldNames({ query: '*', start: '24h', end: 'now' })
+  await store.loadFieldValues(params)
+
+  const state = store.getCachedValues(params)
+  assert.equal(state.status, 'success')
+  assert.equal(state.countsKnown, false)
+  assert.equal(state.total, 0)
+  assert.deepEqual(state.values.map(v => v.hits), [0, 0, 0])
+})
+
+test('field store marks counts as known when real per-value hits are present', async () => {
+  setActivePinia(createPinia())
+  const { createFieldsStore } = await import('../stores/fields.js')
+
+  const useFieldStore = createFieldsStore({
+    getFieldNames: async () => [{ value: 'src_container.name', hits: 30 }],
+    getStreamFieldNames: async () => [],
+    getFieldValues: async () => [
+      { value: 'a', hits: 20 },
+      { value: 'b', hits: 10 },
+    ],
+    getStreamFieldValues: async () => [],
+  })
+
+  const store = useFieldStore()
+  const params = { field: 'src_container.name', isStream: false, query: '*', start: '24h', end: 'now' }
+
+  await store.loadFieldNames({ query: '*', start: '24h', end: 'now' })
+  await store.loadFieldValues(params)
+
+  const state = store.getCachedValues(params)
+  assert.equal(state.status, 'success')
+  assert.equal(state.countsKnown, true)
+  assert.equal(state.total, 30)
+  assert.deepEqual(state.values, [{ value: 'a', hits: 20 }, { value: 'b', hits: 10 }])
+})
+
+
 test('field store increments names version only after field names load successfully', async () => {
   setActivePinia(createPinia())
   const { createFieldsStore } = await import('../stores/fields.js')

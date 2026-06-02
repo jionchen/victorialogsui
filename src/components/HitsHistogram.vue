@@ -3,7 +3,7 @@
     <div class="histogram-panel__header">
       <span class="histogram-panel__title">日志命中分布</span>
       <span class="histogram-panel__total">
-      总计: <strong>{{ formatNumber(totalHitsDisplay) }}</strong> 条
+      共命中: <strong>{{ formatNumber(totalHitsDisplay) }}</strong> 条 · 已加载 <strong>{{ formatNumber(logStore.loadedCount) }}</strong> 条
       </span>
     </div>
     <div class="histogram-panel__chart" ref="chartRef">

@@ -44,6 +44,7 @@ export function createLogsStore(deps = {}) {
     const error = ref(null)
     const connectionError = ref(null)
     const totalHits = ref(0)
+    const loadedCount = ref(0)
     const sortOrder = ref('desc')
 
     const histogramData = ref(null)
@@ -66,14 +67,14 @@ export function createLogsStore(deps = {}) {
 
         console.log(`[fetchLogs] id=${id}, target=${targetUrl}, results=${data.length}`)
         logs.value = sortLogsByTime(data, sortOrder.value)
-        totalHits.value = data.length
+        loadedCount.value = data.length
       } catch (e) {
         if (id !== fetchId) return
         if (e.cancelled) return
         error.value = e.message || 'Query failed'
         connectionError.value = classifyConnectionError(e)
         logs.value = []
-        totalHits.value = 0
+        loadedCount.value = 0
       } finally {
         if (id === fetchId) {
           loading.value = false
@@ -109,6 +110,7 @@ export function createLogsStore(deps = {}) {
     function clearLogs() {
       logs.value = []
       totalHits.value = 0
+      loadedCount.value = 0
       error.value = null
       connectionError.value = null
       histogramData.value = null
@@ -126,7 +128,7 @@ export function createLogsStore(deps = {}) {
     }
 
     return {
-      logs, loading, error, connectionError, totalHits, sortOrder,
+      logs, loading, error, connectionError, totalHits, loadedCount, sortOrder,
       histogramData, histogramLoading, histogramError,
       fetchLogs, fetchHistogram, clearLogs,
       setSortOrder, toggleSortOrder,
