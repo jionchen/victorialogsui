@@ -19,16 +19,16 @@
 
 | ID | 标题 | 来源维度 | 类型 | 严重度 | 工作量 | 影响文件（推断） | 验收要点 | 本轮 | 状态 |
 |---|---|---|---|---|---|---|---|---|---|
-| **Q1** | Nginx 层强制代理目标白名单堵 SSRF | 安全/工程化 | 风险 | 🔴 | M | `nginx/default.conf`、`vite.config.js`、`config/proxyConfig.js` | 服务端枚举命名上游，非白名单拒绝/回落；不再把 `X-Proxy-Target` 当 `proxy_pass`；dev 代理对齐等价白名单 | ✅ | 🔲 |
-| **Q2** | 修复数据失真（命中总数 / 字段值分布） | 功能/API/质量 | 风险 | 🔴 | S-M | `src/stores/logs.js`、`src/stores/fields.js`、`src/components/HitsHistogram.vue`、`src/components/FieldItem.vue` | 拆分「命中总数」与「已加载条数」两独立字段；字段值缺真实计数时标「分布未知」而非均摊伪造等长条 | ✅ | 🔲 |
-| **Q3** | 统一收敛约 11 处 console 调试日志 | 质量/安全/性能 | 优化 | 🟠 | S | `App.vue`、`stores/logs.js`、`stores/fields.js`、`stores/query.js`、`components/LogDetail.vue`、`components/LogContextModal.vue`、`api/client.js` | 引入 DEV 开关的轻量 logger 或删除；务必关闭 `client.js` 逐请求打印后端地址 | ✅ | 🔲 |
-| **Q4** | 为 `queryBuilder.js` 补专属单测 | 质量 | 风险 | 🔴 | S | `src/__tests__/queryBuilder.test.mjs`（新增） | 覆盖转义/否定/多值/中文自由文本/`parseBasicLogsQL` 往返；`node --test` 通过 | ✅ | 🔲 |
-| **Q5** | 接入最小 CI（PR 跑 ci+test+build 门禁） | 工程化 | 技术债 | 🔴 | M | `.github/workflows/ci.yml`（新增） | PR 上 install + `node --test` + `vite build` 全绿作为合并门禁 | ✅ | 🔲 |
+| **Q1** | Nginx 层强制代理目标白名单堵 SSRF | 安全/工程化 | 风险 | 🔴 | M | `nginx/default.conf`、`vite.config.js`、`config/proxyConfig.js` | 服务端枚举命名上游，非白名单拒绝/回落；不再把 `X-Proxy-Target` 当 `proxy_pass`；dev 代理对齐等价白名单 | ✅ | ✅ |
+| **Q2** | 修复数据失真（命中总数 / 字段值分布） | 功能/API/质量 | 风险 | 🔴 | S-M | `src/stores/logs.js`、`src/stores/fields.js`、`src/components/HitsHistogram.vue`、`src/components/FieldItem.vue` | 拆分「命中总数」与「已加载条数」两独立字段；字段值缺真实计数时标「分布未知」而非均摊伪造等长条 | ✅ | ✅ |
+| **Q3** | 统一收敛约 11 处 console 调试日志 | 质量/安全/性能 | 优化 | 🟠 | S | `App.vue`、`stores/logs.js`、`stores/fields.js`、`stores/query.js`、`components/LogDetail.vue`、`components/LogContextModal.vue`、`api/client.js` | 引入 DEV 开关的轻量 logger 或删除；务必关闭 `client.js` 逐请求打印后端地址 | ✅ | ✅ |
+| **Q4** | 为 `queryBuilder.js` 补专属单测 | 质量 | 风险 | 🔴 | S | `src/__tests__/queryBuilder.test.mjs`（新增） | 覆盖转义/否定/多值/中文自由文本/`parseBasicLogsQL` 往返；`node --test` 通过 | ✅ | ✅ |
+| **Q5** | 接入最小 CI（PR 跑 ci+test+build 门禁） | 工程化 | 技术债 | 🔴 | M | `.github/workflows/ci.yml`（新增） | PR 上 install + `node --test` + `vite build` 全绿作为合并门禁 | ✅ | ✅ |
 | **Q6** | 加「复制链接」入口 | UX | 新功能 | 🟠 | S | 工具栏组件、`stores/query.js`/URL 同步处 | URL 状态已可序列化恢复，加一键复制+反馈；显式提交改 pushState 支持前进后退 | — | ⏸️ |
 | **Q7** | 空态/错误态用语义化 SVG 图标替换 `--` 占位 | UX | 优化 | 🟠 | S | `FieldSidebar.vue`、`LogTable.vue`、空态相关组件 | 按连接失败/无结果/无字段区分语义化图标 | — | ⏸️ |
 | **Q8** | 引入 ESLint + Prettier（warn 级接入存量）+ 锁定关键依赖 | 质量/工程化 | 技术债 | 🔴 | M | `package.json`、`.eslintrc*`、`.prettierrc*`、`package-lock.json` | lint/format 脚本就位，改动文件强制通过；CI 执行 | — | ⏸️ |
-| **Q9** | 修复上下文查询回退过滤非法前导 `AND`，统一排序时间口径 | API | 风险 | 🟠 | S | `src/components/LogContextModal.vue` | `streamFilter += ' AND ...'` 去掉非法前导 AND；排序复用 `getLogDisplayTimestamp` | ✅ | 🔲 |
-| **Q10** | 修正 docker-compose 版本脱节、后端镜像固定版本 | 工程化 | 风险 | 🟠 | S | `docker-compose.yml` | `vlogs-ui:v0.0.1` → 对齐 `package.json` 2.0.0；后端 `victoria-logs:latest` → 固定版本 | ✅ | 🔲 |
+| **Q9** | 修复上下文查询回退过滤非法前导 `AND`，统一排序时间口径 | API | 风险 | 🟠 | S | `src/components/LogContextModal.vue` | `streamFilter += ' AND ...'` 去掉非法前导 AND；排序复用 `getLogDisplayTimestamp` | ✅ | ✅ |
+| **Q10** | 修正 docker-compose 版本脱节、后端镜像固定版本 | 工程化 | 风险 | 🟠 | S | `docker-compose.yml` | `vlogs-ui:v0.0.1` → 对齐 `package.json` 2.0.0；后端 `victoria-logs:latest` → 固定版本 | ✅ | ✅ |
 
 ---
 
