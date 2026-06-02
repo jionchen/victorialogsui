@@ -41,7 +41,7 @@
 | **S1** | 接入 facets 批量分布（`/select/logsql/facets`） | 功能/API | 新功能 | 🔴 | M | `api/logs.js`(`queryFacets`→已接入 `loadFacets`)、`stores/fields.js` | ✅ | ✅ |
 | **S2** | 查询编辑器升级为带补全/错误定位/着色 | UX/功能 | 新功能 | 🔴 | L | `components/QueryEditor.vue`、`stores/fields.js` | — | ⏸️ |
 | **S3** | 新增聚合分析（stats by）模式 | 功能 | 新功能 | 🔴 | L | 新模块 + `queryBuilder.js` + ECharts | — | ⏸️ |
-| **S4** | 抽离 App.vue 编排逻辑为协调器/composable | 架构 | 技术债 | 🔴 | M | `App.vue`、新 `composables/*`、`utils/searchOrchestration.js` | — | ⏸️ |
+| **S4** | 抽离 App.vue 编排逻辑为协调器/composable | 架构 | 技术债 | 🔴 | M | `App.vue`、新 `composables/*`、`utils/searchOrchestration.js` | ✅ | ✅ |
 | **S5** | 真正的增量实时尾随（时间游标+去重+环形缓冲） | 性能/功能 | 新功能 | 🔴 | L | `components/LiveTailPanel.vue`、`stores/logs.js`、`api/logs.js` | — | ⏸️ |
 | **S6** | 日志全量数据改 shallowRef/markRaw + 取消模块级单例控制器 | 性能/API | 优化 | 🔴 | M | `stores/logs.js`、`api/logs.js`、`components/LogTable.vue` | — | ⏸️ |
 | **S7** | 建立响应式断点策略（侧栏抽屉化/工具栏堆叠/表格降级） | UX | 新功能 | 🔴 | L | 全局样式 + 多组件 | — | ⏸️ |
@@ -144,8 +144,8 @@
 
 ## 汇总
 
-- **快速见效 Q1–Q10**：10 项 **全部完成 ✅**（第一批 Q1/Q2/Q3/Q4/Q5/Q9/Q10 + 第二批 Q6/Q7/Q8）
-- **战略投入 S1–S10**：**S1 已完成 ✅**（v2.1 批，commit `1eda00d`+`1e29744`），其余 9 项登记入版本计划
-- **细分发现 D1–D53**：**D22 ✅ / D49 ✅(截断提示) 已完成**（v2.1 批），其余 51 项与 Q/S 交叉引用、登记
+- **快速见效 Q1–Q10**：10 项 **全部完成 ✅**
+- **战略投入 S1–S10**：**S1 ✅ / S4 ✅ 已完成**，S2/S3/S5–S10 登记入版本计划
+- **细分发现 D1–D53**：**D22 ✅ / D49 ✅(截断提示) 已完成**，其余 51 项与 Q/S 交叉引用、登记
 
 > 路线图衔接见报告「功能更新路线图建议」：v2.1 止损与基础体验（**已清零**：Q2/Q6/Q7 + S1/D49/D22）→ v2.2–v2.3 分析能力升级（S2 查询补全 / S3 聚合分析 / S5 增量尾随 / S4 抽离编排）→ v3.0 平台化重构。详见 [`PLAN-2026-06-02-v2.1-facets-truncation-timeecho.md`](./PLAN-2026-06-02-v2.1-facets-truncation-timeecho.md)。
