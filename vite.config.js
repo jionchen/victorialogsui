@@ -4,8 +4,6 @@ import { createProxyMiddleware } from 'http-proxy-middleware'
 import { APP_BASE_PATH, DEV_SERVER_HOST, DEV_SERVER_PORT } from './config/appConfig.js'
 import { API_PROXY_TIMEOUT_MS, DEFAULT_PROXY_TARGET } from './config/proxyConfig.js'
 
-const STRICT_PROXY_TARGETS = process.env.VITE_STRICT_PROXY_TARGETS === 'true'
-
 function normalizeTarget(raw) {
   if (!raw) return null
 
@@ -42,7 +40,7 @@ function dynamicProxyPlugin() {
         router(req) {
           const rawTarget = req.headers['x-proxy-target'] || req.headers['X-Proxy-Target'] || req.headers['x-target-url']
           const target = normalizeTarget(rawTarget)
-          if (target && (!STRICT_PROXY_TARGETS || ALLOWED_TARGETS.has(target))) {
+          if (target && ALLOWED_TARGETS.has(target)) {
             console.log(`[Vite Proxy Router] Routing to Target: ${target}`)
             return target
           }
@@ -54,7 +52,7 @@ function dynamicProxyPlugin() {
         onProxyReq(proxyReq, req) {
           const rawTarget = req.headers['x-proxy-target'] || req.headers['X-Proxy-Target'] || req.headers['x-target-url']
           const target = normalizeTarget(rawTarget)
-          if (target && (!STRICT_PROXY_TARGETS || ALLOWED_TARGETS.has(target))) {
+          if (target && ALLOWED_TARGETS.has(target)) {
             const parsedTarget = new URL(target)
             proxyReq.setHeader('Host', parsedTarget.host)
           }

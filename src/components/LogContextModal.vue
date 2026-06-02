@@ -67,6 +67,7 @@ import { getStreamLabel } from '../utils/formatters.js'
 import { getHighlightTerms } from '../utils/highlighting.js'
 import { formatLogTimestamp, getLogDisplayTimestamp } from '../utils/logTime.js'
 import { useQueryStore } from '../stores/query.js'
+import { logger } from '../utils/logger.js'
 import HighlightedText from './HighlightedText.vue'
 
 const props = defineProps({
@@ -124,7 +125,7 @@ async function fetchContext() {
     } else {
       // Fallback if no stream_id
       const host = props.log['host.name'] || props.log['__host_ip__'] || ''
-      if (host) streamFilter += ` AND host.name:"${host}"`
+      if (host) streamFilter = `host.name:"${host}"`
     }
     
     const query = `${streamFilter}`.trim() || '*'
@@ -141,8 +142,8 @@ async function fetchContext() {
     // VictoriaLogs returns logs in arbitrary order, wait queryLogs doesn't sort.
     // Let's sort manually by time descending
     contextLogs.value = logs.sort((a, b) => {
-      const ta = new Date(a._time).getTime()
-      const tb = new Date(b._time).getTime()
+      const ta = new Date(getLogDisplayTimestamp(a)).getTime()
+      const tb = new Date(getLogDisplayTimestamp(b)).getTime()
       return tb - ta
     })
     
@@ -156,7 +157,7 @@ async function fetchContext() {
     
   } catch (e) {
     if (!e.cancelled) {
-      console.error('Failed to load context:', e)
+      logger.error('Failed to load context:', e)
     }
   } finally {
     loading.value = false

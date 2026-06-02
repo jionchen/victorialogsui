@@ -25,6 +25,7 @@ export function createSearchExecutor({
   fetchLogs,
   fetchHistogram,
   loadFieldNames,
+  loadFacets = () => {},
   auxiliaryDelayMs,
   onAuxiliaryError = () => {},
 }) {
@@ -49,9 +50,20 @@ export function createSearchExecutor({
         query: params.query,
         start: params.start,
         end: params.end,
-      }).catch((error) => {
-        onAuxiliaryError('fields', error)
-      }),
+      })
+        .then(() => {
+          if (runId !== activeRunId) return
+          return loadFacets({
+            query: params.query,
+            start: params.start,
+            end: params.end,
+          }).catch((error) => {
+            onAuxiliaryError('facets', error)
+          })
+        })
+        .catch((error) => {
+          onAuxiliaryError('fields', error)
+        }),
     ])
   }
 

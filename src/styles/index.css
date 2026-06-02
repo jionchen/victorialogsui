@@ -558,6 +558,19 @@ html, body, #app {
   font-weight: 600;
 }
 
+.histogram-panel__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.histogram-panel__truncated {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--warning);
+  cursor: help;
+}
+
 .histogram-panel__chart {
   flex: 1;
 }

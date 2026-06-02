@@ -80,3 +80,24 @@ test('query store can export and re-apply a saved view snapshot', async () => {
   assert.equal(store.manualDraft, 'status:500')
   assert.equal(store.effectiveQuery, 'status:500')
 })
+
+test('query store echoes custom time range and distinguishes relative presets', async () => {
+  setActivePinia(createPinia())
+  const { useQueryStore } = await import('../stores/query.js')
+  const store = useQueryStore()
+
+  store.setCustomTime('2026-06-01T00:00:00.000Z', '2026-06-02T00:00:00.000Z')
+
+  assert.equal(store.isCustomTime, true)
+  assert.equal(store.timePreset, '')
+  assert.ok(store.timeRangeLabel.includes('2026-06-01'))
+  assert.ok(store.timeRangeLabel.includes('2026-06-02'))
+  assert.ok(store.timeRangeLabel.includes('~'))
+
+  store.setTimePreset('6h')
+
+  assert.equal(store.isCustomTime, false)
+  assert.equal(store.customStart, '')
+  assert.equal(store.customEnd, '')
+  assert.equal(store.timeRangeLabel, '最近 6h')
+})

@@ -2,8 +2,17 @@
   <div class="histogram-panel">
     <div class="histogram-panel__header">
       <span class="histogram-panel__title">日志命中分布</span>
-      <span class="histogram-panel__total">
-      总计: <strong>{{ formatNumber(totalHitsDisplay) }}</strong> 条
+      <span class="histogram-panel__meta">
+        <span class="histogram-panel__total">
+        共命中: <strong>{{ formatNumber(totalHitsDisplay) }}</strong> 条 · 已加载 <strong>{{ formatNumber(logStore.loadedCount) }}</strong> 条
+        </span>
+        <span
+          v-if="logStore.isTruncated"
+          class="histogram-panel__truncated"
+          title="可缩小时间范围或提高结果上限以查看更多"
+        >
+          ⚠ 已截断 · 仅展示前 {{ formatNumber(logStore.loadedCount) }} / 共 {{ formatNumber(totalHitsDisplay) }} 条
+        </span>
       </span>
     </div>
     <div class="histogram-panel__chart" ref="chartRef">

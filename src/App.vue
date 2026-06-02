@@ -48,6 +48,11 @@
         <button class="btn-primary" @click="submitSearch" :disabled="logStore.loading">
           ▶ 查询
         </button>
+        <button class="icon-btn" @click="copyShareLink" title="复制链接">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+          </svg>
+        </button>
       </div>
       <FilterBar v-if="queryStore.filters.length > 0" />
     </div>
@@ -80,6 +85,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { Message } from '@arco-design/web-vue'
 import { useSettingsStore } from './stores/settings.js'
 import { useQueryStore } from './stores/query.js'
 import { useFieldStore } from './stores/fields.js'
@@ -98,6 +104,7 @@ import SettingsPanel from './components/SettingsPanel.vue'
 import ActivityDrawer from './components/ActivityDrawer.vue'
 import { createSearchExecutor } from './utils/searchOrchestration.js'
 import { DEFAULT_KEYWORDS, countKeywordMatches } from './utils/keywordStats.js'
+import { logger } from './utils/logger.js'
 
 const settingsStore = useSettingsStore()
 const queryStore = useQueryStore()
@@ -120,13 +127,23 @@ const searchExecutor = createSearchExecutor({
   fetchLogs: (params) => logStore.fetchLogs(params),
   fetchHistogram: (params) => logStore.fetchHistogram(params),
   loadFieldNames: (params) => fieldStore.loadFieldNames(params),
+  loadFacets: (params) => fieldStore.loadFacets(params),
   onAuxiliaryError: (source, error) => {
-    console.warn(`[executeSearch] auxiliary ${source} failed:`, error)
+    logger.warn(`[executeSearch] auxiliary ${source} failed:`, error)
   },
 })
 
 function toggleTheme() {
   settingsStore.setTheme(settingsStore.theme === 'dark' ? 'light' : 'dark')
+}
+
+function copyShareLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    Message.success('链接已复制')
+  }).catch(err => {
+    logger.error('Failed to copy link: ', err)
+    Message.error('复制失败')
+  })
 }
 
 async function executeSearch() {
@@ -198,7 +215,7 @@ watch(
   () => settingsStore.apiBaseUrl,
   async (newUrl, oldUrl) => {
     if (newUrl === oldUrl) return
-    console.log(`[App] Switching API Base URL from [${oldUrl}] to [${newUrl}]`)
+    logger.debug(`[App] Switching API Base URL from [${oldUrl}] to [${newUrl}]`)
 
     // 1. 清除所有旧数据和缓存
     logStore.clearLogs()

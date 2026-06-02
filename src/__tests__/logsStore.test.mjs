@@ -106,3 +106,64 @@ test('log store records histogram failures without clearing fetched logs', async
   assert.equal(store.histogramData, null)
   assert.equal(store.histogramError, 'histogram gateway timeout')
 })
+
+test('log store tracks loaded count from fetchLogs and total hits from fetchHistogram separately', async () => {
+  setActivePinia(createPinia())
+  const { createLogsStore } = await import('../stores/logs.js')
+
+  const useLogStore = createLogsStore({
+    queryLogs: async () => ([
+      { _time: '2026-04-10T10:00:00.000Z', _msg: 'a' },
+      { _time: '2026-04-10T09:00:00.000Z', _msg: 'b' },
+    ]),
+    queryHits: async () => ({ hits: [{ total: 500 }, { total: 250 }] }),
+    getApiBaseUrl: () => 'http://logs.example.com',
+  })
+
+  const store = useLogStore()
+  await store.fetchLogs({ query: '*', limit: 2, start: '24h', end: 'now' })
+
+  // fetchLogs records how many rows were loaded, not the hit total.
+  assert.equal(store.loadedCount, 2)
+  assert.equal(store.totalHits, 0)
+
+  await store.fetchHistogram({ query: '*', start: '24h', end: 'now', step: '1m' })
+
+  // totalHits is authoritatively the aggregated histogram total, loadedCount stays untouched.
+  assert.equal(store.totalHits, 750)
+  assert.equal(store.loadedCount, 2)
+
+  store.clearLogs()
+  assert.equal(store.totalHits, 0)
+  assert.equal(store.loadedCount, 0)
+})
+
+test('log store flags isTruncated only when total hits exceed a non-zero loaded count', async () => {
+  setActivePinia(createPinia())
+  const { createLogsStore } = await import('../stores/logs.js')
+
+  const useLogStore = createLogsStore({
+    queryLogs: async () => ([]),
+    queryHits: async () => null,
+    getApiBaseUrl: () => 'http://logs.example.com',
+  })
+
+  const store = useLogStore()
+
+  store.totalHits = 1000
+  store.loadedCount = 500
+  assert.equal(store.isTruncated, true)
+
+  store.totalHits = 500
+  store.loadedCount = 500
+  assert.equal(store.isTruncated, false)
+
+  store.totalHits = 0
+  store.loadedCount = 500
+  assert.equal(store.isTruncated, false)
+
+  store.totalHits = 1000
+  store.loadedCount = 0
+  assert.equal(store.isTruncated, false)
+})
+

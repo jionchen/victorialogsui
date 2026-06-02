@@ -59,7 +59,16 @@
 
         <!-- Empty state -->
         <div v-if="filteredStreamFields.length === 0 && filteredLogFields.length === 0 && pinnedFieldItems.length === 0" class="empty-state">
-          <div class="empty-state__icon">--</div>
+          <div class="empty-state__icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="6" x2="21" y2="6" />
+              <line x1="8" y1="12" x2="21" y2="12" />
+              <line x1="8" y1="18" x2="21" y2="18" />
+              <line x1="3" y1="6" x2="3.01" y2="6" />
+              <line x1="3" y1="12" x2="3.01" y2="12" />
+              <line x1="3" y1="18" x2="3.01" y2="18" />
+            </svg>
+          </div>
           <div class="empty-state__text">未找到字段</div>
           <div class="empty-state__hint">请尝试调整时间范围</div>
         </div>

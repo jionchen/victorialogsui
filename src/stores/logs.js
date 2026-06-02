@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { queryLogs, queryHits } from '../api/logs.js'
 import { getApiBaseUrl } from '../api/client.js'
 import { classifyConnectionError } from '../utils/connectionStatus.js'
 import { getLogDisplayTimestamp } from '../utils/logTime.js'
+import { logger } from '../utils/logger.js'
 
 export function sortLogsByTime(entries = [], order = 'desc') {
   const direction = order === 'asc' ? 1 : -1
@@ -44,11 +45,16 @@ export function createLogsStore(deps = {}) {
     const error = ref(null)
     const connectionError = ref(null)
     const totalHits = ref(0)
+    const loadedCount = ref(0)
     const sortOrder = ref('desc')
 
     const histogramData = ref(null)
     const histogramLoading = ref(false)
     const histogramError = ref(null)
+
+    const isTruncated = computed(() =>
+      totalHits.value > 0 && loadedCount.value > 0 && totalHits.value > loadedCount.value
+    )
 
     let fetchId = 0
     let histogramId = 0
@@ -64,16 +70,16 @@ export function createLogsStore(deps = {}) {
 
         if (id !== fetchId) return
 
-        console.log(`[fetchLogs] id=${id}, target=${targetUrl}, results=${data.length}`)
+        logger.debug(`[fetchLogs] id=${id}, target=${targetUrl}, results=${data.length}`)
         logs.value = sortLogsByTime(data, sortOrder.value)
-        totalHits.value = data.length
+        loadedCount.value = data.length
       } catch (e) {
         if (id !== fetchId) return
         if (e.cancelled) return
         error.value = e.message || 'Query failed'
         connectionError.value = classifyConnectionError(e)
         logs.value = []
-        totalHits.value = 0
+        loadedCount.value = 0
       } finally {
         if (id === fetchId) {
           loading.value = false
@@ -109,6 +115,7 @@ export function createLogsStore(deps = {}) {
     function clearLogs() {
       logs.value = []
       totalHits.value = 0
+      loadedCount.value = 0
       error.value = null
       connectionError.value = null
       histogramData.value = null
@@ -126,7 +133,8 @@ export function createLogsStore(deps = {}) {
     }
 
     return {
-      logs, loading, error, connectionError, totalHits, sortOrder,
+      logs, loading, error, connectionError, totalHits, loadedCount, sortOrder,
+      isTruncated,
       histogramData, histogramLoading, histogramError,
       fetchLogs, fetchHistogram, clearLogs,
       setSortOrder, toggleSortOrder,

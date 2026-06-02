@@ -130,6 +130,62 @@ test('field store records field name failures without clearing existing field va
   assert.deepEqual(store.getCachedValues(params).values, [{ value: 'paas', hits: 8 }])
 })
 
+test('field store does not fabricate evenly spread hits when per-value counts are missing', async () => {
+  setActivePinia(createPinia())
+  const { createFieldsStore } = await import('../stores/fields.js')
+
+  const useFieldStore = createFieldsStore({
+    getFieldNames: async () => [{ value: 'src_container.name', hits: 99 }],
+    getStreamFieldNames: async () => [],
+    getFieldValues: async () => [
+      { value: 'a', hits: 0 },
+      { value: 'b', hits: 0 },
+      { value: 'c', hits: 0 },
+    ],
+    getStreamFieldValues: async () => [],
+  })
+
+  const store = useFieldStore()
+  const params = { field: 'src_container.name', isStream: false, query: '*', start: '24h', end: 'now' }
+
+  await store.loadFieldNames({ query: '*', start: '24h', end: 'now' })
+  await store.loadFieldValues(params)
+
+  const state = store.getCachedValues(params)
+  assert.equal(state.status, 'success')
+  assert.equal(state.countsKnown, false)
+  assert.equal(state.total, 0)
+  assert.deepEqual(state.values.map(v => v.hits), [0, 0, 0])
+})
+
+test('field store marks counts as known when real per-value hits are present', async () => {
+  setActivePinia(createPinia())
+  const { createFieldsStore } = await import('../stores/fields.js')
+
+  const useFieldStore = createFieldsStore({
+    getFieldNames: async () => [{ value: 'src_container.name', hits: 30 }],
+    getStreamFieldNames: async () => [],
+    getFieldValues: async () => [
+      { value: 'a', hits: 20 },
+      { value: 'b', hits: 10 },
+    ],
+    getStreamFieldValues: async () => [],
+  })
+
+  const store = useFieldStore()
+  const params = { field: 'src_container.name', isStream: false, query: '*', start: '24h', end: 'now' }
+
+  await store.loadFieldNames({ query: '*', start: '24h', end: 'now' })
+  await store.loadFieldValues(params)
+
+  const state = store.getCachedValues(params)
+  assert.equal(state.status, 'success')
+  assert.equal(state.countsKnown, true)
+  assert.equal(state.total, 30)
+  assert.deepEqual(state.values, [{ value: 'a', hits: 20 }, { value: 'b', hits: 10 }])
+})
+
+
 test('field store increments names version only after field names load successfully', async () => {
   setActivePinia(createPinia())
   const { createFieldsStore } = await import('../stores/fields.js')
@@ -154,4 +210,148 @@ test('field store increments names version only after field names load successfu
   shouldFail = false
   await store.loadFieldNames({ query: '*', start: '24h', end: 'now' })
   assert.equal(store.namesVersion, 1)
+})
+
+test('loadFacets writes aligned-key cache entries with known numeric counts', async () => {
+  setActivePinia(createPinia())
+  const { createFieldsStore } = await import('../stores/fields.js')
+
+  const useFieldStore = createFieldsStore({
+    getFieldNames: async () => [],
+    getStreamFieldNames: async () => [],
+    getFieldValues: async () => [],
+    getStreamFieldValues: async () => [],
+    queryFacets: async () => ({
+      facets: [
+        {
+          field_name: 'src_namespace',
+          field_values: [
+            { field_value: 'prod', hits: 12 },
+            { field_value: 'dev', hits: 30 },
+          ],
+        },
+      ],
+    }),
+  })
+
+  const store = useFieldStore()
+  await store.loadFacets({ query: '*', start: '1h', end: 'now' })
+
+  const state = store.getCachedValues({
+    field: 'src_namespace',
+    isStream: false,
+    query: '*',
+    start: '1h',
+    end: 'now',
+    filter: '',
+  })
+
+  assert.equal(state.status, 'success')
+  assert.equal(state.countsKnown, true)
+  assert.equal(state.loading, false)
+  assert.equal(state.total, 42)
+  assert.deepEqual(state.values, [{ value: 'dev', hits: 30 }, { value: 'prod', hits: 12 }])
+})
+
+test('loadFacets coerces string hits into numbers', async () => {
+  setActivePinia(createPinia())
+  const { createFieldsStore } = await import('../stores/fields.js')
+
+  const useFieldStore = createFieldsStore({
+    getFieldNames: async () => [],
+    getStreamFieldNames: async () => [],
+    getFieldValues: async () => [],
+    getStreamFieldValues: async () => [],
+    queryFacets: async () => ({
+      facets: [
+        {
+          field_name: 'level',
+          field_values: [
+            { field_value: 'info', hits: '5' },
+            { field_value: 'error', hits: '10' },
+          ],
+        },
+      ],
+    }),
+  })
+
+  const store = useFieldStore()
+  await store.loadFacets({ query: '*', start: '1h', end: 'now' })
+
+  const state = store.getCachedValues({
+    field: 'level',
+    isStream: false,
+    query: '*',
+    start: '1h',
+    end: 'now',
+    filter: '',
+  })
+
+  assert.equal(state.total, 15)
+  assert.deepEqual(state.values, [{ value: 'error', hits: 10 }, { value: 'info', hits: 5 }])
+  assert.equal(typeof state.values[0].hits, 'number')
+})
+
+test('loadFacets does not throw or pollute cache on empty or malformed responses', async () => {
+  setActivePinia(createPinia())
+  const { createFieldsStore } = await import('../stores/fields.js')
+
+  const useFieldStore = createFieldsStore({
+    getFieldNames: async () => [],
+    getStreamFieldNames: async () => [],
+    getFieldValues: async () => [],
+    getStreamFieldValues: async () => [],
+    queryFacets: async () => ({ unexpected: true }),
+  })
+
+  const store = useFieldStore()
+  await store.loadFacets({ query: '*', start: '1h', end: 'now' })
+
+  assert.deepEqual(store.fieldValuesCache, {})
+})
+
+test('loadFacets classifies a stream-named field under the stream cache key', async () => {
+  setActivePinia(createPinia())
+  const { createFieldsStore } = await import('../stores/fields.js')
+
+  const useFieldStore = createFieldsStore({
+    getFieldNames: async () => [],
+    getStreamFieldNames: async () => [{ value: 'src_stream', hits: 100 }],
+    getFieldValues: async () => [],
+    getStreamFieldValues: async () => [],
+    queryFacets: async () => ({
+      facets: [
+        {
+          field_name: 'src_stream',
+          // legacy `values` spelling — exercises the field_values/values fallback
+          values: [{ field_value: 'app-1', hits: 7 }],
+        },
+      ],
+    }),
+  })
+
+  const store = useFieldStore()
+  await store.loadFieldNames({ query: '*', start: '1h', end: 'now' })
+  await store.loadFacets({ query: '*', start: '1h', end: 'now' })
+
+  const streamState = store.getCachedValues({
+    field: 'src_stream',
+    isStream: true,
+    query: '*',
+    start: '1h',
+    end: 'now',
+    filter: '',
+  })
+  assert.equal(streamState.status, 'success')
+  assert.deepEqual(streamState.values, [{ value: 'app-1', hits: 7 }])
+
+  const logState = store.getCachedValues({
+    field: 'src_stream',
+    isStream: false,
+    query: '*',
+    start: '1h',
+    end: 'now',
+    filter: '',
+  })
+  assert.equal(logState.status, 'idle')
 })
