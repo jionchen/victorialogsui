@@ -138,3 +138,32 @@ test('log store tracks loaded count from fetchLogs and total hits from fetchHist
   assert.equal(store.loadedCount, 0)
 })
 
+test('log store flags isTruncated only when total hits exceed a non-zero loaded count', async () => {
+  setActivePinia(createPinia())
+  const { createLogsStore } = await import('../stores/logs.js')
+
+  const useLogStore = createLogsStore({
+    queryLogs: async () => ([]),
+    queryHits: async () => null,
+    getApiBaseUrl: () => 'http://logs.example.com',
+  })
+
+  const store = useLogStore()
+
+  store.totalHits = 1000
+  store.loadedCount = 500
+  assert.equal(store.isTruncated, true)
+
+  store.totalHits = 500
+  store.loadedCount = 500
+  assert.equal(store.isTruncated, false)
+
+  store.totalHits = 0
+  store.loadedCount = 500
+  assert.equal(store.isTruncated, false)
+
+  store.totalHits = 1000
+  store.loadedCount = 0
+  assert.equal(store.isTruncated, false)
+})
+

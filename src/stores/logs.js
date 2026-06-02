@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { queryLogs, queryHits } from '../api/logs.js'
 import { getApiBaseUrl } from '../api/client.js'
 import { classifyConnectionError } from '../utils/connectionStatus.js'
@@ -51,6 +51,10 @@ export function createLogsStore(deps = {}) {
     const histogramData = ref(null)
     const histogramLoading = ref(false)
     const histogramError = ref(null)
+
+    const isTruncated = computed(() =>
+      totalHits.value > 0 && loadedCount.value > 0 && totalHits.value > loadedCount.value
+    )
 
     let fetchId = 0
     let histogramId = 0
@@ -130,6 +134,7 @@ export function createLogsStore(deps = {}) {
 
     return {
       logs, loading, error, connectionError, totalHits, loadedCount, sortOrder,
+      isTruncated,
       histogramData, histogramLoading, histogramError,
       fetchLogs, fetchHistogram, clearLogs,
       setSortOrder, toggleSortOrder,
