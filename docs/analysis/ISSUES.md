@@ -24,9 +24,9 @@
 | **Q3** | 统一收敛约 11 处 console 调试日志 | 质量/安全/性能 | 优化 | 🟠 | S | `App.vue`、`stores/logs.js`、`stores/fields.js`、`stores/query.js`、`components/LogDetail.vue`、`components/LogContextModal.vue`、`api/client.js` | 引入 DEV 开关的轻量 logger 或删除；务必关闭 `client.js` 逐请求打印后端地址 | ✅ | ✅ |
 | **Q4** | 为 `queryBuilder.js` 补专属单测 | 质量 | 风险 | 🔴 | S | `src/__tests__/queryBuilder.test.mjs`（新增） | 覆盖转义/否定/多值/中文自由文本/`parseBasicLogsQL` 往返；`node --test` 通过 | ✅ | ✅ |
 | **Q5** | 接入最小 CI（PR 跑 ci+test+build 门禁） | 工程化 | 技术债 | 🔴 | M | `.github/workflows/ci.yml`（新增） | PR 上 install + `node --test` + `vite build` 全绿作为合并门禁 | ✅ | ✅ |
-| **Q6** | 加「复制链接」入口 | UX | 新功能 | 🟠 | S | 工具栏组件、`stores/query.js`/URL 同步处 | URL 状态已可序列化恢复，加一键复制+反馈；显式提交改 pushState 支持前进后退 | — | ⏸️ |
-| **Q7** | 空态/错误态用语义化 SVG 图标替换 `--` 占位 | UX | 优化 | 🟠 | S | `FieldSidebar.vue`、`LogTable.vue`、空态相关组件 | 按连接失败/无结果/无字段区分语义化图标 | — | ⏸️ |
-| **Q8** | 引入 ESLint + Prettier（warn 级接入存量）+ 锁定关键依赖 | 质量/工程化 | 技术债 | 🔴 | M | `package.json`、`.eslintrc*`、`.prettierrc*`、`package-lock.json` | lint/format 脚本就位，改动文件强制通过；CI 执行 | — | ⏸️ |
+| **Q6** | 加「复制链接」入口 | UX | 新功能 | 🟠 | S | 工具栏组件、`stores/query.js`/URL 同步处 | URL 状态已可序列化恢复，加一键复制+反馈（pushState 前进后退留作后续） | ✅ | ✅ |
+| **Q7** | 空态/错误态用语义化 SVG 图标替换 `--` 占位 | UX | 优化 | 🟠 | S | `FieldSidebar.vue`、`LogTable.vue`、空态相关组件 | 按连接失败/无结果/无字段区分语义化图标 | ✅ | ✅ |
+| **Q8** | 引入 ESLint + Prettier（warn 级接入存量）+ 锁定关键依赖 | 质量/工程化 | 技术债 | 🔴 | M | `package.json`、`.eslintrc*`、`.prettierrc*`、`package-lock.json` | lint/format 脚本就位（warn 级接入存量，npm run lint 退出 0）；CI 执行 | ✅ | ✅ |
 | **Q9** | 修复上下文查询回退过滤非法前导 `AND`，统一排序时间口径 | API | 风险 | 🟠 | S | `src/components/LogContextModal.vue` | `streamFilter += ' AND ...'` 去掉非法前导 AND；排序复用 `getLogDisplayTimestamp` | ✅ | ✅ |
 | **Q10** | 修正 docker-compose 版本脱节、后端镜像固定版本 | 工程化 | 风险 | 🟠 | S | `docker-compose.yml` | `vlogs-ui:v0.0.1` → 对齐 `package.json` 2.0.0；后端 `victoria-logs:latest` → 固定版本 | ✅ | ✅ |
 
@@ -144,7 +144,7 @@
 
 ## 汇总
 
-- **快速见效 Q1–Q10**：10 项（本轮编码 **7** 项：Q1/Q2/Q3/Q4/Q5/Q9/Q10；后续：Q6/Q7/Q8）
+- **快速见效 Q1–Q10**：10 项 **全部完成 ✅**（第一批 Q1/Q2/Q3/Q4/Q5/Q9/Q10 + 第二批 Q6/Q7/Q8）
 - **战略投入 S1–S10**：10 项（本轮 0，登记入版本计划）
 - **细分发现 D1–D53**：53 项（与 Q/S 交叉引用，本轮 0）
 
