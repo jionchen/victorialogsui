@@ -48,6 +48,11 @@
         <button class="btn-primary" @click="submitSearch" :disabled="logStore.loading">
           ▶ 查询
         </button>
+        <button class="icon-btn" @click="copyShareLink" title="复制链接">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+          </svg>
+        </button>
       </div>
       <FilterBar v-if="queryStore.filters.length > 0" />
     </div>
@@ -80,6 +85,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { Message } from '@arco-design/web-vue'
 import { useSettingsStore } from './stores/settings.js'
 import { useQueryStore } from './stores/query.js'
 import { useFieldStore } from './stores/fields.js'
@@ -128,6 +134,15 @@ const searchExecutor = createSearchExecutor({
 
 function toggleTheme() {
   settingsStore.setTheme(settingsStore.theme === 'dark' ? 'light' : 'dark')
+}
+
+function copyShareLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    Message.success('链接已复制')
+  }).catch(err => {
+    logger.error('Failed to copy link: ', err)
+    Message.error('复制失败')
+  })
 }
 
 async function executeSearch() {
