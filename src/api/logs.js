@@ -101,4 +101,25 @@ export async function queryFacets({ query, start, end, limit = 10, maxValuesPerF
   return response.data
 }
 
-export default { queryLogs, queryHits, queryFacets }
+/**
+ * Query stats aggregation
+ * API: /select/logsql/query (with stats by clause)
+ */
+export async function queryStats({ query, start, end }, signal) {
+  const params = new URLSearchParams()
+  params.set('query', query)
+  if (start) params.set('start', start)
+  if (end) params.set('end', end)
+
+  const response = await client.post('/select/logsql/query', params.toString(), {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    signal,
+    transformResponse: [(data) => data],
+    timeout: API_STATS_QUERY_TIMEOUT_MS,
+  })
+
+  const { items } = parseNdjsonChunk(response.data, '')
+  return items
+}
+
+export default { queryLogs, queryHits, queryFacets, queryStats }

@@ -130,3 +130,11 @@ export function parseBasicLogsQL(query) {
 
   return { filters, freeText }
 }
+
+export const AGGREGATE_FUNCTIONS = ['count', 'count_uniq', 'sum', 'avg', 'max', 'min']
+
+export function buildStatsQuery(baseQuery, byFields, aggFn = 'count') {
+  if (!byFields || byFields.length === 0) return baseQuery
+  const fields = byFields.join(', ')
+  return `${baseQuery} | stats by (${fields}) ${aggFn}()`
+}

@@ -53,6 +53,11 @@
             <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
           </svg>
         </button>
+        <button class="icon-btn" @click="showStats = true" title="聚合分析">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M18 20V10M12 20V4M6 20v-6"/>
+          </svg>
+        </button>
       </div>
       <FilterBar v-if="queryStore.filters.length > 0" />
     </div>
@@ -68,6 +73,16 @@
         />
       </div>
     </div>
+
+    <!-- Stats Drawer -->
+    <a-drawer
+      v-model:visible="showStats"
+      title="聚合分析"
+      :width="480"
+      placement="right"
+    >
+      <StatsPanel @close="showStats = false" />
+    </a-drawer>
 
     <!-- Settings Drawer -->
     <a-drawer
@@ -102,6 +117,7 @@ import HitsHistogram from './components/HitsHistogram.vue'
 import LogTable from './components/LogTable.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import ActivityDrawer from './components/ActivityDrawer.vue'
+import StatsPanel from './components/StatsPanel.vue'
 import { createSearchExecutor } from './utils/searchOrchestration.js'
 import { createSearchController } from './composables/searchController.js'
 import { createUrlSync } from './composables/urlSync.js'
@@ -115,7 +131,7 @@ const fieldStore = useFieldStore()
 const logStore = useLogStore()
 
 const showSettings = ref(false)
-
+const showStats = ref(false)
 const showActivity = ref(false)
 
 const currentApi = computed(() => {
