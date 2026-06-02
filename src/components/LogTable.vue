@@ -46,7 +46,12 @@
 
       <!-- Error state -->
       <div v-else-if="logStore.error && recoverableConnectionError.recoverable" class="connection-recovery">
-        <div class="connection-recovery__icon">--</div>
+        <div class="connection-recovery__icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+            <path d="M21 3v6h-6" />
+          </svg>
+        </div>
         <div class="connection-recovery__title">{{ recoverableConnectionError.title }}</div>
         <div class="connection-recovery__detail">
           {{ recoverableConnectionError.detail }}
@@ -64,14 +69,26 @@
         </div>
       </div>
       <div v-else-if="logStore.error" class="empty-state">
-        <div class="empty-state__icon">--</div>
+        <div class="empty-state__icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        </div>
         <div class="empty-state__text text-danger">{{ logStore.error }}</div>
         <div class="empty-state__hint">请检查 VictoriaLogs 连接设置</div>
       </div>
 
       <!-- Empty state -->
       <div v-else-if="logStore.logs.length === 0" class="empty-state">
-        <div class="empty-state__icon">--</div>
+        <div class="empty-state__icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <line x1="8" y1="11" x2="14" y2="11" />
+          </svg>
+        </div>
         <div class="empty-state__text">未找到日志</div>
         <div class="empty-state__hint">请尝试调整时间范围或移除筛选条件</div>
       </div>
