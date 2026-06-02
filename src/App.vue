@@ -103,6 +103,9 @@ import LogTable from './components/LogTable.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import ActivityDrawer from './components/ActivityDrawer.vue'
 import { createSearchExecutor } from './utils/searchOrchestration.js'
+import { createSearchController } from './composables/searchController.js'
+import { createUrlSync } from './composables/urlSync.js'
+import { createAutoRefresh } from './composables/autoRefresh.js'
 import { DEFAULT_KEYWORDS, countKeywordMatches } from './utils/keywordStats.js'
 import { logger } from './utils/logger.js'
 
@@ -133,6 +136,29 @@ const searchExecutor = createSearchExecutor({
   },
 })
 
+const urlSync = createUrlSync({
+  getUrlState: () => queryStore.getUrlState(),
+  loadUrlState: (s) => queryStore.loadUrlState(s),
+  getCurrentHref: () => window.location.href,
+  getSearchString: () => window.location.search,
+  replaceState: (href) => window.history.replaceState({}, '', href),
+})
+const controller = createSearchController({
+  searchExecutor,
+  getSearchParams: () => ({
+    query: queryStore.effectiveQuery,
+    limit: settingsStore.resultLimit,
+    start: queryStore.timeRange.start,
+    end: queryStore.timeRange.end,
+    step: queryStore.histogramStep,
+    rangeMs: queryStore.timeRange.rangeMs,
+  }),
+  clearFieldCache: () => fieldStore.clearCache(),
+  writeUrlState: () => urlSync.writeState(),
+  logAudit: () => settingsStore.logAuditEvent('执行查询', queryStore.effectiveQuery),
+})
+const autoRefresh = createAutoRefresh({ onTick: () => controller.executeSearch() })
+
 function toggleTheme() {
   settingsStore.setTheme(settingsStore.theme === 'dark' ? 'light' : 'dark')
 }
@@ -143,21 +169,6 @@ function copyShareLink() {
   }).catch(err => {
     logger.error('Failed to copy link: ', err)
     Message.error('复制失败')
-  })
-}
-
-async function executeSearch() {
-  const { start, end } = queryStore.timeRange
-  const query = queryStore.effectiveQuery
-  const limit = settingsStore.resultLimit
-
-  await searchExecutor.execute({
-    query,
-    limit,
-    start,
-    end,
-    step: queryStore.histogramStep,
-    rangeMs: queryStore.timeRange.rangeMs,
   })
 }
 
@@ -187,27 +198,13 @@ watch(
 
 watch(
   () => queryStore.queryVersion,
-  () => {
-    fieldStore.clearCache()
-    const state = queryStore.getUrlState()
-    const url = new URL(window.location)
-    url.searchParams.set('s', state)
-    window.history.replaceState({}, '', url)
-    settingsStore.logAuditEvent('执行查询', queryStore.effectiveQuery)
-    executeSearch()
-  }
+  () => controller.runSearch()
 )
 
 // Auto refresh
-let autoRefreshTimer = null
 watch(
   () => queryStore.autoRefreshInterval,
-  (interval) => {
-    clearInterval(autoRefreshTimer)
-    if (interval > 0) {
-      autoRefreshTimer = setInterval(() => executeSearch(), interval)
-    }
-  }
+  (interval) => autoRefresh.sync(interval)
 )
 
 // Watch for API changes → auto re-search
@@ -230,11 +227,7 @@ onMounted(() => {
   settingsStore.initTheme()
 
   // Load from URL if present
-  const params = new URLSearchParams(window.location.search)
-  const stateStr = params.get('s')
-  if (stateStr) {
-    queryStore.loadUrlState(stateStr)
-  }
+  urlSync.readInitialState()
 
   queryStore.executeQuery()
 
@@ -255,6 +248,6 @@ function onGlobalKeydown(e) {
 onUnmounted(() => {
   window.removeEventListener('keydown', onGlobalKeydown)
   clearTimeout(searchTimer)
-  clearInterval(autoRefreshTimer)
+  autoRefresh.stop()
 })
 </script>
