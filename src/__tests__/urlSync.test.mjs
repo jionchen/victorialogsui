@@ -69,3 +69,31 @@ test('readInitialState does nothing when s param absent', () => {
 
   assert.equal(loadedState, null)
 })
+
+test('readInitialState returns true when s param present', () => {
+  const urlSync = createUrlSync({
+    getUrlState: () => '',
+    loadUrlState: () => {},
+    getCurrentHref: () => 'http://localhost:5173/?s=XYZ',
+    getSearchString: () => '?s=XYZ',
+    replaceState: () => {},
+  })
+
+  const result = urlSync.readInitialState()
+
+  assert.equal(result, true)
+})
+
+test('readInitialState returns false when s param absent', () => {
+  const urlSync = createUrlSync({
+    getUrlState: () => '',
+    loadUrlState: () => {},
+    getCurrentHref: () => 'http://localhost:5173/',
+    getSearchString: () => '',
+    replaceState: () => {},
+  })
+
+  const result = urlSync.readInitialState()
+
+  assert.equal(result, false)
+})

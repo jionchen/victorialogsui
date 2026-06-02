@@ -227,10 +227,11 @@ onMounted(() => {
   settingsStore.initTheme()
 
   // Load from URL if present
-  urlSync.readInitialState()
+  const loadedFromUrl = urlSync.readInitialState()
 
-  queryStore.executeQuery()
-
+  if (!loadedFromUrl) {
+    queryStore.executeQuery()
+  }
 
   // Global Keyboard Shortcuts
   window.addEventListener('keydown', onGlobalKeydown)

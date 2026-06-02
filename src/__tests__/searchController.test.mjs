@@ -64,3 +64,45 @@ test('executeSearch returns the promise from searchExecutor.execute', async () =
 
   assert.equal(result, sentinel)
 })
+
+test('runSearch skips clearFieldCache when search params unchanged', async () => {
+  const events = []
+
+  const controller = createSearchController({
+    searchExecutor: {
+      execute: async () => {},
+    },
+    getSearchParams: () => ({ query: '*', limit: 500 }),
+    clearFieldCache: () => events.push('clear'),
+    writeUrlState: () => events.push('write'),
+    logAudit: () => events.push('audit'),
+  })
+
+  await controller.runSearch()
+  events.length = 0
+  await controller.runSearch()
+
+  assert.deepEqual(events, ['write', 'audit'])
+})
+
+test('runSearch clears cache again when search params change', async () => {
+  const events = []
+  let params = { query: '*', limit: 500 }
+
+  const controller = createSearchController({
+    searchExecutor: {
+      execute: async () => {},
+    },
+    getSearchParams: () => params,
+    clearFieldCache: () => events.push('clear'),
+    writeUrlState: () => events.push('write'),
+    logAudit: () => events.push('audit'),
+  })
+
+  await controller.runSearch()
+  events.length = 0
+  params = { query: 'error', limit: 500 }
+  await controller.runSearch()
+
+  assert.ok(events.includes('clear'))
+})

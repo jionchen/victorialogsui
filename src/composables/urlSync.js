@@ -15,7 +15,9 @@ export function createUrlSync({
     const s = new URLSearchParams(getSearchString()).get('s')
     if (s) {
       loadUrlState(s)
+      return true
     }
+    return false
   }
 
   return {
