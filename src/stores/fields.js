@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getFieldNames, getFieldValues, getStreamFieldNames, getStreamFieldValues } from '../api/fields.js'
+import { logger } from '../utils/logger.js'
 
 const FIELD_VALUE_RETRY_ATTEMPTS = 1
 
@@ -73,7 +74,7 @@ export function createFieldsStore(fetchers = {
       } catch (e) {
         if (id !== namesFetchId || e.cancelled) return
         error.value = e.message || 'Failed to load fields'
-        console.error('Failed to load field names:', e)
+        logger.error('Failed to load field names:', e)
       } finally {
         if (id === namesFetchId) {
           loading.value = false
@@ -143,7 +144,7 @@ export function createFieldsStore(fetchers = {
         if (id !== valuesFetchIds[key] || e.cancelled) return
         cache.status = 'error'
         cache.error = e.message || '加载失败'
-        console.error(`Failed to load values for ${field}:`, e)
+        logger.error(`Failed to load values for ${field}:`, e)
       } finally {
         if (id === valuesFetchIds[key]) {
           cache.loading = false

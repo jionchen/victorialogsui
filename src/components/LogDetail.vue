@@ -75,6 +75,7 @@ import { useQueryStore } from '../stores/query.js'
 import { tryFormatJSON } from '../utils/formatters.js'
 import { getHighlightTerms } from '../utils/highlighting.js'
 import { formatLogTimestamp, getLogDisplayTimestamp } from '../utils/logTime.js'
+import { logger } from '../utils/logger.js'
 import HighlightedText from './HighlightedText.vue'
 
 const props = defineProps({
@@ -99,7 +100,7 @@ function copyLog() {
     copied.value = true
     setTimeout(() => { copied.value = false }, 2000)
   }).catch(err => {
-    console.error('Failed to copy text: ', err)
+    logger.error('Failed to copy text: ', err)
   })
 }
 

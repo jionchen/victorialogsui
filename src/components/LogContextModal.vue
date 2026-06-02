@@ -67,6 +67,7 @@ import { getStreamLabel } from '../utils/formatters.js'
 import { getHighlightTerms } from '../utils/highlighting.js'
 import { formatLogTimestamp, getLogDisplayTimestamp } from '../utils/logTime.js'
 import { useQueryStore } from '../stores/query.js'
+import { logger } from '../utils/logger.js'
 import HighlightedText from './HighlightedText.vue'
 
 const props = defineProps({
@@ -156,7 +157,7 @@ async function fetchContext() {
     
   } catch (e) {
     if (!e.cancelled) {
-      console.error('Failed to load context:', e)
+      logger.error('Failed to load context:', e)
     }
   } finally {
     loading.value = false

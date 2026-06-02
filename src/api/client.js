@@ -8,6 +8,7 @@ import {
   API_REQUEST_TIMEOUT_MS,
 } from '../../config/proxyConfig.js'
 import { STORAGE_KEYS, SESSION_STORAGE_KEYS } from '../../config/storageKeys.js'
+import { logger } from '../utils/logger.js'
 
 const RAW_ALLOWED_PROXY_TARGETS = import.meta.env?.VITE_ALLOWED_PROXY_TARGETS || ''
 const STRICT_PROXY_TARGETS = import.meta.env?.VITE_STRICT_PROXY_TARGETS === 'true'
@@ -149,14 +150,14 @@ client.interceptors.request.use((config) => {
   const target = getTargetUrl()
 
   if (target && isAllowedProxyTarget(target)) {
-    console.log(`[Axios Outgoing] ${config.method?.toUpperCase()} ${config.url} -> Proxy-Target: ${target}`)
+    logger.debug(`[Axios Outgoing] ${config.method?.toUpperCase()} ${config.url} -> Proxy-Target: ${target}`)
     if (config.headers && typeof config.headers.set === 'function') {
       config.headers.set('x-proxy-target', target)
     } else {
       config.headers['x-proxy-target'] = target
     }
   } else {
-    console.log(`[Axios Outgoing] ${config.method?.toUpperCase()} ${config.url} -> Using default (no target header)`)
+    logger.debug(`[Axios Outgoing] ${config.method?.toUpperCase()} ${config.url} -> Using default (no target header)`)
   }
 
   // Basic Auth
@@ -189,7 +190,7 @@ client.interceptors.response.use(
 
     if (isRetryable && config._retryCount < MAX_API_RETRIES) {
       config._retryCount++
-      console.warn(`[retry ${config._retryCount}/${MAX_API_RETRIES}] ${config.url}`)
+      logger.warn(`[retry ${config._retryCount}/${MAX_API_RETRIES}] ${config.url}`)
       const baseDelay = config.retryDelayMs ?? API_RETRY_DELAY_MS
       const retryDelay = baseDelay * (2 ** (config._retryCount - 1))
       const jitter = baseDelay > 0 ? Math.floor(Math.random() * 100) : 0

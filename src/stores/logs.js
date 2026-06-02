@@ -4,6 +4,7 @@ import { queryLogs, queryHits } from '../api/logs.js'
 import { getApiBaseUrl } from '../api/client.js'
 import { classifyConnectionError } from '../utils/connectionStatus.js'
 import { getLogDisplayTimestamp } from '../utils/logTime.js'
+import { logger } from '../utils/logger.js'
 
 export function sortLogsByTime(entries = [], order = 'desc') {
   const direction = order === 'asc' ? 1 : -1
@@ -65,7 +66,7 @@ export function createLogsStore(deps = {}) {
 
         if (id !== fetchId) return
 
-        console.log(`[fetchLogs] id=${id}, target=${targetUrl}, results=${data.length}`)
+        logger.debug(`[fetchLogs] id=${id}, target=${targetUrl}, results=${data.length}`)
         logs.value = sortLogsByTime(data, sortOrder.value)
         loadedCount.value = data.length
       } catch (e) {

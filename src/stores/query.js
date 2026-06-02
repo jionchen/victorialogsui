@@ -4,6 +4,7 @@ import { buildLogsQL, isLogsQLSyntax } from '../utils/queryBuilder.js'
 import { getTimeRange, calculateStep } from '../utils/timeUtils.js'
 import { DEFAULT_TIME_PRESET, MAX_QUERY_HISTORY } from '../../config/appConfig.js'
 import { STORAGE_KEYS } from '../../config/storageKeys.js'
+import { logger } from '../utils/logger.js'
 
 export const useQueryStore = defineStore('query', () => {
   // Time range
@@ -219,7 +220,7 @@ export const useQueryStore = defineStore('query', () => {
       const state = JSON.parse(decodeURIComponent(escape(atob(base64Str))))
       applySnapshot(state)
     } catch (e) {
-      console.error('Failed to parse URL state', e)
+      logger.error('Failed to parse URL state', e)
     }
   }
 

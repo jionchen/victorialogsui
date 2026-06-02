@@ -98,6 +98,7 @@ import SettingsPanel from './components/SettingsPanel.vue'
 import ActivityDrawer from './components/ActivityDrawer.vue'
 import { createSearchExecutor } from './utils/searchOrchestration.js'
 import { DEFAULT_KEYWORDS, countKeywordMatches } from './utils/keywordStats.js'
+import { logger } from './utils/logger.js'
 
 const settingsStore = useSettingsStore()
 const queryStore = useQueryStore()
@@ -121,7 +122,7 @@ const searchExecutor = createSearchExecutor({
   fetchHistogram: (params) => logStore.fetchHistogram(params),
   loadFieldNames: (params) => fieldStore.loadFieldNames(params),
   onAuxiliaryError: (source, error) => {
-    console.warn(`[executeSearch] auxiliary ${source} failed:`, error)
+    logger.warn(`[executeSearch] auxiliary ${source} failed:`, error)
   },
 })
 
@@ -198,7 +199,7 @@ watch(
   () => settingsStore.apiBaseUrl,
   async (newUrl, oldUrl) => {
     if (newUrl === oldUrl) return
-    console.log(`[App] Switching API Base URL from [${oldUrl}] to [${newUrl}]`)
+    logger.debug(`[App] Switching API Base URL from [${oldUrl}] to [${newUrl}]`)
 
     // 1. 清除所有旧数据和缓存
     logStore.clearLogs()
