@@ -81,3 +81,89 @@ test('settings store force-migrates persisted defaults to the new pinned fields 
   assert.equal(localStorage.getItem('vlogs_pinned_fields'), JSON.stringify(['src_namespace', 'src_container_name', 'src_pod_name']))
   assert.equal(localStorage.getItem('vlogs_table_columns'), JSON.stringify(['_stream']))
 })
+
+test('settings store persists theme via useStorage', async () => {
+  localStorage.clear()
+  setActivePinia(createPinia())
+  const { useSettingsStore } = await import('../stores/settings.js')
+  const store = useSettingsStore()
+
+  assert.equal(store.theme, 'dark')
+
+  store.setTheme('light')
+
+  assert.equal(store.theme, 'light')
+  assert.equal(localStorage.getItem('vlogs_theme'), JSON.stringify('light'))
+})
+
+test('settings store persists pinnedFields via useStorage', async () => {
+  localStorage.clear()
+  setActivePinia(createPinia())
+  const { useSettingsStore } = await import('../stores/settings.js')
+  const store = useSettingsStore()
+
+  store.setPinnedFields(['foo', 'bar'])
+
+  assert.deepEqual(store.pinnedFields, ['foo', 'bar'])
+  assert.equal(localStorage.getItem('vlogs_pinned_fields'), JSON.stringify(['foo', 'bar']))
+})
+
+test('settings store persists resultLimit via useStorage', async () => {
+  localStorage.clear()
+  setActivePinia(createPinia())
+  const { useSettingsStore } = await import('../stores/settings.js')
+  const store = useSettingsStore()
+
+  assert.equal(store.resultLimit, 500)
+
+  store.setResultLimit(1000)
+
+  assert.equal(store.resultLimit, 1000)
+  assert.equal(localStorage.getItem('vlogs_result_limit'), '1000')
+})
+
+test('settings store persists savedViews via useStorage', async () => {
+  localStorage.clear()
+  setActivePinia(createPinia())
+  const { useSettingsStore } = await import('../stores/settings.js')
+  const store = useSettingsStore()
+
+  store.upsertSavedView({ name: 'test-view', snapshot: {} })
+
+  assert.equal(store.savedViews.length, 1)
+  assert.equal(store.savedViews[0].name, 'test-view')
+
+  const persisted = JSON.parse(localStorage.getItem('vlogs_saved_views'))
+  assert.equal(persisted.length, 1)
+  assert.equal(persisted[0].name, 'test-view')
+})
+
+test('settings store persists savedQueries via useStorage', async () => {
+  localStorage.clear()
+  setActivePinia(createPinia())
+  const { useSettingsStore } = await import('../stores/settings.js')
+  const store = useSettingsStore()
+
+  store.upsertSavedQuery({ name: 'test-query', query: 'level:error' })
+
+  assert.equal(store.savedQueries.length, 1)
+  assert.equal(store.savedQueries[0].name, 'test-query')
+
+  const persisted = JSON.parse(localStorage.getItem('vlogs_saved_queries'))
+  assert.equal(persisted.length, 1)
+  assert.equal(persisted[0].name, 'test-query')
+})
+
+test('settings store persists tableColumns via useStorage', async () => {
+  localStorage.clear()
+  setActivePinia(createPinia())
+  const { useSettingsStore } = await import('../stores/settings.js')
+  const store = useSettingsStore()
+
+  store.toggleTableColumn('new_col')
+
+  assert.ok(store.tableColumns.includes('new_col'))
+
+  const persisted = JSON.parse(localStorage.getItem('vlogs_table_columns'))
+  assert.ok(persisted.includes('new_col'))
+})

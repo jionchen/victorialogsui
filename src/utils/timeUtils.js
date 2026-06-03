@@ -6,6 +6,29 @@ import { TIME_PRESETS } from '../../config/uiConfig.js'
 
 export { TIME_PRESETS }
 
+export const DEFAULT_TIMEZONE_OFFSET = -480 // minutes; -480 = UTC+8 (China)
+
+let configuredTimezoneOffset = DEFAULT_TIMEZONE_OFFSET
+
+export function setTimezoneOffset(minutes) {
+  configuredTimezoneOffset = minutes
+}
+
+export function getTimezoneOffset() {
+  return configuredTimezoneOffset
+}
+
+/**
+ * Apply a timezone offset (in minutes) to a Date object.
+ * Returns a new Date that represents the same instant but with
+ * the target offset applied for display purposes.
+ */
+function applyTimezoneOffset(d, offsetMinutes = configuredTimezoneOffset) {
+  const localOffset = d.getTimezoneOffset()
+  const delta = (localOffset - offsetMinutes) * 60000
+  return new Date(d.getTime() + delta)
+}
+
 /**
  * Calculate appropriate histogram step based on time range
  */
@@ -34,8 +57,9 @@ export function formatTimestamp(ts) {
   if (!ts) return ''
   try {
     const d = new Date(ts)
+    const adjusted = applyTimezoneOffset(d)
     const pad = (n) => String(n).padStart(2, '0')
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+    return `${adjusted.getFullYear()}-${pad(adjusted.getMonth() + 1)}-${pad(adjusted.getDate())} ${pad(adjusted.getHours())}:${pad(adjusted.getMinutes())}:${pad(adjusted.getSeconds())}`
   } catch {
     return String(ts)
   }
@@ -48,8 +72,25 @@ export function formatTimeShort(ts) {
   if (!ts) return ''
   try {
     const d = new Date(ts)
+    const adjusted = applyTimezoneOffset(d)
     const pad = (n) => String(n).padStart(2, '0')
-    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+    return `${pad(adjusted.getHours())}:${pad(adjusted.getMinutes())}:${pad(adjusted.getSeconds())}`
+  } catch {
+    return String(ts)
+  }
+}
+
+/**
+ * Format timestamp with an explicit timezone offset (in minutes).
+ * Useful for testing or one-off formatting with a different offset.
+ */
+export function formatTimestampUtc(ts, offsetMinutes = configuredTimezoneOffset) {
+  if (!ts) return ''
+  try {
+    const d = new Date(ts)
+    const adjusted = applyTimezoneOffset(d, offsetMinutes)
+    const pad = (n) => String(n).padStart(2, '0')
+    return `${adjusted.getFullYear()}-${pad(adjusted.getMonth() + 1)}-${pad(adjusted.getDate())} ${pad(adjusted.getHours())}:${pad(adjusted.getMinutes())}:${pad(adjusted.getSeconds())}`
   } catch {
     return String(ts)
   }
