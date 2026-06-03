@@ -48,14 +48,58 @@ npm run build
 
 ## 🛠️ 配置说明
 
-### 1. 代理配置 (Nginx)
+### 1. 代理目标白名单（安全必填）
+
+为防止 SSRF 攻击，UI 的代理层默认启用**严格模式**，只允许转发到白名单内的后端地址。
+
+#### 环境变量
+
+| 变量 | 说明 | 示例 |
+|---|---|---|
+| `VITE_ALLOWED_PROXY_TARGETS` | 允许的 VictoriaLogs 后端地址列表，逗号分隔 | `http://logs1:9428,http://logs2:9428` |
+| `VITE_STRICT_PROXY_TARGETS` | 是否启用严格模式（默认 `true`） | `true` / `false` |
+
+**前端行为**：
+- 严格模式下，设置面板仅允许选择白名单内的地址，用户无法随意填写未授权的后端。
+- 自由模式（`VITE_STRICT_PROXY_TARGETS=false`）下，用户可手动输入任意合法地址（仅建议内网/可信环境使用）。
+
+#### Nginx 服务端白名单
+
+生产环境的 Nginx 配置（`nginx/default.conf`）中，通过 `map` 指令硬编码允许的后端地址：
+
+```nginx
+map $http_x_proxy_target $backend {
+    default                       "";                   # 不在白名单 => 返回 403
+    "http://victorialogs:9428"    $http_x_proxy_target;  # 允许的后端
+    # 部署方在此按需追加其它允许的后端地址
+}
+```
+
+**注意**：Nginx 白名单是最终防线，即使前端校验被绕过，非法目标也会返回 `403 Forbidden`。
+
+### 2. Docker Compose 配置示例
+
+```yaml
+services:
+  vlogs-ui:
+    image: victorialogsui:v2.0.0
+    ports:
+      - "8080:80"
+    environment:
+      # 允许代理到多个后端（对应 nginx/default.conf 中的白名单）
+      - VITE_ALLOWED_PROXY_TARGETS=http://victorialogs:9428
+      - VITE_STRICT_PROXY_TARGETS=true
+```
+
+### 3. 代理配置 (Nginx)
 在生产环境中，通常将此 UI 作为 VictoriaLogs 的代理层部署。内置的 Nginx 配置已处理了：
 - 静态文件路径 `/vlogs-ui/`。
 - API 转发 `/api/` 到 VictoriaLogs 后端（端口 9428），有效解决跨域问题。
+- 安全响应头（CSP、X-Frame-Options 等）。
 
-### 2. 界面配置
+### 4. 界面配置
 访问 UI 后，点击右上角 **⚙️ 设置** 图标：
-- **API Base URL**：配置 VictoriaLogs 的访问地址（默认为 `/api`）。
+- **API Base URL**：配置 VictoriaLogs 的访问地址（受白名单限制）。
 - **Authentication**：配置 Basic Auth 用户名和密码。
 - **Pinned Fields**：配置侧边栏置顶展示的常用字段。
 

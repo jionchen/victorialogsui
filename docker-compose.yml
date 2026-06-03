@@ -15,6 +15,12 @@ services:
     image: victorialogsui:v2.0.0
     ports:
       - "8080:80"
+    environment:
+      # 代理目标白名单：允许转发的 VictoriaLogs 后端地址（逗号分隔）
+      # 必须与 nginx/default.conf 中的 map 白名单保持一致
+      - VITE_ALLOWED_PROXY_TARGETS=http://victorialogs:9428
+      # 严格模式：true = 用户只能从白名单选择地址；false = 可自由填写（仅建议内网环境）
+      - VITE_STRICT_PROXY_TARGETS=true
     depends_on:
       - victorialogs
 
