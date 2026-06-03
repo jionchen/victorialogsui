@@ -79,7 +79,13 @@
     <div
       class="field-sidebar__resize-handle"
       :class="{ active: isResizing }"
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="调整侧边栏宽度"
+      tabindex="0"
       @mousedown="startResize"
+      @keydown.enter="startResize"
+      @keydown.space.prevent="startResize"
     />
   </div>
 </template>

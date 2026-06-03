@@ -1,17 +1,28 @@
 <template>
   <div class="field-item">
     <!-- Field Header -->
-    <div class="field-item__header" @click="toggleExpand" :class="{ 'is-active-col': isColumnActive }">
+    <div
+      class="field-item__header"
+      role="button"
+      tabindex="0"
+      :aria-expanded="expanded"
+      :aria-label="`字段 ${field.value}${isStream ? '（Stream 字段）' : '（日志字段）'}`"
+      @click="toggleExpand"
+      @keydown.enter="toggleExpand"
+      @keydown.space.prevent="toggleExpand"
+      :class="{ 'is-active-col': isColumnActive }"
+    >
       <svg class="field-item__icon" :class="{ expanded }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M9 18l6-6-6-6"/>
       </svg>
       <span class="field-item__type-badge" :class="isStream ? 'stream' : 'log'" />
       <span class="field-item__name" :title="field.value">{{ field.value }}</span>
       <span class="field-item__hits" style="margin-left: auto;">{{ formatNumber(field.hits) }}</span>
-      <button 
-        class="icon-btn" 
-        style="margin-left: 4px; padding: 0 4px; font-size: 14px;" 
-        title="在表格中切换此列" 
+      <button
+        class="icon-btn"
+        style="margin-left: 4px; padding: 0 4px; font-size: 14px;"
+        :aria-label="isColumnActive ? `从表格移除列 ${field.value}` : `在表格添加列 ${field.value}`"
+        title="在表格中切换此列"
         @click.stop="settingsStore.toggleTableColumn(field.value)"
       >
         <span :style="{ color: isColumnActive ? 'var(--accent)' : 'inherit', opacity: isColumnActive ? 1 : 0.3 }">▦</span>
@@ -52,8 +63,9 @@
         <div
           v-else-if="cachedData.status === 'success' && cachedData.values.length > 0 && !cachedData.countsKnown"
           style="padding: 4px 0; font-size: 11px; color: var(--text-muted);"
+          aria-live="polite"
         >
-          分布未知（无逐值计数）
+          <span>分布未知（无逐值计数）</span>
         </div>
         <div
           v-for="val in displayedValues"
@@ -63,11 +75,13 @@
           <div class="field-value-row__actions">
             <button
               class="field-value-row__action-btn"
+              :aria-label="`添加过滤条件 ${val.value}`"
               title="包含此值"
               @click.stop="addIncludeFilter(val.value)"
             >+</button>
             <button
               class="field-value-row__action-btn exclude"
+              :aria-label="`排除过滤条件 ${val.value}`"
               title="排除此值"
               @click.stop="addExcludeFilter(val.value)"
             >−</button>
@@ -90,8 +104,8 @@
         </div>
 
         <!-- More indicator -->
-        <div v-if="cachedData.values.length >= 30" class="field-values__more">
-          显示前 30 个值，可使用搜索查找更多。
+        <div v-if="cachedData.values.length >= 30" class="field-values__more" aria-live="polite">
+          <span>显示前 30 个值，可使用搜索查找更多。</span>
         </div>
       </template>
     </div>

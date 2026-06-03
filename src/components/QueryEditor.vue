@@ -6,6 +6,12 @@
         class="query-editor__input"
         :class="[`is-${validation.level}`]"
         v-model="queryText"
+        aria-label="查询输入"
+        :role="showSuggestions && suggestions.length > 0 ? 'combobox' : undefined"
+        :aria-autocomplete="showSuggestions && suggestions.length > 0 ? 'list' : undefined"
+        :aria-expanded="showSuggestions && suggestions.length > 0"
+        :aria-controls="showSuggestions && suggestions.length > 0 ? 'query-suggestions' : undefined"
+        :aria-activedescendant="showSuggestions && suggestions.length > 0 ? `query-suggestion-${selectedIndex}` : undefined"
         :placeholder="'LogsQL: 例如 level:error 或 {src_k8s.namespace.name=\x22production\x22}'"
         @keydown.enter="onKeydownEnter"
         @keydown.down.prevent="onKeydownDown"
@@ -59,13 +65,19 @@
     </div>
     <div
       v-if="showSuggestions && suggestions.length > 0"
+      id="query-suggestions"
       class="query-editor__suggestions"
+      role="listbox"
+      :aria-label="'查询建议'"
     >
       <div
         v-for="(s, idx) in suggestions"
+        :id="`query-suggestion-${idx}`"
         :key="idx"
         class="query-editor__suggestion"
         :class="{ 'is-selected': idx === selectedIndex }"
+        role="option"
+        :aria-selected="idx === selectedIndex"
         @mousedown.prevent="applySuggestion(s)"
         @mouseenter="selectedIndex = idx"
       >
