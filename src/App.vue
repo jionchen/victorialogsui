@@ -67,9 +67,31 @@
       <FieldSidebar />
       <div class="main-content">
         <HitsHistogram />
+        <!-- Panel tabs -->
+        <div class="panel-tabs">
+          <button
+            class="panel-tabs__btn"
+            :class="{ active: activePanel === 'logs' }"
+            @click="activePanel = 'logs'"
+          >
+            日志
+          </button>
+          <button
+            class="panel-tabs__btn"
+            :class="{ active: activePanel === 'patterns' }"
+            @click="activePanel = 'patterns'"
+          >
+            模式
+          </button>
+        </div>
         <LogTable
+          v-if="activePanel === 'logs'"
           @configure-connection="openConnectionSettings"
           @retry-query="submitSearch"
+        />
+        <PatternPanel
+          v-else
+          :logs="logStore.logs"
         />
       </div>
     </div>
@@ -118,6 +140,7 @@ import LogTable from './components/LogTable.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import ActivityDrawer from './components/ActivityDrawer.vue'
 import StatsPanel from './components/StatsPanel.vue'
+import PatternPanel from './components/PatternPanel.vue'
 import { createSearchExecutor } from './utils/searchOrchestration.js'
 import { createSearchController } from './composables/searchController.js'
 import { createUrlSync } from './composables/urlSync.js'
@@ -133,6 +156,7 @@ const logStore = useLogStore()
 const showSettings = ref(false)
 const showStats = ref(false)
 const showActivity = ref(false)
+const activePanel = ref('logs') // 'logs' | 'patterns'
 
 const currentApi = computed(() => {
   return settingsStore.apiBaseUrlList.find(item => item.url === settingsStore.apiBaseUrl)
