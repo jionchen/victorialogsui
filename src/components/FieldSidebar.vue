@@ -1,5 +1,19 @@
 <template>
-  <div class="field-sidebar" :style="{ width: sidebarWidth + 'px' }">
+  <div
+    class="field-sidebar"
+    :class="{ 'is-drawer-open': drawerMode && drawerOpen }"
+    :style="drawerMode ? {} : { width: sidebarWidth + 'px' }"
+  >
+    <!-- Close button for drawer mode -->
+    <button
+      v-if="drawerMode"
+      class="field-sidebar__close-btn"
+      @click="emit('closeDrawer')"
+      title="关闭"
+    >
+      &#10005;
+    </button>
+
     <!-- Search -->
     <div class="field-sidebar__search">
       <input
@@ -90,6 +104,13 @@ import { useFieldStore } from '../stores/fields.js'
 import { useSettingsStore } from '../stores/settings.js'
 import { useQueryStore } from '../stores/query.js'
 import FieldItem from './FieldItem.vue'
+
+const props = defineProps({
+  drawerMode: { type: Boolean, default: false },
+  drawerOpen: { type: Boolean, default: false },
+})
+
+const emit = defineEmits(['closeDrawer'])
 
 const fieldStore = useFieldStore()
 const settingsStore = useSettingsStore()
