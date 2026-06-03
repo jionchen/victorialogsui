@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import {
   setApiBaseUrl,
   getApiBaseUrl,
@@ -19,6 +19,7 @@ import {
   MAX_SAVED_VIEWS,
 } from '../../config/appConfig.js'
 import { STORAGE_KEYS } from '../../config/storageKeys.js'
+import { useStorage } from '../composables/useStorage.js'
 
 function buildDefaultApiList() {
   const defaults = [{ name: '默认 (代理配置)', url: '' }]
@@ -63,8 +64,8 @@ function applyDefaultsMigration() {
 export const useSettingsStore = defineStore('settings', () => {
   applyDefaultsMigration()
 
-  const theme = ref(localStorage.getItem(STORAGE_KEYS.theme) || DEFAULT_THEME)
-  
+  const theme = useStorage(STORAGE_KEYS.theme, DEFAULT_THEME)
+
   function setTheme(newTheme) {
     theme.value = newTheme
     document.documentElement.setAttribute('data-theme', newTheme)
@@ -73,7 +74,6 @@ export const useSettingsStore = defineStore('settings', () => {
     } else {
       document.body.removeAttribute('arco-theme')
     }
-    localStorage.setItem(STORAGE_KEYS.theme, newTheme)
   }
 
   function initTheme() {
@@ -81,10 +81,9 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   const apiBaseUrlList = ref(
-    sanitizeApiList(JSON.parse(localStorage.getItem(STORAGE_KEYS.apiUrlList) || 'null'))
+    sanitizeApiList(useStorage(STORAGE_KEYS.apiUrlList, null).value)
   )
   const apiBaseUrl = ref(getApiBaseUrl())
-
 
   function saveUrlList() {
     localStorage.setItem(STORAGE_KEYS.apiUrlList, JSON.stringify(apiBaseUrlList.value))
@@ -124,37 +123,25 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
-  const pinnedFields = ref(
-    JSON.parse(localStorage.getItem(STORAGE_KEYS.pinnedFields) || 'null') || [...DEFAULT_PINNED_FIELDS]
-  )
+  const pinnedFields = useStorage(STORAGE_KEYS.pinnedFields, [...DEFAULT_PINNED_FIELDS])
 
   function setPinnedFields(fields) {
     pinnedFields.value = fields
-    localStorage.setItem(STORAGE_KEYS.pinnedFields, JSON.stringify(fields))
   }
 
-  const resultLimit = ref(
-    parseInt(localStorage.getItem(STORAGE_KEYS.resultLimit) || String(DEFAULT_RESULT_LIMIT), 10)
-  )
+  const resultLimit = useStorage(STORAGE_KEYS.resultLimit, DEFAULT_RESULT_LIMIT, {
+    serialize: String,
+    deserialize: (raw) => parseInt(raw, 10),
+  })
 
   function setResultLimit(limit) {
     resultLimit.value = limit
-    localStorage.setItem(STORAGE_KEYS.resultLimit, String(limit))
   }
 
-  const tableColumns = ref(
-    JSON.parse(localStorage.getItem(STORAGE_KEYS.tableColumns) || 'null') || [...DEFAULT_TABLE_COLUMNS]
-  )
-  const auditEvents = ref(
-    JSON.parse(localStorage.getItem(STORAGE_KEYS.auditEvents) || '[]')
-  )
-
-  const savedViews = ref(
-    JSON.parse(localStorage.getItem(STORAGE_KEYS.savedViews) || '[]')
-  )
-  const savedQueries = ref(
-    JSON.parse(localStorage.getItem(STORAGE_KEYS.savedQueries) || '[]')
-  )
+  const tableColumns = useStorage(STORAGE_KEYS.tableColumns, [...DEFAULT_TABLE_COLUMNS])
+  const auditEvents = useStorage(STORAGE_KEYS.auditEvents, [])
+  const savedViews = useStorage(STORAGE_KEYS.savedViews, [])
+  const savedQueries = useStorage(STORAGE_KEYS.savedQueries, [])
 
   function toggleTableColumn(field) {
     const idx = tableColumns.value.indexOf(field)
@@ -163,12 +150,10 @@ export const useSettingsStore = defineStore('settings', () => {
     } else {
       tableColumns.value.push(field)
     }
-    localStorage.setItem(STORAGE_KEYS.tableColumns, JSON.stringify(tableColumns.value))
   }
 
   function resetTableColumns() {
     tableColumns.value = [...DEFAULT_TABLE_COLUMNS]
-    localStorage.setItem(STORAGE_KEYS.tableColumns, JSON.stringify(tableColumns.value))
   }
 
   function logAuditEvent(action, summary) {
@@ -179,12 +164,10 @@ export const useSettingsStore = defineStore('settings', () => {
       timestamp: new Date().toISOString(),
     }
     auditEvents.value = [event, ...auditEvents.value].slice(0, MAX_AUDIT_EVENTS)
-    localStorage.setItem(STORAGE_KEYS.auditEvents, JSON.stringify(auditEvents.value))
   }
 
   function clearAuditEvents() {
     auditEvents.value = []
-    localStorage.setItem(STORAGE_KEYS.auditEvents, JSON.stringify(auditEvents.value))
   }
 
   function upsertSavedView(view) {
@@ -199,13 +182,11 @@ export const useSettingsStore = defineStore('settings', () => {
       item,
       ...savedViews.value.filter(existing => existing.id !== item.id),
     ].slice(0, MAX_SAVED_VIEWS)
-    localStorage.setItem(STORAGE_KEYS.savedViews, JSON.stringify(savedViews.value))
     logAuditEvent('保存视图', view.name)
   }
 
   function removeSavedView(id) {
     savedViews.value = savedViews.value.filter(item => item.id !== id)
-    localStorage.setItem(STORAGE_KEYS.savedViews, JSON.stringify(savedViews.value))
   }
 
   function upsertSavedQuery(item) {
@@ -219,20 +200,16 @@ export const useSettingsStore = defineStore('settings', () => {
       saved,
       ...savedQueries.value.filter(existing => existing.id !== saved.id),
     ].slice(0, MAX_SAVED_QUERIES)
-    localStorage.setItem(STORAGE_KEYS.savedQueries, JSON.stringify(savedQueries.value))
     logAuditEvent('保存查询', item.name)
   }
 
   function removeSavedQuery(id) {
     savedQueries.value = savedQueries.value.filter(item => item.id !== id)
-    localStorage.setItem(STORAGE_KEYS.savedQueries, JSON.stringify(savedQueries.value))
   }
 
   return {
     theme, setTheme, initTheme,
     apiBaseUrl, updateApiBaseUrl, apiBaseUrlList, addApiBaseUrl, removeApiBaseUrl,
-
-
     pinnedFields, setPinnedFields,
     resultLimit, setResultLimit,
     savedViews, upsertSavedView, removeSavedView,

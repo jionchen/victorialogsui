@@ -92,6 +92,17 @@
     </div>
 
     <div class="settings-drawer__section">
+      <div class="settings-drawer__label">时区</div>
+      <a-select v-model="selectedTimezone" @change="onTimezoneChange">
+        <a-option v-for="tz in timezoneOptions" :key="tz.value" :value="tz.value">{{ tz.label }}</a-option>
+      </a-select>
+      <div v-if="selectedTimezone === 'custom'" class="timezone-custom">
+        <a-input-number v-model="customOffset" :min="-720" :max="840" @change="onCustomOffsetChange" placeholder="偏移分钟数" />
+        <span class="timezone-custom__hint">例如: -480 = UTC+8, 0 = UTC</span>
+      </div>
+    </div>
+
+    <div class="settings-drawer__section">
       <div class="settings-drawer__label">主题</div>
       <a-radio-group v-model="theme" @change="onThemeChange">
         <a-radio value="dark">深色</a-radio>
@@ -115,6 +126,9 @@ import { ref, computed } from 'vue'
 import { useSettingsStore } from '../stores/settings.js'
 import { useQueryStore } from '../stores/query.js'
 import { API_CONNECTION_TEST_TIMEOUT_MS } from '../../config/proxyConfig.js'
+import { setTimezoneOffset, getTimezoneOffset } from '../utils/timeUtils.js'
+import { STORAGE_KEYS } from '../../config/storageKeys.js'
+import { useStorage } from '../composables/useStorage.js'
 import client, {
   getAuthCredentials,
   getAuthStorageMode,
@@ -123,6 +137,14 @@ import client, {
   isStrictProxyMode,
   normalizeProxyTarget,
 } from '../api/client.js'
+
+const TIMEZONE_OPTIONS = [
+  { value: -480, label: 'UTC+8 (北京时间)' },
+  { value: 0, label: 'UTC' },
+  { value: -540, label: 'UTC+9 (东京)' },
+  { value: 300, label: 'UTC-5 (纽约)' },
+  { value: 'custom', label: '自定义' },
+]
 
 const settingsStore = useSettingsStore()
 const queryStore = useQueryStore()
@@ -146,6 +168,35 @@ const strictProxyMode = isStrictProxyMode()
 const currentTargetLabel = computed(() => {
   return apiUrl.value || '使用默认代理地址'
 })
+
+const timezoneOptions = TIMEZONE_OPTIONS
+const storedOffset = useStorage(STORAGE_KEYS.timezoneOffset, getTimezoneOffset(), {
+  serialize: String,
+  deserialize: (raw) => parseInt(raw, 10),
+})
+const customOffset = ref(storedOffset.value)
+const selectedTimezone = ref(
+  TIMEZONE_OPTIONS.find(t => t.value === storedOffset.value)?.value ?? 'custom'
+)
+
+function onTimezoneChange() {
+  if (selectedTimezone.value === 'custom') {
+    setTimezoneOffset(customOffset.value)
+    storedOffset.value = customOffset.value
+  } else {
+    const offset = selectedTimezone.value
+    customOffset.value = offset
+    setTimezoneOffset(offset)
+    storedOffset.value = offset
+  }
+}
+
+function onCustomOffsetChange() {
+  if (selectedTimezone.value === 'custom') {
+    setTimezoneOffset(customOffset.value)
+    storedOffset.value = customOffset.value
+  }
+}
 
 function selectApi(url) {
   settingsStore.updateApiBaseUrl(url)

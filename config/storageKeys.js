@@ -11,6 +11,7 @@ export const STORAGE_KEYS = {
   savedQueries: 'vlogs_saved_queries',
   queryHistory: 'vlogs_query_history',
   customKeywords: 'vlogs_custom_keywords',
+  timezoneOffset: 'vlogs_timezone_offset',
 }
 
 export const SESSION_STORAGE_KEYS = {
