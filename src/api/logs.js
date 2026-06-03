@@ -4,9 +4,6 @@ import {
   API_STATS_QUERY_TIMEOUT_MS,
 } from '../../config/proxyConfig.js'
 
-let currentQueryController = null
-let currentHitsController = null
-
 export function parseNdjsonChunk(chunk, remainder = '') {
   const raw = `${remainder}${chunk || ''}`
   const lines = raw.split('\n')
@@ -29,13 +26,7 @@ export function parseNdjsonChunk(chunk, remainder = '') {
  * Query logs
  * API: /select/logsql/query
  */
-export async function queryLogs({ query, limit = 100, start, end }) {
-  // Cancel previous query
-  if (currentQueryController) {
-    currentQueryController.abort()
-  }
-  currentQueryController = new AbortController()
-
+export async function queryLogs({ query, limit = 100, start, end, signal }) {
   const params = new URLSearchParams()
   params.set('query', query)
   if (limit) params.set('limit', String(limit))
@@ -44,7 +35,7 @@ export async function queryLogs({ query, limit = 100, start, end }) {
 
   const response = await client.post('/select/logsql/query', params.toString(), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    signal: currentQueryController.signal,
+    signal,
     transformResponse: [(data) => data], // keep raw
     timeout: API_LOG_QUERY_TIMEOUT_MS,
   })
@@ -60,13 +51,7 @@ export async function queryLogs({ query, limit = 100, start, end }) {
  * Query hits stats (histogram)
  * API: /select/logsql/hits
  */
-export async function queryHits({ query, start, end, step, field }) {
-  // Cancel previous histogram request
-  if (currentHitsController) {
-    currentHitsController.abort()
-  }
-  currentHitsController = new AbortController()
-
+export async function queryHits({ query, start, end, step, field, signal }) {
   const params = new URLSearchParams()
   params.set('query', query)
   if (start) params.set('start', start)
@@ -76,7 +61,7 @@ export async function queryHits({ query, start, end, step, field }) {
 
   const response = await client.post('/select/logsql/hits', params.toString(), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    signal: currentHitsController.signal,
+    signal,
     timeout: API_STATS_QUERY_TIMEOUT_MS,
   })
   return response.data

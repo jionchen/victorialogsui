@@ -167,3 +167,65 @@ test('log store flags isTruncated only when total hits exceed a non-zero loaded 
   assert.equal(store.isTruncated, false)
 })
 
+test('log store uses shallowRef so fetched log entries are not Vue proxies', async () => {
+  setActivePinia(createPinia())
+  const { createLogsStore } = await import('../stores/logs.js')
+
+  const useLogStore = createLogsStore({
+    queryLogs: async () => ([
+      { _time: '2026-04-10T10:00:00.000Z', _msg: 'hello' },
+    ]),
+    queryHits: async () => null,
+    getApiBaseUrl: () => 'http://logs.example.com',
+  })
+
+  const store = useLogStore()
+  await store.fetchLogs({ query: '*', limit: 100, start: '24h', end: 'now' })
+
+  assert.equal(store.logs.length, 1)
+  const log = store.logs[0]
+  // markRaw prevents Vue from wrapping the object in a reactive proxy
+  assert.equal(log.__v_isRef, undefined, 'log should not be a ref')
+  assert.equal(log.__v_reactive, undefined, 'log should not be a reactive proxy')
+})
+
+test('log store passes AbortController signal to queryLogs', async () => {
+  setActivePinia(createPinia())
+  const { createLogsStore } = await import('../stores/logs.js')
+
+  let receivedSignal = null
+  const useLogStore = createLogsStore({
+    queryLogs: async ({ signal }) => {
+      receivedSignal = signal
+      return [{ _time: '2026-04-10T10:00:00.000Z', _msg: 'hello' }]
+    },
+    queryHits: async () => null,
+    getApiBaseUrl: () => 'http://logs.example.com',
+  })
+
+  const store = useLogStore()
+  await store.fetchLogs({ query: '*', limit: 100, start: '24h', end: 'now' })
+
+  assert.ok(receivedSignal instanceof AbortSignal, 'signal should be passed to queryLogs')
+})
+
+test('log store passes AbortController signal to queryHits', async () => {
+  setActivePinia(createPinia())
+  const { createLogsStore } = await import('../stores/logs.js')
+
+  let receivedSignal = null
+  const useLogStore = createLogsStore({
+    queryLogs: async () => [],
+    queryHits: async ({ signal }) => {
+      receivedSignal = signal
+      return { hits: [{ total: 1 }] }
+    },
+    getApiBaseUrl: () => 'http://logs.example.com',
+  })
+
+  const store = useLogStore()
+  await store.fetchHistogram({ query: '*', start: '24h', end: 'now', step: '1m' })
+
+  assert.ok(receivedSignal instanceof AbortSignal, 'signal should be passed to queryHits')
+})
+
