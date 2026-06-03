@@ -43,11 +43,11 @@
 | **S3** | 新增聚合分析（stats by）模式 | 功能 | 新功能 | 🔴 | L | 新模块 + `queryBuilder.js` + ECharts | ✅ | ✅ |
 | **S4** | 抽离 App.vue 编排逻辑为协调器/composable | 架构 | 技术债 | 🔴 | M | `App.vue`、新 `composables/*`、`utils/searchOrchestration.js` | ✅ | ✅ |
 | **S5** | 真正的增量实时尾随（时间游标+去重+环形缓冲） | 性能/功能 | 新功能 | 🔴 | L | `components/LiveTailPanel.vue`、`stores/logs.js`、`api/logs.js` | ✅ | ✅ |
-| **S6** | 日志全量数据改 shallowRef/markRaw + 取消模块级单例控制器 | 性能/API | 优化 | 🔴 | M | `stores/logs.js`、`api/logs.js`、`components/LogTable.vue` | — | ⏸️ |
-| **S7** | 建立响应式断点策略（侧栏抽屉化/工具栏堆叠/表格降级） | UX | 新功能 | 🔴 | L | 全局样式 + 多组件 | — | ⏸️ |
-| **S8** | 补齐 a11y（语义化按钮/role/tabindex/焦点样式/焦点陷阱） | UX | 技术债 | 🔴 | M | 多组件 | — | ⏸️ |
-| **S9** | 统一持久化（useStorage）与时间归一化层（时区可配） | 架构/API | 优化 | 🟠 | M | `stores/settings.js`、`utils/timeUtils.js`、`config/storageKeys.js` | — | ⏸️ |
-| **S10** | 日志模式聚类（Pattern/Drain 归并） | 功能 | 新功能 | 🔴 | L | 新模块 + 结果集处理 | — | ⏸️ |
+| **S6** | 日志全量数据改 shallowRef/markRaw + 取消模块级单例控制器 | 性能/API | 优化 | 🔴 | M | `stores/logs.js`、`api/logs.js`、`components/LogTable.vue` | ✅ | ✅ |
+| **S7** | 建立响应式断点策略（侧栏抽屉化/工具栏堆叠/表格降级） | UX | 新功能 | 🔴 | L | 全局样式 + 多组件 | ✅ | ✅ |
+| **S8** | 补齐 a11y（语义化按钮/role/tabindex/焦点样式/焦点陷阱） | UX | 技术债 | 🔴 | M | 多组件 | ✅ | ✅ |
+| **S9** | 统一持久化（useStorage）与时间归一化层（时区可配） | 架构/API | 优化 | 🟠 | M | `stores/settings.js`、`utils/timeUtils.js`、`config/storageKeys.js` | ✅ | ✅ |
+| **S10** | 日志模式聚类（Pattern/Drain 归并） | 功能 | 新功能 | 🔴 | L | 新模块 + 结果集处理 | ✅ | ✅ |
 
 ---
 
@@ -145,7 +145,7 @@
 ## 汇总
 
 - **快速见效 Q1–Q10**：10 项 **全部完成 ✅**
-- **战略投入 S1–S10**：**S1 ✅ / S2 ✅ / S3 ✅ / S4 ✅ / S5 ✅ 已完成**，S6–S10 登记入版本计划
+- **战略投入 S1–S10**：**S1 ✅ / S2 ✅ / S3 ✅ / S4 ✅ / S5 ✅ / S6 ✅ / S7 ✅ / S8 ✅ / S9 ✅ / S10 ✅ 全部完成**
 - **细分发现 D1–D53**：**D22 ✅ / D49 ✅(截断提示) 已完成**，其余 51 项与 Q/S 交叉引用、登记
 
-> 路线图衔接见报告「功能更新路线图建议」：v2.1 止损与基础体验（**已清零**：Q2/Q6/Q7 + S1/D49/D22）→ v2.2–v2.3 分析能力升级（S2 查询补全 / S3 聚合分析 / S5 增量尾随 / S4 抽离编排）→ v3.0 平台化重构。详见 [`PLAN-2026-06-02-v2.1-facets-truncation-timeecho.md`](./PLAN-2026-06-02-v2.1-facets-truncation-timeecho.md)。
+> 路线图衔接见报告「功能更新路线图建议」：v2.1 止损与基础体验（**已清零**：Q2/Q6/Q7 + S1/D49/D22）→ v2.2–v2.3 分析能力升级（S2 查询补全 / S3 聚合分析 / S5 增量尾随 / S4 抽离编排 / S6 shallowRef / S7 响应式 / S8 a11y / S9 持久化 / S10 模式聚类）→ v3.0 平台化重构。详见 [`PLAN-2026-06-02-v2.1-facets-truncation-timeecho.md`](./PLAN-2026-06-02-v2.1-facets-truncation-timeecho.md)。
