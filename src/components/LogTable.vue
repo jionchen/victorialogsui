@@ -22,7 +22,7 @@
           <a-option :value="2000">2000</a-option>
         </a-select>
         <a-dropdown trigger="click">
-          <button class="icon-btn" title="导出">
+          <button class="icon-btn" title="导出" aria-haspopup="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
@@ -101,6 +101,7 @@
             type="button"
             class="log-row__cell log-row__time log-row__time-header"
             :aria-label="logStore.sortOrder === 'desc' ? '按时间倒序，点击切换为正序' : '按时间正序，点击切换为倒序'"
+            :aria-sort="logStore.sortOrder === 'desc' ? 'descending' : 'ascending'"
             @click="logStore.toggleSortOrder()"
           >
             <span class="log-row__time-header-label">时间</span>
@@ -119,7 +120,7 @@
             class="log-row__cell log-row__col-header"
           >
             <span class="log-row__col-header-label" :title="col">{{ col === '_stream' ? '流标签' : col }}</span>
-            <button class="icon-btn log-row__col-remove" title="移除此列" @click.stop="settingsStore.toggleTableColumn(col)">✕</button>
+            <button class="icon-btn log-row__col-remove" :aria-label="`移除列 ${col}`" title="移除此列" @click.stop="settingsStore.toggleTableColumn(col)">✕</button>
           </div>
           <div class="log-row__cell log-row__msg">日志内容</div>
         </div>
@@ -133,7 +134,12 @@
             class="log-row"
             :class="{ expanded: expandedIndex === index }"
             :ref="setLogRowRef(log)"
+            role="button"
+            tabindex="0"
+            :aria-expanded="expandedIndex === index"
             @click="toggleExpand(index)"
+            @keydown.enter="toggleExpand(index)"
+            @keydown.space.prevent="toggleExpand(index)"
           >
             <div class="log-row__cell log-row__time" :title="getLogTimeTitle(log)">
               {{ formatLogTimestamp(getLogDisplayTimestamp(log)) }}

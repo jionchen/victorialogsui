@@ -5,12 +5,17 @@
     width="90%"
     :footer="false"
     class="context-modal"
+    :esc-to-close="true"
+    :mask-closable="true"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="context-modal-title"
     @cancel="close"
   >
     <div class="context-panel">
       <!-- Toolbar -->
-      <div class="context-toolbar">
-        <div v-if="log" class="context-toolbar__info">
+      <div class="context-toolbar" role="region" aria-label="上下文日志工具栏">
+        <div v-if="log" id="context-modal-title" class="context-toolbar__info">
           正在查看 <strong>{{ formatLogTimestamp(getLogDisplayTimestamp(log)) }}</strong> 前后 ±{{ windowMinutes }} 分钟
           <span style="color: var(--text-muted); margin-left: 8px;">(所属流: <span class="context-toolbar__stream-tag">{{ getStreamLabel(log) }}</span>)</span>
         </div>
