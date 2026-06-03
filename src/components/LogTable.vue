@@ -205,7 +205,8 @@ const scrollContainer = ref(null)
 const contextVisible = ref(false)
 const contextLog = ref(null)
 const scrollTop = ref(0)
-const rowHeights = ref(new Map())
+const rowHeightsMap = new Map()
+const rowHeightsVersion = ref(0)
 const rowObservers = new Map()
 const logRenderKeys = new WeakMap()
 let nextRenderKey = 0
@@ -214,7 +215,9 @@ let nextRenderKey = 0
 const skeletonWidths = Array.from({ length: 15 }, (_, i) => 30 + ((i * 17 + 7) % 60))
 
 const measuredHeights = computed(() => {
-  return logStore.logs.map(log => rowHeights.value.get(log) ?? LOG_ROW_HEIGHT)
+  // eslint-disable-next-line no-unused-expressions
+  rowHeightsVersion.value
+  return logStore.logs.map(log => rowHeightsMap.get(log) ?? LOG_ROW_HEIGHT)
 })
 
 const virtualWindow = computed(() => {
@@ -256,7 +259,8 @@ watch(() => logStore.logs, () => {
   expandedIndex.value = -1
   scrollTop.value = 0
   disconnectRowObservers()
-  rowHeights.value = new Map()
+  rowHeightsMap.clear()
+  rowHeightsVersion.value++
   if (scrollContainer.value) {
     scrollContainer.value.scrollTop = 0
   }
@@ -292,12 +296,11 @@ function getLogRenderKey(log) {
 
 function updateRowHeight(log, height) {
   const nextHeight = Math.max(1, Math.ceil(height || 0))
-  const currentHeight = rowHeights.value.get(log)
+  const currentHeight = rowHeightsMap.get(log)
   if (currentHeight === nextHeight) return
 
-  const nextMap = new Map(rowHeights.value)
-  nextMap.set(log, nextHeight)
-  rowHeights.value = nextMap
+  rowHeightsMap.set(log, nextHeight)
+  rowHeightsVersion.value++
 }
 
 function observeRow(log, el) {

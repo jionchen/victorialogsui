@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, shallowRef, computed, markRaw } from 'vue'
 import { queryLogs, queryHits } from '../api/logs.js'
 import { getApiBaseUrl } from '../api/client.js'
 import { classifyConnectionError } from '../utils/connectionStatus.js'
@@ -40,7 +40,7 @@ export function createLogsStore(deps = {}) {
   } = deps
 
   return defineStore('logs', () => {
-    const logs = ref([])
+    const logs = shallowRef([])
     const loading = ref(false)
     const error = ref(null)
     const connectionError = ref(null)
@@ -73,7 +73,7 @@ export function createLogsStore(deps = {}) {
         if (seen.has(key)) return false
         seen.add(key)
         return true
-      })
+      }).map(l => markRaw(l))
       let combined = [...logs.value, ...unique]
       // Ring buffer: keep last MAX_TAIL_LOGS
       if (combined.length > MAX_TAIL_LOGS) {
@@ -88,18 +88,20 @@ export function createLogsStore(deps = {}) {
       loading.value = true
       error.value = null
       connectionError.value = null
+      const controller = new AbortController()
       try {
         const targetUrl = getApiBaseUrlImpl()
-        const data = await queryLogsImpl({ query, limit, start, end })
+        const data = await queryLogsImpl({ query, limit, start, end, signal: controller.signal })
 
         if (id !== fetchId) return
 
         logger.debug(`[fetchLogs] id=${id}, target=${targetUrl}, results=${data.length}`)
+        const rawData = data.map(log => markRaw(log))
         if (tailMode.value) {
-          appendLogs(data)
+          appendLogs(rawData)
         } else {
-          logs.value = sortLogsByTime(data, sortOrder.value)
-          loadedCount.value = data.length
+          logs.value = sortLogsByTime(rawData, sortOrder.value)
+          loadedCount.value = rawData.length
         }
       } catch (e) {
         if (id !== fetchId) return
@@ -121,8 +123,9 @@ export function createLogsStore(deps = {}) {
       const id = ++histogramId
       histogramLoading.value = true
       histogramError.value = null
+      const controller = new AbortController()
       try {
-        const data = await queryHitsImpl({ query, start, end, step, field })
+        const data = await queryHitsImpl({ query, start, end, step, field, signal: controller.signal })
 
         if (id !== histogramId) return
 

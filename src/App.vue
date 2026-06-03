@@ -2,6 +2,9 @@
   <div class="app-layout">
     <!-- Header -->
     <header class="app-header">
+      <button v-if="isNarrow" class="hamburger-btn" @click="toggleSidebar" title="打开侧边栏">
+        &#9776;
+      </button>
       <div class="app-header__logo">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
@@ -64,10 +67,21 @@
 
     <!-- Body -->
     <div class="app-body">
-      <FieldSidebar />
+      <FieldSidebar
+        :drawer-mode="isNarrow"
+        :drawer-open="isSidebarOpen"
+        @close-drawer="closeSidebar"
+      />
+      <div
+        v-if="isNarrow && isSidebarOpen"
+        class="drawer-backdrop"
+        :class="{ 'is-visible': isSidebarOpen }"
+        @click="closeSidebar"
+      />
       <div class="main-content">
         <HitsHistogram />
         <LogTable
+          :is-mobile="isMobile"
           @configure-connection="openConnectionSettings"
           @retry-query="submitSearch"
         />
@@ -133,6 +147,27 @@ const logStore = useLogStore()
 const showSettings = ref(false)
 const showStats = ref(false)
 const showActivity = ref(false)
+
+// Responsive breakpoint detection
+const isNarrow = ref(false)
+const isMobile = ref(false)
+const isSidebarOpen = ref(false)
+
+function updateBreakpoints() {
+  isNarrow.value = window.matchMedia('(max-width: 1024px)').matches
+  isMobile.value = window.matchMedia('(max-width: 768px)').matches
+  if (!isNarrow.value) {
+    isSidebarOpen.value = false
+  }
+}
+
+function toggleSidebar() {
+  isSidebarOpen.value = !isSidebarOpen.value
+}
+
+function closeSidebar() {
+  isSidebarOpen.value = false
+}
 
 const currentApi = computed(() => {
   return settingsStore.apiBaseUrlList.find(item => item.url === settingsStore.apiBaseUrl)
@@ -251,6 +286,18 @@ onMounted(() => {
 
   // Global Keyboard Shortcuts
   window.addEventListener('keydown', onGlobalKeydown)
+
+  // Responsive breakpoint listeners
+  updateBreakpoints()
+  const mqlNarrow = window.matchMedia('(max-width: 1024px)')
+  const mqlMobile = window.matchMedia('(max-width: 768px)')
+  mqlNarrow.addEventListener('change', updateBreakpoints)
+  mqlMobile.addEventListener('change', updateBreakpoints)
+
+  onUnmounted(() => {
+    mqlNarrow.removeEventListener('change', updateBreakpoints)
+    mqlMobile.removeEventListener('change', updateBreakpoints)
+  })
 })
 
 function onGlobalKeydown(e) {
