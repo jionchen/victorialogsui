@@ -49,7 +49,7 @@
         <SavedViewsPanel />
         <LiveTailPanel />
         <button class="btn-primary" @click="submitSearch" :disabled="logStore.loading">
-          ▶ 查询
+          &#9654; 查询
         </button>
         <button class="icon-btn" @click="copyShareLink" title="复制链接">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">

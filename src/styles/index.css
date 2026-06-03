@@ -1851,6 +1851,68 @@ html, body, #app {
     border-radius: 0 0 var(--radius-md) var(--radius-md);
   }
 
+  /* Mobile card-specific styles */
+  .log-row--card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .log-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .log-card__time {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .log-card__level {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+  }
+
+  .log-card__level.error { color: var(--danger); background: rgba(248, 113, 113, 0.1); }
+  .log-card__level.warn { color: var(--warning); background: rgba(251, 191, 36, 0.1); }
+  .log-card__level.info { color: var(--info); background: rgba(96, 165, 250, 0.1); }
+  .log-card__level.debug { color: var(--text-muted); background: rgba(108, 108, 138, 0.1); }
+
+  .log-card__field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .log-card__label {
+    color: var(--text-muted);
+    font-size: 11px;
+    min-width: 60px;
+    flex-shrink: 0;
+  }
+
+  .log-card__value {
+    color: var(--text-primary);
+    word-break: break-word;
+    flex: 1;
+  }
+
+  .log-card__msg {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    word-break: break-word;
+    padding-top: 4px;
+    border-top: 1px solid var(--border-light);
+  }
   .field-sidebar {
     width: 85vw !important;
     max-width: 320px;
@@ -1897,6 +1959,32 @@ html, body, #app {
 }
 
 .hamburger-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* Field sidebar close button */
+.field-sidebar__close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  z-index: 10;
+  transition: all var(--transition);
+}
+
+.field-sidebar__close-btn:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
 }

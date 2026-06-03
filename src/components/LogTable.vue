@@ -95,8 +95,8 @@
 
       <!-- Log rows -->
       <template v-else>
-        <!-- Header Row -->
-        <div class="log-row log-row--header">
+        <!-- Header Row (desktop only) -->
+        <div v-if="!isMobile" class="log-row log-row--header">
           <button
             type="button"
             class="log-row__cell log-row__time log-row__time-header"
@@ -127,7 +127,9 @@
         <div :style="{ height: `${virtualWindow.offsetTop}px` }" />
 
         <template v-for="({ log, index, renderKey }) in visibleLogs" :key="renderKey">
+          <!-- Desktop row layout -->
           <div
+            v-if="!isMobile"
             class="log-row"
             :class="{ expanded: expandedIndex === index }"
             :ref="setLogRowRef(log)"
@@ -152,6 +154,38 @@
               <div class="log-row__msg-preview">
                 <HighlightedText :text="log._msg || ''" :terms="highlightTerms" />
               </div>
+            </div>
+          </div>
+
+          <!-- Mobile card layout -->
+          <div
+            v-else
+            class="log-row log-row--card"
+            :class="{ expanded: expandedIndex === index }"
+            :ref="setLogRowRef(log)"
+            @click="toggleExpand(index)"
+          >
+            <div class="log-card__header">
+              <span class="log-card__time">{{ formatLogTimestamp(getLogDisplayTimestamp(log)) }}</span>
+              <span
+                v-if="log.level"
+                class="log-card__level"
+                :class="(log.level || '').toLowerCase()"
+              >{{ log.level }}</span>
+            </div>
+            <div
+              v-for="col in settingsStore.tableColumns"
+              :key="col"
+              class="log-card__field"
+            >
+              <span class="log-card__label">{{ col === '_stream' ? '流标签' : col }}</span>
+              <span
+                class="log-card__value"
+                :class="{ 'log-row__level': col === 'level', [ (log.level || '').toLowerCase() ]: col === 'level' }"
+              >{{ col === '_stream' ? getStreamLabel(log) : (log[col] || '-') }}</span>
+            </div>
+            <div class="log-card__msg">
+              <HighlightedText :text="log._msg || ''" :terms="highlightTerms" />
             </div>
           </div>
 
@@ -191,6 +225,10 @@ import HighlightedText from './HighlightedText.vue'
 import LogDetail from './LogDetail.vue'
 import LogContextModal from './LogContextModal.vue'
 import { LOG_ROW_HEIGHT } from '../../config/uiConfig.js'
+
+const props = defineProps({
+  isMobile: { type: Boolean, default: false },
+})
 
 const logStore = useLogStore()
 const fieldStore = useFieldStore()
