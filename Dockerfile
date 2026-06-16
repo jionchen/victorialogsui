@@ -8,7 +8,16 @@ RUN npm run build
 
 # Stage 2: Serve
 FROM nginxinc/nginx-unprivileged:alpine
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+
+USER root
+COPY nginx/default.conf.template /etc/nginx/conf.d/default.conf.template
+COPY nginx/entrypoint.sh /entrypoint.sh
 COPY --from=builder /app/dist /usr/share/nginx/html/vlogs-ui
+RUN chmod +x /entrypoint.sh && \
+    chown -R nginx:nginx /etc/nginx/conf.d /usr/share/nginx/html/vlogs-ui /var/cache/nginx /var/log/nginx && \
+    touch /var/run/nginx.pid && \
+    chown nginx:nginx /var/run/nginx.pid
+USER nginx
+
 EXPOSE 8080
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/entrypoint.sh"]

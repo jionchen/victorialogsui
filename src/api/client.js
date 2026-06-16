@@ -10,12 +10,36 @@ import {
 import { STORAGE_KEYS, SESSION_STORAGE_KEYS } from '../../config/storageKeys.js'
 import { logger } from '../utils/logger.js'
 
+const RUNTIME_CONFIG_KEY = '__VLOGS_RUNTIME_CONFIG__'
+
 function getRuntimeEnv(name) {
+  const runtime = globalThis[RUNTIME_CONFIG_KEY]
+  if (runtime && Object.prototype.hasOwnProperty.call(runtime, name)) {
+    return runtime[name]
+  }
   return import.meta.env?.[name] || globalThis.process?.env?.[name] || ''
 }
 
-const RAW_ALLOWED_PROXY_TARGETS = getRuntimeEnv('VITE_ALLOWED_PROXY_TARGETS')
-const STRICT_PROXY_TARGETS = getRuntimeEnv('VITE_STRICT_PROXY_TARGETS') !== 'false'
+export function setRuntimeConfig(config) {
+  globalThis[RUNTIME_CONFIG_KEY] = { ...config }
+}
+
+export async function initializeRuntimeConfig() {
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 3000)
+    const res = await fetch('/vlogs-ui/config.json', { signal: controller.signal })
+    clearTimeout(timeout)
+    if (res.ok) {
+      const config = await res.json()
+      setRuntimeConfig(config)
+      return
+    }
+  } catch {
+    // 开发环境或配置未提供时静默回退到 import.meta.env / process.env
+  }
+  setRuntimeConfig({})
+}
 
 export function normalizeProxyTarget(raw) {
   if (raw === undefined || raw === null) return ''
@@ -42,38 +66,35 @@ function parseAllowedProxyTargets(raw) {
     .filter(Boolean)
 }
 
-const CONFIGURED_PROXY_TARGETS = parseAllowedProxyTargets(RAW_ALLOWED_PROXY_TARGETS)
-const ALLOWED_PROXY_TARGETS = Array.from(new Set([
-  DEFAULT_PROXY_TARGET,
-  ...CONFIGURED_PROXY_TARGETS,
-]))
-
-export function getAllowedProxyTargets() {
-  return [...ALLOWED_PROXY_TARGETS]
+export function getConfiguredProxyTargets() {
+  return parseAllowedProxyTargets(getRuntimeEnv('VITE_ALLOWED_PROXY_TARGETS'))
 }
 
-export function getConfiguredProxyTargets() {
-  return [...CONFIGURED_PROXY_TARGETS]
+export function getAllowedProxyTargets() {
+  return Array.from(new Set([
+    DEFAULT_PROXY_TARGET,
+    ...getConfiguredProxyTargets(),
+  ]))
 }
 
 export function isStrictProxyMode() {
-  return STRICT_PROXY_TARGETS
+  return getRuntimeEnv('VITE_STRICT_PROXY_TARGETS') !== 'false'
 }
 
 export function getImplicitProxyTarget(options = {}) {
-  const strict = options.strict ?? STRICT_PROXY_TARGETS
-  const configuredTargets = options.configuredTargets ?? CONFIGURED_PROXY_TARGETS
+  const strict = options.strict ?? isStrictProxyMode()
+  const configuredTargets = options.configuredTargets ?? getConfiguredProxyTargets()
   if (!strict) return ''
   return configuredTargets.length === 1 ? configuredTargets[0] : ''
 }
 
 export function isAllowedProxyTarget(raw, options = {}) {
-  const strict = options.strict ?? STRICT_PROXY_TARGETS
+  const strict = options.strict ?? isStrictProxyMode()
   const normalized = normalizeProxyTarget(raw)
   if (normalized === '') return true
   if (!normalized) return false
   if (!strict) return true
-  return ALLOWED_PROXY_TARGETS.includes(normalized)
+  return getAllowedProxyTargets().includes(normalized)
 }
 
 // axios 始终通过 /api 代理发送请求，避免跨域问题

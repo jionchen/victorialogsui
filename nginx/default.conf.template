@@ -1,9 +1,9 @@
 # 服务端代理目标白名单: 仅下列后端地址允许被转发, 其余一律返回 403。
-# 维护位置: 部署方在此 map 中按需追加允许的后端地址(与 docker-compose 后端服务名一致)。
+# 维护位置: 部署方通过 VITE_ALLOWED_PROXY_TARGETS 环境变量声明允许的后端地址。
+# 该文件为模板, 容器启动时 entrypoint.sh 会把 __ALLOWED_PROXY_TARGETS_MAP__ 替换为实际 map 条目。
 map $http_x_proxy_target $backend {
     default                       "";                  # 不在白名单 => 空, 后续 403
-    "http://victorialogs:9428"    $http_x_proxy_target; # 允许的后端(与 docker-compose 后端服务名一致)
-    # 部署方在此按需追加其它允许的后端地址
+__ALLOWED_PROXY_TARGETS_MAP__
 }
 
 server {
@@ -24,7 +24,7 @@ server {
     location /vlogs-ui/ {
         alias /usr/share/nginx/html/vlogs-ui/;
         try_files $uri $uri/ /vlogs-ui/index.html;
-        
+
         location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
             expires 30d;
             add_header Cache-Control "public, immutable";

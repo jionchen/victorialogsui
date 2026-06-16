@@ -56,7 +56,7 @@ test('source files do not contain empty catch blocks', async () => {
 })
 
 test('nginx exposes a lightweight health endpoint', async () => {
-  const nginxConfig = await readProjectFile('nginx/default.conf')
+  const nginxConfig = await readProjectFile('nginx/default.conf.template')
 
   assert.match(nginxConfig, /location\s*=\s*\/health/)
   assert.match(nginxConfig, /return\s+200/)
