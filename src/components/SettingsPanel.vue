@@ -28,7 +28,7 @@
       <div class="add-api-form">
         <a-input v-model="newApiName" placeholder="名称 (如: 生产集群)" />
         <a-input v-model="newApiUrl" placeholder="http://IP:端口" />
-        <a-button type="primary" @click="addNewApi" :disabled="!newApiUrl">
+        <a-button type="primary" :disabled="!canAddApi" @click="addNewApi">
           添加
         </a-button>
       </div>
@@ -39,8 +39,8 @@
       <div v-if="strictProxyMode" style="margin-top: 6px; font-size: 11px; color: var(--text-muted);">
         允许列表: {{ allowedTargets.join(' / ') || '仅默认代理' }}
       </div>
-      <div v-if="addApiError" style="margin-top: 6px; font-size: 11px; color: var(--danger);">
-        {{ addApiError }}
+      <div v-if="addApiError || newApiValidationMessage" style="margin-top: 6px; font-size: 11px; color: var(--danger);">
+        {{ addApiError || newApiValidationMessage }}
       </div>
     </div>
 
@@ -60,7 +60,7 @@
           @change="onAuthChange"
         />
       </div>
-      <a-checkbox v-model="persistAuth" @change="onAuthChange" style="margin-top: 10px;">
+      <a-checkbox v-model="persistAuth" style="margin-top: 10px;" @change="onAuthChange">
         关闭浏览器后仍保留凭证
       </a-checkbox>
       <div class="settings-drawer__hint">
@@ -97,7 +97,7 @@
         <a-option v-for="tz in timezoneOptions" :key="tz.value" :value="tz.value">{{ tz.label }}</a-option>
       </a-select>
       <div v-if="selectedTimezone === 'custom'" class="timezone-custom">
-        <a-input-number v-model="customOffset" :min="-720" :max="840" @change="onCustomOffsetChange" placeholder="偏移分钟数" />
+        <a-input-number v-model="customOffset" :min="-720" :max="840" placeholder="偏移分钟数" @change="onCustomOffsetChange" />
         <span class="timezone-custom__hint">例如: -480 = UTC+8, 0 = UTC</span>
       </div>
     </div>
@@ -111,7 +111,7 @@
     </div>
 
     <div class="settings-drawer__section">
-      <a-button type="primary" @click="testConnection" :loading="testing">
+      <a-button type="primary" :loading="testing" @click="testConnection">
         测试连接
       </a-button>
       <div v-if="testResult" style="margin-top: 8px; font-size: 12px;" :style="{ color: testResult.ok ? 'var(--success)' : 'var(--danger)' }">
@@ -168,6 +168,21 @@ const strictProxyMode = isStrictProxyMode()
 const currentTargetLabel = computed(() => {
   return apiUrl.value || '使用默认代理地址'
 })
+const normalizedNewApiUrl = computed(() => normalizeProxyTarget(sanitizeApiInput(newApiUrl.value)))
+const newApiValidationMessage = computed(() => {
+  if (!newApiUrl.value.trim()) return ''
+  if (!normalizedNewApiUrl.value) {
+    return '请输入合法的 http/https 地址，且不要包含路径、账号密码或查询参数。'
+  }
+  if (
+    strictProxyMode
+    && !allowedTargets.includes(normalizedNewApiUrl.value)
+  ) {
+    return '该地址未在允许列表中，请先在部署配置中声明允许的后端地址。'
+  }
+  return ''
+})
+const canAddApi = computed(() => Boolean(newApiUrl.value.trim()) && !newApiValidationMessage.value)
 
 const timezoneOptions = TIMEZONE_OPTIONS
 const storedOffset = useStorage(STORAGE_KEYS.timezoneOffset, getTimezoneOffset(), {
@@ -202,19 +217,22 @@ function selectApi(url) {
   settingsStore.updateApiBaseUrl(url)
 }
 
-function addNewApi() {
-  addApiError.value = ''
-  if (!newApiUrl.value) return
-  
-  let sanitizedUrl = newApiUrl.value.trim().replace(/\/$/, '')
+function sanitizeApiInput(raw) {
+  let sanitizedUrl = raw.trim().replace(/\/$/, '')
   sanitizedUrl = sanitizedUrl.replace(/\/select\/vmui$/, '')
   sanitizedUrl = sanitizedUrl.replace(/\/select$/, '')
-  
+
   if (sanitizedUrl && !sanitizedUrl.startsWith('http')) {
     sanitizedUrl = 'http://' + sanitizedUrl
   }
+  return sanitizedUrl
+}
 
-  const normalized = normalizeProxyTarget(sanitizedUrl)
+function addNewApi() {
+  addApiError.value = ''
+  if (!canAddApi.value) return
+
+  const normalized = normalizedNewApiUrl.value
   const ok = settingsStore.addApiBaseUrl(newApiName.value || '未命名', normalized)
   if (!ok) {
     addApiError.value = strictProxyMode
@@ -229,6 +247,7 @@ function addNewApi() {
 }
 
 function removeApi(url) {
+  if (!confirm('确定要删除这个地址吗？')) return
   settingsStore.removeApiBaseUrl(url)
 }
 

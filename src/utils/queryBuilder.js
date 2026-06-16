@@ -80,7 +80,7 @@ export function buildLogsQL(filters = [], freeText = '') {
  */
 export function isLogsQLSyntax(text) {
   // Contains field:value, stream selector {}, logical operators, pipes, regex, etc.
-  return /[:{}\|]/.test(text) ||
+  return /[:{}|]/.test(text) ||
     /\b(AND|OR|NOT|IN)\b/.test(text) ||
     /~"/.test(text) ||
     text.startsWith('*') ||

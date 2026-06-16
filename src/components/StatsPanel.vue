@@ -2,7 +2,7 @@
   <div class="stats-panel">
     <div class="stats-panel__header">
       <span class="stats-panel__title">聚合分析</span>
-      <button class="icon-btn" @click="$emit('close')" title="关闭">
+      <button class="icon-btn" title="关闭" @click="$emit('close')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
           <path d="M18 6 6 18M6 6l12 12"/>
         </svg>
@@ -20,9 +20,9 @@
             :class="{ 'is-selected': selectedFields.includes(f.value) }"
           >
             <input
+              v-model="selectedFields"
               type="checkbox"
               :value="f.value"
-              v-model="selectedFields"
             />
             <span>{{ f.value }}</span>
             <span v-if="f.hits" class="field-hits">{{ formatHits(f.hits) }}</span>
@@ -47,8 +47,8 @@
 
       <button
         class="btn-primary stats-run-btn"
-        @click="runStats"
         :disabled="selectedFields.length === 0 || loading"
+        @click="runStats"
       >
         {{ loading ? '计算中...' : '▶ 执行聚合' }}
       </button>

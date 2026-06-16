@@ -17,7 +17,7 @@
           <a-doption @click="setLive(0)">关闭</a-doption>
         </template>
         <template v-else>
-          <a-doption @click="stopTail" class="live-tail-stop">⏹ 停止尾随</a-doption>
+          <a-doption class="live-tail-stop" @click="stopTail">⏹ 停止尾随</a-doption>
         </template>
       </div>
     </template>

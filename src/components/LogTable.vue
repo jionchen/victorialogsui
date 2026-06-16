@@ -36,7 +36,7 @@
     </div>
 
     <!-- Log body -->
-    <div class="log-panel__body" ref="scrollContainer" @scroll="onScroll">
+    <div ref="scrollContainer" class="log-panel__body" @scroll="onScroll">
       <!-- Loading skeleton -->
       <template v-if="logStore.loading">
         <div v-for="i in 15" :key="i" class="skeleton-log-row">
@@ -131,9 +131,9 @@
           <!-- Desktop row layout -->
           <div
             v-if="!isMobile"
+            :ref="setLogRowRef(log)"
             class="log-row"
             :class="{ expanded: expandedIndex === index }"
-            :ref="setLogRowRef(log)"
             role="button"
             tabindex="0"
             :aria-expanded="expandedIndex === index"
@@ -166,9 +166,9 @@
           <!-- Mobile card layout -->
           <div
             v-else
+            :ref="setLogRowRef(log)"
             class="log-row log-row--card"
             :class="{ expanded: expandedIndex === index }"
-            :ref="setLogRowRef(log)"
             @click="toggleExpand(index)"
           >
             <div class="log-card__header">
@@ -232,7 +232,7 @@ import LogDetail from './LogDetail.vue'
 import LogContextModal from './LogContextModal.vue'
 import { LOG_ROW_HEIGHT } from '../../config/uiConfig.js'
 
-const props = defineProps({
+defineProps({
   isMobile: { type: Boolean, default: false },
 })
 
@@ -259,7 +259,6 @@ let nextRenderKey = 0
 const skeletonWidths = Array.from({ length: 15 }, (_, i) => 30 + ((i * 17 + 7) % 60))
 
 const measuredHeights = computed(() => {
-  // eslint-disable-next-line no-unused-expressions
   rowHeightsVersion.value
   return logStore.logs.map(log => rowHeightsMap.get(log) ?? LOG_ROW_HEIGHT)
 })

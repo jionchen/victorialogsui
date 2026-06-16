@@ -1,4 +1,4 @@
-import client, { axios } from './client.js'
+import client from './client.js'
 import {
   API_LOG_QUERY_TIMEOUT_MS,
   API_STATS_QUERY_TIMEOUT_MS,

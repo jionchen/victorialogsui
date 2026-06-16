@@ -7,10 +7,10 @@
       tabindex="0"
       :aria-expanded="expanded"
       :aria-label="`字段 ${field.value}${isStream ? '（Stream 字段）' : '（日志字段）'}`"
+      :class="{ 'is-active-col': isColumnActive }"
       @click="toggleExpand"
       @keydown.enter="toggleExpand"
       @keydown.space.prevent="toggleExpand"
-      :class="{ 'is-active-col': isColumnActive }"
     >
       <svg class="field-item__icon" :class="{ expanded }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M9 18l6-6-6-6"/>

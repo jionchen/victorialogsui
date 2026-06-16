@@ -57,7 +57,9 @@ export function createFieldsStore(fetchers = {
         let streams = []
         try {
           streams = await fetchers.getStreamFieldNames({ query, start, end })
-        } catch { /* ignore */ }
+        } catch (e) {
+          logger.warn('Failed to load stream field names; continuing with log fields only:', e)
+        }
 
         if (id !== namesFetchId) return
 

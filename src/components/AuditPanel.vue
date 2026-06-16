@@ -5,7 +5,7 @@
         <div class="audit-panel__heading">{{ title }}</div>
         <div class="audit-panel__caption">{{ caption }}</div>
       </div>
-      <button v-if="showClear && settingsStore.auditEvents.length > 0" class="audit-panel__clear" @click="settingsStore.clearAuditEvents()">
+      <button v-if="showClear && settingsStore.auditEvents.length > 0" class="audit-panel__clear" @click="confirmClearAuditEvents">
         清空
       </button>
     </div>
@@ -52,5 +52,10 @@ const settingsStore = useSettingsStore()
 
 function formatTime(value) {
   return new Date(value).toLocaleString()
+}
+
+function confirmClearAuditEvents() {
+  if (!confirm('确定要清空审计记录吗？')) return
+  settingsStore.clearAuditEvents()
 }
 </script>

@@ -17,6 +17,10 @@ function normalizeTarget(raw) {
   }
 }
 
+export function isInsecureProxyTlsAllowed() {
+  return process.env.VITE_INSECURE_PROXY_TLS === 'true'
+}
+
 const ALLOWED_TARGETS = new Set([
   DEFAULT_PROXY_TARGET,
   ...(process.env.VITE_ALLOWED_PROXY_TARGETS || '')
@@ -34,7 +38,7 @@ function dynamicProxyPlugin() {
       const apiProxy = createProxyMiddleware({
         target: DEFAULT_PROXY_TARGET,
         changeOrigin: true,
-        secure: false,
+        secure: !isInsecureProxyTlsAllowed(),
         timeout: API_PROXY_TIMEOUT_MS,
         proxyTimeout: API_PROXY_TIMEOUT_MS,
         router(req) {

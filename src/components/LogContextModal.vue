@@ -21,12 +21,12 @@
         </div>
 
         <div class="context-toolbar__actions">
-          <a-select v-model="windowMinutes" @change="fetchContext" style="width: 100px;">
+          <a-select v-model="windowMinutes" style="width: 100px;" @change="fetchContext">
             <a-option :value="1">± 1 分钟</a-option>
             <a-option :value="5">± 5 分钟</a-option>
             <a-option :value="15">± 15 分钟</a-option>
           </a-select>
-          <a-button type="primary" @click="fetchContext" :loading="loading">
+          <a-button type="primary" :loading="loading" @click="fetchContext">
             刷新
           </a-button>
         </div>

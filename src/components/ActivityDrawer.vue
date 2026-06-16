@@ -78,6 +78,7 @@ import {
 } from '../utils/keywordStats.js'
 import { STORAGE_KEYS } from '../../config/storageKeys.js'
 import { API_LOG_QUERY_TIMEOUT_MS } from '../../config/proxyConfig.js'
+import { logger } from '../utils/logger.js'
 
 const props = defineProps({
   visible: {
@@ -104,7 +105,9 @@ function loadCustomKeywords() {
       const parsed = JSON.parse(raw)
       if (Array.isArray(parsed)) return parsed
     }
-  } catch {}
+  } catch (err) {
+    logger.warn('Failed to load custom keywords:', err)
+  }
   return []
 }
 

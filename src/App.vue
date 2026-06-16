@@ -2,7 +2,7 @@
   <div class="app-layout">
     <!-- Header -->
     <header class="app-header">
-      <button v-if="isNarrow" class="hamburger-btn" @click="toggleSidebar" title="打开侧边栏">
+      <button v-if="isNarrow" class="hamburger-btn" title="打开侧边栏" @click="toggleSidebar">
         &#9776;
       </button>
       <div class="app-header__logo">
@@ -11,13 +11,13 @@
           <path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/>
         </svg>
         VLogs Explorer
-        <div class="app-header__api-badge" v-if="currentApi">
+        <div v-if="currentApi" class="app-header__api-badge">
           {{ currentApi.name }}
         </div>
       </div>
       <div class="app-header__spacer" />
       <div class="app-header__actions">
-        <button class="icon-btn activity-btn" @click="showActivity = true" title="关键字统计">
+        <button class="icon-btn activity-btn" title="关键字统计" @click="showActivity = true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
             <path d="M3 12h4l3 8 4-16 3 8h4"/>
           </svg>
@@ -25,9 +25,9 @@
         </button>
         <button
           class="icon-btn"
-          @click="toggleTheme"
           :title="settingsStore.theme === 'dark' ? '切换为浅色' : '切换为深色'"
           aria-keyshortcuts="t"
+          @click="toggleTheme"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
             <template v-if="settingsStore.theme === 'dark'">
@@ -38,7 +38,7 @@
             </template>
           </svg>
         </button>
-        <button class="icon-btn" @click="showSettings = true" title="设置">
+        <button class="icon-btn" title="设置" @click="showSettings = true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
             <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
           </svg>
@@ -53,15 +53,15 @@
         <QueryEditor />
         <SavedViewsPanel />
         <LiveTailPanel />
-        <button class="btn-primary" @click="submitSearch" :disabled="logStore.loading" aria-keyshortcuts="Control+Enter">
+        <button class="btn-primary" :disabled="logStore.loading" aria-keyshortcuts="Control+Enter" @click="submitSearch">
           ▶ 查询
         </button>
-        <button class="icon-btn" @click="copyShareLink" title="复制链接" aria-keyshortcuts="Control+Shift+C">
+        <button class="icon-btn" title="复制链接" aria-keyshortcuts="Control+Shift+C" @click="copyShareLink">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
             <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
           </svg>
         </button>
-        <button class="icon-btn" @click="showStats = true" title="聚合分析" aria-keyshortcuts="s">
+        <button class="icon-btn" title="聚合分析" aria-keyshortcuts="s" @click="showStats = true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
             <path d="M18 20V10M12 20V4M6 20v-6"/>
           </svg>

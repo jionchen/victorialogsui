@@ -8,8 +8,8 @@
     <button
       v-if="drawerMode"
       class="field-sidebar__close-btn"
-      @click="emit('closeDrawer')"
       title="关闭"
+      @click="emit('closeDrawer')"
     >
       &#10005;
     </button>
@@ -111,7 +111,7 @@ import { useSettingsStore } from '../stores/settings.js'
 import { useQueryStore } from '../stores/query.js'
 import FieldItem from './FieldItem.vue'
 
-const props = defineProps({
+defineProps({
   drawerMode: { type: Boolean, default: false },
   drawerOpen: { type: Boolean, default: false },
 })

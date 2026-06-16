@@ -142,7 +142,7 @@ export function extractHighlightTerms(query = '') {
     ...collectPatternMatches(source, /([A-Za-z_][A-Za-z0-9_.-]*)\s*:in\(([^)]*)\)/gu, match => extractInValues(match[2])),
     ...collectPatternMatches(source, /([A-Za-z_][A-Za-z0-9_.-]*)\s*(?::~|=~)\s*"((?:\\.|[^"])*)"/gu, match => extractRegexTerms(decodePhrase(match[2]))),
     ...collectPatternMatches(source, /([A-Za-z_][A-Za-z0-9_.-]*)\s*(?::|=|!=)\s*"((?:\\.|[^"])*)"/gu, match => splitQueryText(decodePhrase(match[2]))),
-    ...collectPatternMatches(source, /([A-Za-z_][A-Za-z0-9_.-]*)\s*(?::|=|!=)\s*([^\s,(){}\[\]]+)/gu, match => extractBareValueTerms(match[2])),
+    ...collectPatternMatches(source, /([A-Za-z_][A-Za-z0-9_.-]*)\s*(?::|=|!=)\s*([^\s,(){}[\]]+)/gu, match => extractBareValueTerms(match[2])),
   ]
     .filter(match => match.terms.length > 0)
     .sort((a, b) => a.index - b.index || b.length - a.length)
@@ -160,7 +160,7 @@ export function extractHighlightTerms(query = '') {
   }
 
   remainder += source.slice(cursor)
-  const hasStructuredSyntax = /[:={}\[\](),]/.test(source)
+  const hasStructuredSyntax = /[:={}[\](),]/.test(source)
   collected.push(...extractResidualTerms(remainder, { splitWords: hasStructuredSyntax }))
 
   return normalizeTerms(collected)

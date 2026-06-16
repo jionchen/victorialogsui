@@ -3,9 +3,9 @@
     <div class="query-editor__main">
       <input
         ref="inputRef"
+        v-model="queryText"
         class="query-editor__input"
         :class="[`is-${validation.level}`]"
-        v-model="queryText"
         aria-label="查询输入"
         :role="showSuggestions && suggestions.length > 0 ? 'combobox' : undefined"
         :aria-autocomplete="showSuggestions && suggestions.length > 0 ? 'list' : undefined"
@@ -37,13 +37,13 @@
             <a-doption
               v-for="(h, idx) in queryStore.queryHistory"
               :key="idx"
-              @click="applyHistory(h)"
               class="query-history__item"
+              @click="applyHistory(h)"
             >
               {{ h }}
             </a-doption>
             <div class="query-history__divider" />
-            <a-doption @click="queryStore.clearQueryHistory()" class="query-history__clear">
+            <a-doption class="query-history__clear" @click="confirmClearQueryHistory">
               清空历史记录
             </a-doption>
           </template>
@@ -213,6 +213,11 @@ function applyHistory(h) {
   queryStore.updateManualDraft(h)
   queryStore.submitQueryDraft()
   queryStore.executeQuery()
+}
+
+function confirmClearQueryHistory() {
+  if (!confirm('确定要清空查询历史吗？')) return
+  queryStore.clearQueryHistory()
 }
 </script>
 

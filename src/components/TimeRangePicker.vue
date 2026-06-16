@@ -35,6 +35,9 @@
             style="width: 220px;"
             @change="onCustomChange"
           />
+          <div v-if="timeRangeError" class="time-picker__error">
+            {{ timeRangeError }}
+          </div>
         </div>
       </template>
     </a-popover>
@@ -62,6 +65,7 @@ import { TIME_PRESETS } from '../utils/timeUtils.js'
 const queryStore = useQueryStore()
 const startTime = ref('')
 const endTime = ref('')
+const timeRangeError = ref('')
 
 // One-way sync: store ISO -> local pickers, so reopening the popover reflects
 // the current custom range and catches histogram brush-zoom writes.
@@ -70,6 +74,7 @@ watch(
   ([start, end]) => {
     startTime.value = start || ''
     endTime.value = end || ''
+    timeRangeError.value = ''
   },
   { immediate: true }
 )
@@ -82,12 +87,25 @@ const autoRefreshLabel = computed(() => {
 })
 
 function onCustomChange() {
-  if (startTime.value && endTime.value) {
-    queryStore.setCustomTime(
-      new Date(startTime.value).toISOString(),
-      new Date(endTime.value).toISOString()
-    )
+  timeRangeError.value = ''
+  if (!startTime.value || !endTime.value) return
+
+  const startDate = new Date(startTime.value)
+  const endDate = new Date(endTime.value)
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+    timeRangeError.value = '请选择有效时间'
+    return
   }
+
+  if (endDate.getTime() <= startDate.getTime()) {
+    timeRangeError.value = '结束时间必须晚于开始时间'
+    return
+  }
+
+  queryStore.setCustomTime(
+    startDate.toISOString(),
+    endDate.toISOString()
+  )
 }
 </script>
 
@@ -96,5 +114,12 @@ function onCustomChange() {
   font-size: 12px;
   color: var(--text-secondary, #888);
   font-weight: 600;
+}
+
+.time-picker__error {
+  color: var(--danger, #e74c3c);
+  font-size: 12px;
+  line-height: 1.4;
+  max-width: 220px;
 }
 </style>

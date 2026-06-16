@@ -125,7 +125,9 @@ export function setAuth(username, password, options = {}) {
       sessionStorage.setItem(SESSION_STORAGE_KEYS.auth, JSON.stringify(auth))
       localStorage.removeItem(SESSION_STORAGE_KEYS.auth)
     }
-  } catch { /* ignore */ }
+  } catch (err) {
+    logger.warn('[client] failed to persist auth credentials:', err)
+  }
 }
 
 export function getAuthCredentials() {
@@ -135,7 +137,9 @@ export function getAuthCredentials() {
 export function getAuthStorageMode() {
   try {
     if (localStorage.getItem(SESSION_STORAGE_KEYS.auth)) return 'persistent'
-  } catch { /* ignore */ }
+  } catch (err) {
+    logger.warn('[client] failed to read auth storage mode:', err)
+  }
   return 'session'
 }
 

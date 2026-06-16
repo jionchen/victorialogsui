@@ -21,7 +21,7 @@
         </template>
 
         <div class="saved-views-menu__header">已保存查询</div>
-        <a-doption @click="openSaveDialog('query')" :disabled="!canSaveQuery">保存当前查询</a-doption>
+        <a-doption :disabled="!canSaveQuery" @click="openSaveDialog('query')">保存当前查询</a-doption>
         <div v-if="settingsStore.savedQueries.length === 0" class="saved-views-menu__empty">
           暂无保存查询
         </div>

@@ -5,7 +5,7 @@ import prettier from 'eslint-config-prettier'
 
 export default [
   {
-    ignores: ['dist/**', 'node_modules/**', 'graphify-out/**']
+    ignores: ['dist/**', 'node_modules/**', 'graphify-out/**', '.claude/**']
   },
   js.configs.recommended,
   ...pluginVue.configs['flat/recommended'],
@@ -17,16 +17,16 @@ export default [
       }
     },
     rules: {
-      'no-unused-vars': 'warn',
-      'no-undef': 'warn',
-      'no-empty': 'warn',
+      'no-unused-vars': 'error',
+      'no-undef': 'error',
+      'no-empty': 'error',
       'no-useless-escape': 'warn',
       'vue/multi-word-component-names': 'off',
-      'vue/no-unused-vars': 'warn',
+      'vue/no-unused-vars': 'error',
       'vue/require-default-prop': 'off',
       'vue/attributes-order': 'warn',
       'vue/order-in-components': 'warn',
-      'vue/no-mutating-props': 'warn'
+      'vue/no-mutating-props': 'error'
     }
   },
   prettier

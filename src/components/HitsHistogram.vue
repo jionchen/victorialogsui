@@ -15,7 +15,7 @@
         </span>
       </span>
     </div>
-    <div class="histogram-panel__chart" ref="chartRef">
+    <div ref="chartRef" class="histogram-panel__chart">
       <div v-if="logStore.histogramLoading" class="loading-spinner" style="height: 100%;">
         <a-spin />
       </div>
@@ -24,8 +24,8 @@
         <button class="link-btn" @click="retryHistogram">重试</button>
       </div>
       <v-chart
-        ref="echartsInstanceRef"
         v-else-if="chartOption"
+        ref="echartsInstanceRef"
         :option="chartOption"
         autoresize
         style="height: 100%; cursor: crosshair;"
@@ -96,8 +96,8 @@ const chartOption = computed(() => {
   const data = logStore.histogramData
   if (!data?.hits || data.hits.length === 0) return null
 
-  // Access theme to trigger recompute on theme change
-  const _theme = settingsStore.theme
+  // Access theme to trigger recompute on theme change.
+  void settingsStore.theme
   const hits = data.hits
 
   const hasLevels = hits.some(h => h.fields?.level)

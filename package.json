@@ -8,7 +8,7 @@
     "test": "node --test",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings=0",
     "format": "prettier --write ."
   },
   "dependencies": {
