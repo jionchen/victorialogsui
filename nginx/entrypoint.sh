@@ -56,7 +56,7 @@ fi
 
 # 从模板生成最终 nginx 配置
 awk '
-  /__ALLOWED_PROXY_TARGETS_MAP__/ {
+  /^__ALLOWED_PROXY_TARGETS_MAP__$/ {
     while ((getline line < mapfile) > 0) print line
     close(mapfile)
     next

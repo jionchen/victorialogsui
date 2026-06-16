@@ -1,6 +1,6 @@
 # 服务端代理目标白名单: 仅下列后端地址允许被转发, 其余一律返回 403。
 # 维护位置: 部署方通过 VITE_ALLOWED_PROXY_TARGETS 环境变量声明允许的后端地址。
-# 该文件为模板, 容器启动时 entrypoint.sh 会把 __ALLOWED_PROXY_TARGETS_MAP__ 替换为实际 map 条目。
+# 该文件为模板, 容器启动时 entrypoint.sh 会替换下方的占位符为实际 map 条目。
 map $http_x_proxy_target $backend {
     default                       "";                  # 不在白名单 => 空, 后续 403
 __ALLOWED_PROXY_TARGETS_MAP__
