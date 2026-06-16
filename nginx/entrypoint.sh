@@ -55,11 +55,20 @@ if [ "${DEFAULT_ADDED}" != "true" ]; then
 fi
 
 # 从模板生成最终 nginx 配置
-sed -e "/__ALLOWED_PROXY_TARGETS_MAP__/r ${MAP_FILE}" \
-    -e '/__ALLOWED_PROXY_TARGETS_MAP__/d' \
-    "${NGINX_TEMPLATE}" > "${NGINX_CONF}"
+awk '
+  /__ALLOWED_PROXY_TARGETS_MAP__/ {
+    while ((getline line < mapfile) > 0) print line
+    close(mapfile)
+    next
+  }
+  { print }
+' mapfile="${MAP_FILE}" "${NGINX_TEMPLATE}" > "${NGINX_CONF}"
 
-# 校验配置
-nginx -t
+# 校验配置, 失败时打印生成的配置以便排查
+if ! nginx -t >/dev/null 2>&1; then
+  echo "[entrypoint] nginx config test failed, generated config:" >&2
+  cat "${NGINX_CONF}" >&2
+  exit 1
+fi
 
 exec nginx -g 'daemon off;'
