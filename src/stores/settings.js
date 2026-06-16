@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import {
   setApiBaseUrl,
   getApiBaseUrl,
-  getConfiguredProxyTargets,
+  getConfiguredProxyTargetOptions,
   isStrictProxyMode,
   isAllowedProxyTarget,
   normalizeProxyTarget,
@@ -26,12 +26,7 @@ function buildDefaultApiList() {
   if (!isStrictProxyMode()) {
     return defaults
   }
-  return defaults.concat(
-    getConfiguredProxyTargets().map((url) => ({
-      name: new URL(url).host,
-      url,
-    }))
-  )
+  return defaults.concat(getConfiguredProxyTargetOptions())
 }
 
 function sanitizeApiList(items) {

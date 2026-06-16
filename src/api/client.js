@@ -57,17 +57,37 @@ export function normalizeProxyTarget(raw) {
   }
 }
 
-function parseAllowedProxyTargets(raw) {
+function parseProxyTargetOptions(raw) {
+  const seen = new Set()
   return raw
     .split(',')
     .map(item => item.trim())
     .filter(Boolean)
-    .map(item => normalizeProxyTarget(item))
+    .map((item) => {
+      const parts = item.split('|')
+      let label = ''
+      let urlPart = item
+      if (parts.length === 2) {
+        label = parts[0].trim()
+        urlPart = parts[1].trim()
+      }
+      const url = normalizeProxyTarget(urlPart)
+      if (!url || seen.has(url)) return null
+      seen.add(url)
+      return {
+        url,
+        name: label || new URL(url).host,
+      }
+    })
     .filter(Boolean)
 }
 
+export function getConfiguredProxyTargetOptions() {
+  return parseProxyTargetOptions(getRuntimeEnv('VITE_ALLOWED_PROXY_TARGETS'))
+}
+
 export function getConfiguredProxyTargets() {
-  return parseAllowedProxyTargets(getRuntimeEnv('VITE_ALLOWED_PROXY_TARGETS'))
+  return getConfiguredProxyTargetOptions().map(option => option.url)
 }
 
 export function getAllowedProxyTargets() {

@@ -17,6 +17,7 @@ services:
       - "8080:8080"
     environment:
       # 代理目标白名单：允许转发的 VictoriaLogs 后端地址（逗号分隔）
+      # 支持带显示名称的格式：名称|http://ip:port（无名称时默认显示 ip:port）
       # 容器启动时会自动同步到前端运行时配置与 nginx 白名单，无需重新构建镜像
       - VITE_ALLOWED_PROXY_TARGETS=http://victorialogs:9428
       # 严格模式：true = 用户只能从白名单选择地址；false = 可自由填写（仅建议内网环境）

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import {
   normalizeProxyTarget,
   getConfiguredProxyTargets,
+  getConfiguredProxyTargetOptions,
   getAllowedProxyTargets,
   isStrictProxyMode,
   isAllowedProxyTarget,
@@ -54,6 +55,28 @@ describe('proxy target configuration (process.env)', () => {
     assert.deepEqual(getConfiguredProxyTargets(), [
       'http://172.19.0.176:49428',
       'http://172.19.0.176:29428',
+    ])
+  })
+
+  test('getConfiguredProxyTargetOptions parses labels in label|url format', () => {
+    setEnv('生产|http://172.19.0.176:49428,测试|http://172.19.0.176:29428', 'true')
+    assert.deepEqual(getConfiguredProxyTargetOptions(), [
+      { url: 'http://172.19.0.176:49428', name: '生产' },
+      { url: 'http://172.19.0.176:29428', name: '测试' },
+    ])
+  })
+
+  test('getConfiguredProxyTargetOptions falls back to host when label is missing', () => {
+    setEnv('http://172.19.0.176:49428', 'true')
+    assert.deepEqual(getConfiguredProxyTargetOptions(), [
+      { url: 'http://172.19.0.176:49428', name: '172.19.0.176:49428' },
+    ])
+  })
+
+  test('getConfiguredProxyTargetOptions deduplicates by url', () => {
+    setEnv('生产|http://172.19.0.176:49428,备用|http://172.19.0.176:49428', 'true')
+    assert.deepEqual(getConfiguredProxyTargetOptions(), [
+      { url: 'http://172.19.0.176:49428', name: '生产' },
     ])
   })
 

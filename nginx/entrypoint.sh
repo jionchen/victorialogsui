@@ -30,21 +30,30 @@ for target in ${ALLOWED_TARGETS}; do
   trimmed=$(printf '%s' "${target}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
   [ -z "${trimmed}" ] && continue
 
-  # 基础校验: 必须是 http/https 开头, 且不含换行/引号/分号等可能破坏 nginx 配置的字符
+  # 支持 label|url 格式, nginx 只需要 URL 部分
+  url_part="${trimmed}"
   case "${trimmed}" in
+    *'|'*)
+      url_part=$(printf '%s' "${trimmed}" | sed 's/^[^|]*|//')
+      ;;
+  esac
+  url_part=$(printf '%s' "${url_part}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+  # 基础校验: 必须是 http/https 开头, 且不含换行/引号/分号等可能破坏 nginx 配置的字符
+  case "${url_part}" in
     http://*|https://*)
-      safe=$(printf '%s' "${trimmed}" | tr -d '"\;')
-      if [ "${safe}" = "${trimmed}" ]; then
+      safe=$(printf '%s' "${url_part}" | tr -d '"\;')
+      if [ "${safe}" = "${url_part}" ]; then
         printf '    "%s"    $http_x_proxy_target;\n' "${safe}" >> "${MAP_FILE}"
         if [ "${safe}" = "http://victorialogs:9428" ]; then
           DEFAULT_ADDED=true
         fi
       else
-        echo "[entrypoint] skip unsafe proxy target: ${trimmed}" >&2
+        echo "[entrypoint] skip unsafe proxy target: ${url_part}" >&2
       fi
       ;;
     *)
-      echo "[entrypoint] skip invalid proxy target: ${trimmed}" >&2
+      echo "[entrypoint] skip invalid proxy target: ${url_part}" >&2
       ;;
   esac
 done

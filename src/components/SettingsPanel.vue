@@ -37,7 +37,7 @@
         {{ strictProxyMode ? '提示: 当前为受控模式，仅允许切换到部署配置声明过的后端地址。' : '提示: 当前为内网自由连接模式，可直接填写合法的 VictoriaLogs 地址。' }}
       </div>
       <div v-if="strictProxyMode" style="margin-top: 6px; font-size: 11px; color: var(--text-muted);">
-        允许列表: {{ allowedTargets.join(' / ') || '仅默认代理' }}
+        允许列表: {{ allowedTargetLabels.join(' / ') || '仅默认代理' }}
       </div>
       <div v-if="addApiError || newApiValidationMessage" style="margin-top: 6px; font-size: 11px; color: var(--danger);">
         {{ addApiError || newApiValidationMessage }}
@@ -133,7 +133,7 @@ import client, {
   getAuthCredentials,
   getAuthStorageMode,
   setAuth,
-  getConfiguredProxyTargets,
+  getConfiguredProxyTargetOptions,
   isStrictProxyMode,
   normalizeProxyTarget,
 } from '../api/client.js'
@@ -163,7 +163,9 @@ const theme = ref(settingsStore.theme)
 const testing = ref(false)
 const testResult = ref(null)
 const addApiError = ref('')
-const allowedTargets = getConfiguredProxyTargets()
+const allowedTargetOptions = getConfiguredProxyTargetOptions()
+const allowedTargets = allowedTargetOptions.map(option => option.url)
+const allowedTargetLabels = allowedTargetOptions.map(option => option.name)
 const strictProxyMode = isStrictProxyMode()
 const currentTargetLabel = computed(() => {
   return apiUrl.value || '使用默认代理地址'
