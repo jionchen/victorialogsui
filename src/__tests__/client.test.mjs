@@ -35,6 +35,84 @@ test('allowed proxy targets must come from the configured allowlist', async () =
   assert.equal(isAllowedProxyTarget('https://evil.example.com', { strict: true }), false)
 })
 
+test('strict mode uses the only configured target as the implicit default', async () => {
+  const { getImplicitProxyTarget } = await import('../api/client.js')
+
+  assert.equal(
+    getImplicitProxyTarget({
+      strict: true,
+      configuredTargets: ['http://172.19.0.176:19428'],
+    }),
+    'http://172.19.0.176:19428'
+  )
+  assert.equal(
+    getImplicitProxyTarget({
+      strict: true,
+      configuredTargets: ['http://logs-a:9428', 'http://logs-b:9428'],
+    }),
+    ''
+  )
+  assert.equal(
+    getImplicitProxyTarget({
+      strict: false,
+      configuredTargets: ['http://172.19.0.176:19428'],
+    }),
+    ''
+  )
+})
+
+test('client sends the implicit target header when only one strict target is configured', async () => {
+  const previousAllowed = process.env.VITE_ALLOWED_PROXY_TARGETS
+  const previousStrict = process.env.VITE_STRICT_PROXY_TARGETS
+  process.env.VITE_ALLOWED_PROXY_TARGETS = 'http://172.19.0.176:19428'
+  process.env.VITE_STRICT_PROXY_TARGETS = 'true'
+
+  const localData = new Map()
+  globalThis.localStorage = {
+    getItem(key) { return localData.get(key) || null },
+    setItem(key, value) { localData.set(key, String(value)) },
+    removeItem(key) { localData.delete(key) },
+  }
+
+  try {
+    const { default: client } = await import(`../api/client.js?implicit-target-${Date.now()}`)
+    const originalAdapter = client.defaults.adapter
+    let observedTarget = ''
+
+    client.defaults.adapter = async (config) => {
+      observedTarget = typeof config.headers.get === 'function'
+        ? config.headers.get('x-proxy-target')
+        : config.headers['x-proxy-target']
+      return {
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config,
+        data: { ok: true },
+      }
+    }
+
+    try {
+      await client.get('/select/logsql/facets')
+    } finally {
+      client.defaults.adapter = originalAdapter
+    }
+
+    assert.equal(observedTarget, 'http://172.19.0.176:19428')
+  } finally {
+    if (previousAllowed === undefined) {
+      delete process.env.VITE_ALLOWED_PROXY_TARGETS
+    } else {
+      process.env.VITE_ALLOWED_PROXY_TARGETS = previousAllowed
+    }
+    if (previousStrict === undefined) {
+      delete process.env.VITE_STRICT_PROXY_TARGETS
+    } else {
+      process.env.VITE_STRICT_PROXY_TARGETS = previousStrict
+    }
+  }
+})
+
 test('non-strict proxy mode allows any normalized http target', async () => {
   const { isAllowedProxyTarget } = await import('../api/client.js')
 

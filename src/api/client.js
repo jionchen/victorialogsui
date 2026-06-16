@@ -10,8 +10,12 @@ import {
 import { STORAGE_KEYS, SESSION_STORAGE_KEYS } from '../../config/storageKeys.js'
 import { logger } from '../utils/logger.js'
 
-const RAW_ALLOWED_PROXY_TARGETS = import.meta.env?.VITE_ALLOWED_PROXY_TARGETS || ''
-const STRICT_PROXY_TARGETS = import.meta.env?.VITE_STRICT_PROXY_TARGETS !== 'false'
+function getRuntimeEnv(name) {
+  return import.meta.env?.[name] || globalThis.process?.env?.[name] || ''
+}
+
+const RAW_ALLOWED_PROXY_TARGETS = getRuntimeEnv('VITE_ALLOWED_PROXY_TARGETS')
+const STRICT_PROXY_TARGETS = getRuntimeEnv('VITE_STRICT_PROXY_TARGETS') !== 'false'
 
 export function normalizeProxyTarget(raw) {
   if (raw === undefined || raw === null) return ''
@@ -38,17 +42,29 @@ function parseAllowedProxyTargets(raw) {
     .filter(Boolean)
 }
 
+const CONFIGURED_PROXY_TARGETS = parseAllowedProxyTargets(RAW_ALLOWED_PROXY_TARGETS)
 const ALLOWED_PROXY_TARGETS = Array.from(new Set([
   DEFAULT_PROXY_TARGET,
-  ...parseAllowedProxyTargets(RAW_ALLOWED_PROXY_TARGETS),
+  ...CONFIGURED_PROXY_TARGETS,
 ]))
 
 export function getAllowedProxyTargets() {
   return [...ALLOWED_PROXY_TARGETS]
 }
 
+export function getConfiguredProxyTargets() {
+  return [...CONFIGURED_PROXY_TARGETS]
+}
+
 export function isStrictProxyMode() {
   return STRICT_PROXY_TARGETS
+}
+
+export function getImplicitProxyTarget(options = {}) {
+  const strict = options.strict ?? STRICT_PROXY_TARGETS
+  const configuredTargets = options.configuredTargets ?? CONFIGURED_PROXY_TARGETS
+  if (!strict) return ''
+  return configuredTargets.length === 1 ? configuredTargets[0] : ''
 }
 
 export function isAllowedProxyTarget(raw, options = {}) {
@@ -72,10 +88,13 @@ function getTargetUrl() {
   try {
     const stored = localStorage.getItem(STORAGE_KEYS.targetUrl) || ''
     const normalized = normalizeProxyTarget(stored)
-    return isAllowedProxyTarget(normalized) ? normalized : ''
+    if (normalized && isAllowedProxyTarget(normalized)) {
+      return normalized
+    }
+    return getImplicitProxyTarget()
   } catch (err) {
     logger.warn('[client] failed to read target URL from storage:', err)
-    return ''
+    return getImplicitProxyTarget()
   }
 }
 

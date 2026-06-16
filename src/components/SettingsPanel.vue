@@ -133,7 +133,7 @@ import client, {
   getAuthCredentials,
   getAuthStorageMode,
   setAuth,
-  getAllowedProxyTargets,
+  getConfiguredProxyTargets,
   isStrictProxyMode,
   normalizeProxyTarget,
 } from '../api/client.js'
@@ -163,7 +163,7 @@ const theme = ref(settingsStore.theme)
 const testing = ref(false)
 const testResult = ref(null)
 const addApiError = ref('')
-const allowedTargets = getAllowedProxyTargets()
+const allowedTargets = getConfiguredProxyTargets()
 const strictProxyMode = isStrictProxyMode()
 const currentTargetLabel = computed(() => {
   return apiUrl.value || '使用默认代理地址'
