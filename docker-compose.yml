@@ -14,7 +14,7 @@ services:
   vlogs-ui:
     image: victorialogsui:v2.0.0
     ports:
-      - "8080:80"
+      - "8080:8080"
     environment:
       # 代理目标白名单：允许转发的 VictoriaLogs 后端地址（逗号分隔）
       # 必须与 nginx/default.conf 中的 map 白名单保持一致

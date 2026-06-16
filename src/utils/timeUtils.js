@@ -3,6 +3,7 @@
  */
 
 import { TIME_PRESETS } from '../../config/uiConfig.js'
+import { logger } from './logger.js'
 
 export { TIME_PRESETS }
 
@@ -60,7 +61,8 @@ export function formatTimestamp(ts) {
     const adjusted = applyTimezoneOffset(d)
     const pad = (n) => String(n).padStart(2, '0')
     return `${adjusted.getFullYear()}-${pad(adjusted.getMonth() + 1)}-${pad(adjusted.getDate())} ${pad(adjusted.getHours())}:${pad(adjusted.getMinutes())}:${pad(adjusted.getSeconds())}`
-  } catch {
+  } catch (e) {
+    logger.warn('formatTimestamp: failed to format timestamp, falling back to raw value:', ts, e)
     return String(ts)
   }
 }
@@ -75,7 +77,8 @@ export function formatTimeShort(ts) {
     const adjusted = applyTimezoneOffset(d)
     const pad = (n) => String(n).padStart(2, '0')
     return `${pad(adjusted.getHours())}:${pad(adjusted.getMinutes())}:${pad(adjusted.getSeconds())}`
-  } catch {
+  } catch (e) {
+    logger.warn('formatTimeShort: failed to format timestamp, falling back to raw value:', ts, e)
     return String(ts)
   }
 }
@@ -91,7 +94,8 @@ export function formatTimestampUtc(ts, offsetMinutes = configuredTimezoneOffset)
     const adjusted = applyTimezoneOffset(d, offsetMinutes)
     const pad = (n) => String(n).padStart(2, '0')
     return `${adjusted.getFullYear()}-${pad(adjusted.getMonth() + 1)}-${pad(adjusted.getDate())} ${pad(adjusted.getHours())}:${pad(adjusted.getMinutes())}:${pad(adjusted.getSeconds())}`
-  } catch {
+  } catch (e) {
+    logger.warn('formatTimestampUtc: failed to format timestamp, falling back to raw value:', ts, e)
     return String(ts)
   }
 }

@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 .codex/
 graphify-out/
+
+# Environment files
+.env
+.env.*
+!.env.example

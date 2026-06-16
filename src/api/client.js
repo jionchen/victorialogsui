@@ -73,7 +73,8 @@ function getTargetUrl() {
     const stored = localStorage.getItem(STORAGE_KEYS.targetUrl) || ''
     const normalized = normalizeProxyTarget(stored)
     return isAllowedProxyTarget(normalized) ? normalized : ''
-  } catch {
+  } catch (err) {
+    logger.warn('[client] failed to read target URL from storage:', err)
     return ''
   }
 }
@@ -84,7 +85,9 @@ export function setApiBaseUrl(url) {
 
   try {
     localStorage.setItem(STORAGE_KEYS.targetUrl, safeUrl)
-  } catch { /* ignore */ }
+  } catch (err) {
+    logger.warn('[client] failed to persist target URL:', err)
+  }
 }
 
 export function getApiBaseUrl() {
@@ -99,7 +102,9 @@ function getAuth() {
 
     const saved = localStorage.getItem(SESSION_STORAGE_KEYS.auth)
     if (saved) return JSON.parse(saved)
-  } catch { /* ignore */ }
+  } catch (err) {
+    logger.warn('[client] failed to read auth credentials from storage:', err)
+  }
   return DEFAULT_AUTH_CREDENTIALS
 }
 
@@ -163,7 +168,8 @@ client.interceptors.request.use((config) => {
   // Basic Auth
   const auth = getAuth()
   if (auth.username) {
-    const encoded = btoa(`${auth.username}:${auth.password}`)
+    const bytes = new TextEncoder().encode(`${auth.username}:${auth.password}`)
+    const encoded = btoa(String.fromCharCode(...bytes))
     config.headers['Authorization'] = `Basic ${encoded}`
   }
   return config

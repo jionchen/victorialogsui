@@ -224,12 +224,23 @@ export const useQueryStore = defineStore('query', () => {
 
   // URL State persistence
   function getUrlState() {
-    return btoa(unescape(encodeURIComponent(JSON.stringify(createSnapshot()))))
+    const bytes = new TextEncoder().encode(JSON.stringify(createSnapshot()))
+    let binary = ''
+    const CHUNK_SIZE = 8192
+    for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK_SIZE))
+    }
+    return btoa(binary)
   }
 
   function loadUrlState(base64Str) {
     try {
-      const state = JSON.parse(decodeURIComponent(escape(atob(base64Str))))
+      const binary = atob(base64Str)
+      const bytes = new Uint8Array(binary.length)
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i)
+      }
+      const state = JSON.parse(new TextDecoder().decode(bytes))
       applySnapshot(state)
     } catch (e) {
       logger.error('Failed to parse URL state', e)

@@ -408,7 +408,8 @@ function exportCSV() {
     return keys.map(k => {
       const v = log[k]
       if (v === undefined || v === null) return ''
-      const s = String(v)
+      let s = String(v)
+      if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`
       return s.includes(',') || s.includes('"') || s.includes('\n')
         ? `"${s.replace(/"/g, '""')}"`
         : s
