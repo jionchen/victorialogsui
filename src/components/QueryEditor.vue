@@ -226,16 +226,20 @@ function confirmClearQueryHistory() {
   position: relative;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .query-editor__main {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  min-width: 0;
 }
 
 .query-editor__input {
   flex: 1;
+  min-width: 0;
   padding: 8px 40px 8px 12px;
   border: 1px solid var(--color-border-2, #c9cdd4);
   border-radius: 4px;

@@ -166,6 +166,7 @@ html, body, #app {
 .app-toolbar__row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -890,8 +891,8 @@ html, body, #app {
 
 /* ===== Query Editor ===== */
 .query-editor {
-  flex: 1;
-  min-width: 0;
+  flex: 0 1 clamp(500px, 39vw, 860px);
+  min-width: min(500px, 100%);
   display: flex;
   align-items: center;
 }
